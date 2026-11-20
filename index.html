@@ -2908,7 +2908,7 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
-    <div class="sec">${fsub('Lousa · versão 20')}</div>`;
+    <div class="sec">${fsub('Lousa · versão 21')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3973,6 +3973,7 @@ function hostAccept(slot){
   if (NV.mode === 'invite') nvInviteNext(true);
 }
 function hostMsg(pe, m){
+  pe.seen = Date.now();
   if (m.k === 'ping'){ pe.send({k:'pong', t: m.t, h: Date.now()}); return; }
   if (m.k === 'hello'){
     const first = !pe.card;
@@ -4159,13 +4160,14 @@ async function joinRoomOnline(raw){
     if (!m || typeof m !== 'object') return;
     if (m.k === 'iam-host' && NET.host && NET.role === 'guest' && NET.room === room){
       // o anfitrião recarregou e reabriu a sala: apresenta-se de novo
-      NET.host.peerId = ctx.peerId; NET.host.send = obj => act.send(obj, {target: ctx.peerId}).catch(() => {});
+      NET.hostSeen = Date.now(); NET.host.peerId = ctx.peerId; NET.host.send = obj => act.send(obj, {target: ctx.peerId}).catch(() => {});
       hostSend({k:'hello', p: meCard()}); if (NET.myReady) hostSend({k:'ready', v:true}); NET.offOk = false; clockSync();
       return;
     }
     if (m.k === 'iam-host' && !NET.host){
       if (my !== joinSeq) return;
       joinStop();
+      NET.hostSeen = Date.now();
       NET.host = {peerId: ctx.peerId, open:true, send: obj => act.send(obj, {target: ctx.peerId}).catch(() => {}), close: () => { if (NET.room === room) NET.room = null; room.leave().catch(() => {}); }};
       NET.role = 'guest'; NET.hostName = m.name || 'Anfitrião'; NET.gallery = null; NET.live = {}; NET.feed = [];
       hostSend({k:'hello', p: meCard()});
@@ -4176,7 +4178,7 @@ async function joinRoomOnline(raw){
       renderScoreTag();
       return;
     }
-    if (NET.host && ctx.peerId === NET.host.peerId) guestMsg(m);
+    if (NET.host && ctx.peerId === NET.host.peerId){ NET.hostSeen = Date.now(); guestMsg(m); }
   });
   room.onPeerJoin(() => { if (!NET.host && my === joinSeq) joinSay('Achei alguém na sala, entrando…'); });
   room.onPeerLeave(({peerId}) => { if (NET.host && peerId === NET.host.peerId) guestDropped(code); });
@@ -4193,7 +4195,7 @@ addEventListener('popstate', () => {
   if (G && modeOpen()){ modeMin = true; renderMode(); armBack(); return; }
   if (NET.role){ toast('Você está numa sala. Para sair, use Sair da sala'); armBack(); return; }
 });
-addEventListener('beforeunload', e => { if (NET.role){ e.preventDefault(); e.returnValue = ''; } });
+addEventListener('beforeunload', e => { if (NET.role && NET.role !== 'guest'){ e.preventDefault(); e.returnValue = ''; } });
 /* tela acesa enquanto estiver numa sala (celular apagado = sai da sala) */
 let roomLock = null;
 async function roomAwake(on){
@@ -4272,11 +4274,32 @@ async function guestJoin(code){
 /* caiu a conexão (gesto de sair, tela apagada, rede): tenta voltar sozinho por um tempo */
 function guestDropped(code){
   if (NET.role !== 'guest') return;
-  const keep = {code};
-  NET.role = 'guest'; guestLost('A conexão caiu. Tentando voltar…', true);
-  NV.resume = {code: keep.code, until: Date.now() + 90000};
-  setTimeout(() => { if (!NET.role && NV.resume) joinRoomOnline(keep.code); }, 1200);
+  if (NET.mode === 'online'){
+    // voltar com a mesma identidade de conexão costuma travar (o anfitrião ainda guarda a antiga):
+    // recarrega o app, que volta sozinho para a sala com uma conexão nova
+    saveSess({role:'guest', code, retry: Date.now()});
+    NET.role = null; toast('A conexão caiu. Voltando para a sala…');
+    setTimeout(() => location.reload(), 900);
+    return;
+  }
+  guestLost('A conexão caiu. Entre de novo pelo QR', false);
 }
+/* sinal de vida: o anfitrião responde aos pings; sem resposta por um tempo, a conexão morreu sem avisar */
+setInterval(() => {
+  if (NET.role === 'guest'){
+    hostSend({k:'ping', t: Date.now()});
+    if (NET.mode === 'online' && NET.hostSeen && Date.now() - NET.hostSeen > 22000) guestDropped(NET.code);
+  }
+  if (NET.role === 'host' && NET.mode === 'online'){
+    for (const [k, pe] of NET.peers) if (pe.open && pe.card && pe.seen && Date.now() - pe.seen > 40000){ pe.open = false; balloon(pe.card, 'leave'); pushRoster(); }
+  }
+}, 6000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || NET.role !== 'guest' || NET.mode !== 'online') return;
+  // voltou ao app (tela desbloqueada, troca de app): confere se a sala ainda responde
+  const t = Date.now(); hostSend({k:'ping', t});
+  setTimeout(() => { if (NET.role === 'guest' && (NET.hostSeen || 0) < t) guestDropped(NET.code); }, 5000);
+});
 const SESS = 'lousa.sess';
 function saveSess(o){ try{ localStorage.setItem(SESS, JSON.stringify(Object.assign({t: Date.now()}, o))); }catch(_){} }
 function clearSess(){ try{ localStorage.removeItem(SESS); }catch(_){} }
@@ -4934,7 +4957,7 @@ setTimeout(() => {
   let ss = null; try{ ss = JSON.parse(localStorage.getItem(SESS) || 'null'); }catch(_){}
   if (!ss || NET.role || NV.mode === 'joinOn' || Date.now() - ss.t > 3 * 3600e3 || !onlineOK() || !ss.code) return;
   if (ss.role === 'host'){ createRoomOnline(ss); return; }
-  NV.resume = {code: ss.code, until: Date.now() + 60000};
+  NV.resume = {code: ss.code, until: Date.now() + (ss.retry ? 120000 : 60000)};
   toast(`Voltando para a sala ${ss.code}…`, 'Cancelar', () => { NV.resume = null; joinStop(); joinSeq++; clearSess(); if (NET.room && !NET.role){ const r = NET.room; NET.room = null; r.leave().catch(() => {}); } });
   joinRoomOnline(ss.code);
 }, 600);
