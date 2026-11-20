@@ -617,6 +617,14 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 @keyframes barw{from{transform:scaleX(0)}}
 .srow .mv{font-style:normal;font-size:11px;font-weight:800;margin-left:6px}.srow .mv.up{color:#57e389}.srow .mv.dn{color:#ff7a7a}
 .srow .st.pop{animation:land .45s cubic-bezier(.2,1.8,.4,1)}
+.ftab{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.frow{display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 8px 6px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.frow.me{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}.frow.off{opacity:.6}
+.frow .pos{width:16px;color:var(--tx3);font-weight:800}.frow .sn{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow small,.gp small{font-weight:700;font-size:11px;color:var(--tx3)}
+.frow .add{font-style:normal;font-weight:800;font-size:13px;color:#3fb6ff}
+.frow .fn{display:flex;align-items:center;gap:4px;min-width:46px;justify-content:center;font:800 18px var(--uif)}.frow .fn svg{width:18px;height:18px;color:#3fb6ff}
+.grp.miss{border-style:dashed}
 .fishbar{display:flex;flex-wrap:wrap;gap:8px}
 .fishbar span{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:99px;background:var(--panel2);border:1px solid var(--line)}
 .fishbar b{font-weight:800}.fishbar i{font-style:normal;font-weight:800;font-size:12px;color:#3fb6ff}
@@ -2913,7 +2921,7 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
-    <div class="sec">${fsub('Lousa · versão 22')}</div>`;
+    <div class="sec">${fsub('Lousa · versão 23')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3393,12 +3401,15 @@ function similar(x, y){
 }
 const half = n => Math.max(1, Math.ceil(n / 2));
 function gPlayers(){ return NET.roster.filter(r => r.st !== 'off'); }
-function gName(id){ const r = NET.roster.find(x => x.id === id); return r ? (r.name || 'Jogador') : 'Alguém'; }
-function gCard(id){ return NET.roster.find(x => x.id === id) || {id, name:'Jogador'}; }
+function gCard(id){ return NET.roster.find(x => x.id === id) || (G && G.cards && G.cards[id]) || {id, name:'Jogador'}; }
+function gName(id){ return gCard(id).name || 'Jogador'; }
+const gOnline = id => gPlayers().some(p => p.id === id);
+/* todos que já jogaram esta partida (quem saiu continua no placar e pode ser ajustado) */
+function gAll(){ return [...new Set([...gPlayers().map(p => p.id), ...Object.keys((G && G.cards) || {}), ...Object.keys((G && G.fish) || {})])]; }
 function avChip(id, extra){ const r = gCard(id), c = /^#[0-9a-f]{6}$/i.test(r.accent || '') ? r.accent : '#ffad2a';
   return `<span class="mav" style="--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#fff'}">${avatarHTML(r)}</span>${extra || ''}`; }
 function act(a){ if (NET.role === 'host') gameAct(myId(), a); else if (NET.role === 'guest') hostSend({k:'ga', a}); }
-function gPush(){ saveHostSess(); if (!G){ netBroadcast({k:'gs', g:null}); renderMode(); return; } G.v = (G.v || 0) + 1; netBroadcast({k:'gs', g:G}); renderMode(); }
+function gPush(){ if (G){ G.cards ||= {}; for (const r of NET.roster) if (r.st !== 'off') G.cards[r.id] = {id: r.id, name: r.name, icon: r.icon, accent: r.accent}; } saveHostSess(); if (!G){ netBroadcast({k:'gs', g:null}); renderMode(); return; } G.v = (G.v || 0) + 1; netBroadcast({k:'gs', g:G}); renderMode(); if (win === 'game') syncSheet(); }
 
 function startMode(kind){
   if (NET.role !== 'host') return;
@@ -3488,6 +3499,7 @@ function gameAct(from, a){
       G.groups = G.groups.filter(g => g.ids.length); G.fov = {};
     }
     else if (a.t === 'fov' && host && G.phase === 'judge'){ G.fov[a.id] = a.v; }
+    else if (a.t === 'fishAdj' && host){ G.fish[a.id] = Math.max(0, (G.fish[a.id] || 0) + a.d); G.left = Math.max(0, G.left - a.d); }
     else if (a.t === 'dispute' && G.phase === 'judge'){ balloon(gCard(from), 'dispute'); netBroadcast({k:'act', id: from, s:'dispute'}); return; }
     else if (a.t === 'confirm' && host && G.phase === 'judge'){
       const f = fluxoFish(); let sum = 0;
@@ -3604,7 +3616,16 @@ function fluxoFish(){
     else v = gi === flow ? 0 : (G.cfg.uniq2 && g.ids.length === 1 ? 2 : 1);
     f[id] = G.fov && G.fov[id] != null ? G.fov[id] : v;
   }));
+  for (const id of gAll()) if (f[id] == null) f[id] = (G.fov && G.fov[id]) || 0;
   return f;
+}
+/* placar do Segue o Fluxo: nome, peixes na mão, peixes desta rodada; quem criou a sala ajusta com − e + */
+function fishTable(f, host){
+  const rows = gAll().map(id => ({id, n: G.fish[id] || 0, add: (f && f[id]) || 0})).sort((a, b) => (a.n + a.add) - (b.n + b.add));
+  return `<div class="ftab">${rows.map((x, i) => `<div class="frow ${x.id === myId() ? 'me' : ''} ${gOnline(x.id) ? '' : 'off'}">
+    <span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}${gOnline(x.id) ? '' : ' <small>saiu</small>'}</span>
+    ${x.add ? `<i class="add">+${x.add}</i>` : ''}
+    ${host ? `<button class="sbtn press" data-fadj="${x.id}" data-d="-1" aria-label="Menos">−</button>` : ''}<b class="fn">${svg(FISH, 1.8)}${x.n}</b>${host ? `<button class="sbtn press" data-fadj="${x.id}" data-d="1" aria-label="Mais">+</button>` : ''}</div>`).join('')}</div>`;
 }
 function fishToast(f){ if (!G) return; const n = (f || {})[myId()] || 0; toast(n ? `Você pegou ${n} ${n === 1 ? 'peixe' : 'peixes'}. Total: ${G.fish[myId()] || 0}` : `Seguiu o fluxo! Total: ${G.fish[myId()] || 0} peixes`); }
 function fluxoAfterReveal(list){
@@ -3782,13 +3803,14 @@ function fluxoHTML(){
           <div class="gmem">${g.ids.map(id => `<button class="gp press ${MV.sel === id ? 'sel' : ''}" data-gp="${id}">${avChip(id)}<span>${esc(gName(id))}</span>${f[id] ? '' : '<small class="ok">no fluxo</small>'}${f[id] ? `<b class="fs" ${host ? `data-fov="${id}"` : ''}>${svg(FISH, 1.8)}${f[id] > 1 ? '×' + f[id] : ''}</b>` : (host ? `<b class="fs z" data-fov="${id}">0</b>` : '')}</button>`).join('')}</div></div>`; }).join('')}
         ${host && MV.sel ? `<div class="grp new" data-grp="new"><div class="glab">Separar em outro grupo</div></div>` : ''}</div>
       <div class="f-sub">${host ? 'Para juntar respostas iguais, toque numa pessoa e depois no grupo certo. Toque no peixe para ajustar.' : 'Discordou? Peça revisão e combinem em voz alta; o anfitrião ajusta.'}</div>
-      <div class="sec-t" style="margin-top:18px">Peixes na mão</div>
-      <div class="fishbar">${gPlayers().map(p => ({id: p.id, n: (G.fish[p.id] || 0), add: f[p.id] || 0})).sort((a, b) => (a.n + a.add) - (b.n + b.add)).map(x => `<span>${avChip(x.id)}<b>${x.n}</b>${x.add ? `<i>+${x.add}</i>` : ''}</span>`).join('')}</div>
+      ${(() => { const inG = new Set(G.groups.flatMap(g => g.ids)), miss = gAll().filter(id => !inG.has(id)); return miss.length ? `<div class="grp miss"><div class="glab">Sem resposta</div><div class="gmem">${miss.map(id => `<span class="gp">${avChip(id)}<span>${esc(gName(id))}${gOnline(id) ? '' : ' <small>saiu</small>'}</span>${host ? `<b class="fs ${f[id] ? '' : 'z'}" data-fov="${id}">${f[id] ? svg(FISH, 1.8) + (f[id] > 1 ? '×' + f[id] : '') : '0'}</b>` : ''}</span>`).join('')}</div></div>` : ''; })()}
+      <div class="sec-t" style="margin-top:18px">Placar</div>
+      ${fishTable(f, host)}
       <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div><div class="f-sub">${G.left} de ${G.cfg.pool} peixes ainda no cardume</div></div>
       <div class="mf">${host ? `<button class="nbtn pri press" data-m="confirm">Confirmar peixes</button>` : `<button class="nbtn press" data-m="dispute">Pedir revisão</button>`}</div>`;
   }
   if (G.phase === 'end'){
-    const ids = gPlayers().map(p => p.id), rows = ids.map(id => ({id, f: G.fish[id] || 0})).sort((a, b) => a.f - b.f);
+    const ids = gAll(), rows = ids.map(id => ({id, f: G.fish[id] || 0})).sort((a, b) => a.f - b.f);
     return `${mHead('O cardume acabou!', `${G.round} rodadas`)}<div class="mb">
       ${rows[0] ? `<div class="podium">${avChip(rows[0].id)}<b>${esc(gName(rows[0].id))}</b><span>seguiu o fluxo melhor: ${rows[0].f} ${rows[0].f === 1 ? 'peixe' : 'peixes'}</span></div>` : ''}
       <div class="stab">${rows.map((x, i) => `<div class="srow ${x.id === myId() ? 'me' : ''}"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}</span><b class="st">${svg(FISH, 1.8)}${x.f}</b></div>`).join('')}</div></div>
@@ -3841,6 +3863,7 @@ modeEl.addEventListener('click', e => {
   if (d.bad){ act({t:'bad', k: d.bad}); return; }
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
+  if (d.fadj){ act({t:'fishAdj', id: d.fadj, d: +d.d}); return; }
   if (d.fov){ e.stopPropagation(); const cur = fluxoFish()[d.fov]; act({t:'fov', id: d.fov, v: (cur + 1) % 3}); return; }
   if (d.gp && host){ MV.sel = MV.sel === d.gp ? null : d.gp; renderMode(); return; }
   if (d.grp != null && host && MV.sel){ const id = MV.sel; MV.sel = null; act({t:'move', id, to: d.grp === 'new' ? 'new' : +d.grp}); return; }
@@ -4351,7 +4374,7 @@ function guestMsg(m){
   if (m.k === 'collect'){ NET.phase = 'revealed'; sendFinalSnap(); updateRoomUI(); return; }
   if (m.k === 'lob'){ if (m.who !== myId()) lobAdd(m.id, m.c, m.w, m.p || [], m.n, m.who); return; }
   if (m.k === 'react'){ if (m.id !== myId()) floatReact(NET.roster.find(r => r.id === m.id), m.e); return; }
-  if (m.k === 'gs'){ G = m.g; renderMode(); return; }
+  if (m.k === 'gs'){ G = m.g; renderMode(); if (win === 'game') syncSheet(); return; }
   if (m.k === 'fishmsg'){ setTimeout(() => fishToast(m.f), 300); return; }
   if (m.k === 'timer'){ const ms = m.at && NET.offOk ? m.at - NET.off - Date.now() : m.ms; startTimer(Math.max(0, ms), true); TM.dur = m.dur; return; }
   if (m.k === 'pong'){ clockSample(m); return; }
@@ -4853,12 +4876,8 @@ function gameHTML(){
       ${fsub('O quadro aparece coberto e vira como uma carta.')}</div>`;
   }
   // placar
-  if (G && G.mode === 'fluxo'){
-    const rows = gPlayers().map(p => ({id: p.id, f: G.fish[p.id] || 0})).sort((a, b) => a.f - b.f);
-    return `<div class="sec"><div class="sec-t">Segue o Fluxo · rodada ${G.round}</div>
-      <div class="stab">${rows.map((x, i) => `<div class="srow ${x.id === myId() ? 'me' : ''}"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}</span><b class="st">${svg(FISH, 1.8)}${x.f}</b></div>`).join('')}</div>
-      <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div>${fsub(`${G.left} de ${G.cfg.pool} peixes ainda no cardume. Vence quem tiver menos.`)}</div>`;
-  }
+  if (G && G.mode === 'fluxo') return `<div class="sec"><div class="sec-t">Segue o Fluxo · rodada ${G.round}</div>${fishTable(null, NET.role === 'host')}
+      <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div>${fsub(`${G.left} de ${G.cfg.pool} peixes ainda no cardume. Vence quem tiver menos.${NET.role === 'host' ? ' − e + corrigem o placar de qualquer um, inclusive de quem saiu.' : ''}`)}</div>`;
   if (NET.role) return `<div class="sec"><div class="sec-t">Placar da sala</div><div class="plist">${NET.roster.map(r => playerRow(r, host)).join('')}</div>
       ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-g="zeroNet">Zerar placar</button></div>' : fsub('Só o anfitrião muda os pontos.')}</div>
       <div class="sec"><div class="f-row"><span class="f-lb">Exibir meus pontos no quadro</span>${tg('data-gtg="showScore"', S.g.showScore)}</div></div>`;
@@ -4924,6 +4943,7 @@ function syncRoomSoon(){
 function gameClick(t){
   const d = t.dataset;
   if (d.sc){ setScore(d.sc, +d.d); return true; }
+  if (d.fadj){ act({t:'fishAdj', id: d.fadj, d: +d.d}); return true; }
   if (d.mode && t.classList.contains('mcard')){
     if (NET.role !== 'host') return true;
     if (d.mode === 'free'){ if (G) endMode(); closeSheet(); return true; }
