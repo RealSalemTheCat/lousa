@@ -523,9 +523,19 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .mtabs{margin-bottom:12px}
 .madd{display:flex;gap:8px}.madd .txt-in{flex:1}.madd .nbtn{flex:none}
 .cats{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.cat{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);color:var(--tx2);text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none}
+.ccount{margin-top:10px;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+.cat{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 8px 8px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);color:var(--tx2);text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none}
 .cat.in{border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--tx);background:color-mix(in srgb,var(--accent) 9%,var(--panel2))}
-.cat .cn{flex:1;min-width:0;font-weight:700;font-size:15px}
+.cat .cname{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;text-align:left;color:inherit;padding:4px 0}
+.cat .cn{font-weight:700;font-size:15px}
+.ctag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:99px;background:var(--panel3);color:var(--tx3)}
+.ctag.entra{background:color-mix(in srgb,#57e389 18%,transparent);color:#57e389}.ctag.fixada{background:var(--accent);color:var(--on-accent)}
+.ctag.vetada{background:rgba(255,90,90,.16);color:#ff7a7a}.ctag.nafila{color:var(--accent)}
+.yn{display:flex;gap:6px}
+.yn button{display:flex;align-items:center;gap:4px;height:36px;min-width:52px;padding:0 10px;border-radius:11px;background:var(--panel3);font-weight:800;font-size:14px;color:var(--tx2)}
+.yn svg{width:15px;height:15px}
+.yn .vy.on{background:#57e389;color:#0d2a17}.yn .vn.on{background:#ff6b6b;color:#2a0d0d}
+.cact .nbtn.on{border-color:var(--accent);color:var(--accent)}
 .cat .pin{font-style:normal;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-left:4px}
 .cat .cb{display:flex;align-items:center;gap:8px}
 .cat .by{display:flex}.cat .by .mav{width:20px;height:20px;margin-left:-5px;font-size:9px}.cat .by .mav:first-child{margin-left:0}
@@ -1094,7 +1104,7 @@ function load(){
   try{
     const j = JSON.parse(localStorage.getItem(KEY));
     if (j && Array.isArray(j.profiles) && j.profiles.length){
-      j.g = Object.assign({rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
+      j.g = Object.assign({rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
       j.ui = Object.assign(defUI(), j.ui || {}); j.ui.sizes = Object.assign(defUI().sizes, j.ui.sizes || {});
       j.profiles.forEach(p => { const d = newProfile(p.name, p.accent); for (const k in d) if (!(k in p)) p[k] = d[k]; if (!THEMES[p.theme]) p.theme = 'lousa'; });
       return j;
@@ -2634,6 +2644,7 @@ async function present(){
   if (isJsTrans(tr)){ measureWriteRows(); txt.style.clipPath = 'path("M0 0Z")'; }
   if ((S.g.cover || forceCover) && !forceUncover) showCover(); else hideCover(false);
   forceUncover = false; forceCover = false; renderMode();
+  if (NET.role && !revTogether() && NET.phase === 'writing'){ if (NET.role === 'host') netBroadcast({k:'act', id: myId(), s:'show'}); else hostSend({k:'st', s:'show'}); }
   await nextFrames(2);
   if (seq !== presentSeq || !presenting) return;
   presentAt = performance.now();
@@ -2701,6 +2712,7 @@ function fitComp(){
 }
 async function finishExit(){
   hideCover(false); setTimeout(renderMode, 50);
+  if (NET.role === 'host' && !revTogether() && !G) setTimeout(() => toast('Todos já mostraram?', 'Nova rodada', newRound), 700);
   if (comp){ comp = null; applyComp(); }
   presentSeq++;
   cancelAnimationFrame(writeRaf); txt.style.clipPath = ''; stopDust();
@@ -2736,8 +2748,8 @@ window.addEventListener('keydown', e => { if (e.key === 'Escape' && presenting) 
 
 /* ================= janelas ================= */
 const sheetBody = $('#sheetBody');
-let win = null, tab = 'texto';
-const TABS = [['texto','Texto'],['efeitos','Efeitos'],['fundo','Fundo'],['tela','Tela']];
+let win = null, tab = 'tema';
+const TABS = [['tema','Tema'],['texto','Texto'],['efeitos','Efeitos'],['fundo','Fundo']];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pressed = b => `aria-pressed="${!!b}"`;
 const tg = (attr, on) => `<button class="tg" role="switch" ${attr} aria-checked="${!!on}"></button>`;
@@ -2791,17 +2803,16 @@ function winHTML(){
     <div class="sec"><div class="sec-t">Cor</div><div class="swatches">${ACCENTS.map(a => `<button class="sw" data-accent="${a}" style="background:${a}" ${pressed(a === p.accent)} aria-label="Cor"></button>`).join('')}<label class="sw swc" ${pressed(!ACCENTS.includes(p.accent))} style="--c:${p.accent}" aria-label="Cor personalizada"><input type="color" id="accCustom" value="${/^#[0-9a-f]{6}$/i.test(p.accent) ? p.accent : '#ffad2a'}"></label></div>
       ${S.profiles.length > 1 ? '<button class="danger" id="delProfile">Excluir jogador</button>' : ''}</div>`;
   }
-  if (win === 'theme'){
+  if (win === 'theme' && tab === 'tema'){
     const t = T();
     return `
     <div class="sticky"><div class="sec-t vrow">Variações · ${t.l}${themeCustomized(p, p.theme) ? '<button class="link-btn press" id="resetTheme">Personalizado · Restaurar</button>' : ''}</div><div class="vars">
       ${t.v.map((v, i) => `<button class="vcard press" data-variant="${i}" ${pressed(i === p.variant)}>${themePreview(p.theme, i, true)}<span class="lb">${v.n}</span></button>`).join('')}</div></div>
     <div class="sec"><div class="sec-t">Temas</div><div class="grid3">
       ${THEME_ORDER.map(k => `<button class="tcard press" data-theme-pick="${k}" ${pressed(k === p.theme)}>${themePreview(k, k === p.theme ? p.variant : 0)}<span class="lb">${THEMES[k].l}${themeCustomized(p, k) ? '<i class="tdot" aria-label="Personalizado"></i>' : ''}</span></button>`).join('')}</div></div>
-    <div class="sec"><button class="wide-btn press" id="resetTheme">Restaurar padrões do tema</button></div>`;
+    <div class="sec">${fsub('Fonte, cores, efeitos e fundo do tema escolhido ficam nas abas acima. Cada tema guarda os próprios ajustes.')}<button class="wide-btn press" id="resetTheme" style="margin-top:10px">Restaurar padrões do tema</button></div>`;
   }
-  // ajustes
-  if (tab === 'texto') return `
+  if (win === 'theme' && tab === 'texto') return `
     <div class="sec"><div class="sec-t">Fonte</div><div class="grid3">
       ${Object.entries(FONTS).filter(([k, f]) => !f.ledOnly || isLed()).map(([k,f]) => `<button class="font-card press" data-font="${k}" ${pressed(k === E('font'))}><span class="aa" style="font-family:${f.f.replace(/"/g,'')};font-weight:${f.w}">Aa</span><span class="lb">${f.l}</span></button>`).join('')}</div></div>
     <div class="sec"><div class="sec-t">Cor</div>
@@ -2810,7 +2821,7 @@ function winHTML(){
     <div class="sec">
       <div class="f-row"><span class="f-lb">Caixa alta</span>${tg('data-ptg="upper"', E('upper'))}</div>
       <div class="f-stack"><span class="f-lb">Alinhamento</span>${seg('align', [['center','Centro'],['left','Esquerda']], p.align)}</div></div>`;
-  if (tab === 'efeitos') return `
+  if (win === 'theme' && tab === 'efeitos') return `
     <div class="sec">
       <div class="f-row"><span class="f-lb">Brilho</span><span class="f-val" id="glowVal">${E('glow')}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="glowIn" min="0" max="100" step="1" value="${E('glow')}" style="--p:${E('glow')}%"></div>
@@ -2818,7 +2829,7 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Sombra</span>${tg('data-ptg="shadow"', p.shadow)}</div></div>
     <div class="sec"><div class="sec-t">Transição ao mostrar</div><div class="opt-grid" data-seg="trans">
       ${TRANS.map(([v,l]) => `<button class="press" data-v="${v}" ${pressed(v === (p.trans || 'auto'))}>${v === 'auto' ? `Do tema · ${(TRANS.find(x => x[0] === (T().trans || 'spin')) || ['', 'Giro'])[1]}` : l}</button>`).join('')}</div>
-      ${!S.g.intro ? '<div class="f-row" style="min-height:0;margin-top:10px"><span class="f-lb" style="font-size:13px;color:var(--tx3)">Transições desligadas em Ajustes › Tela</span></div>' : ''}</div>
+      ${!S.g.intro ? '<div class="f-row" style="min-height:0;margin-top:10px"><span class="f-lb" style="font-size:13px;color:var(--tx3)">Transições desligadas em Ajustes</span></div>' : ''}</div>
     <div class="sec"><div class="sec-t">Animação</div><div class="opt-grid" data-seg="anim">
       ${ANIMS.map(([v,l]) => `<button class="press" data-v="${v}" ${pressed(v === E('anim'))}>${l}</button>`).join('')}</div></div>
     ${E('anim') === 'roll' ? `<div class="sec"><div class="sec-t">Rolagem</div>
@@ -2830,7 +2841,7 @@ function winHTML(){
     ${isLed() ? `<div class="sec"><div class="sec-t">Painel LED</div>
       <div class="f-stack"><span class="f-lb">Densidade</span>${seg('dens', [['low','Baixa'],['med','Média'],['high','Alta']], p.ledDensity)}</div>
       <div class="f-stack"><span class="f-lb">Ponto</span>${seg('shape', [['round','Redondo'],['square','Quadrado']], p.ledShape)}</div></div>` : ''}`;
-  if (tab === 'fundo') return `
+  if (win === 'theme' && tab === 'fundo') return `
     <div class="sec"><div class="sec-t">Cor</div>${swatchRow(BGS, E('bg'), 'bg')}</div>
     ${T().flat ? '' : `<div class="sec"><div class="f-row"><span class="f-lb">${isLed() ? 'Pontos apagados e vinheta' : 'Textura do tema'}</span>${tg('data-ptg="texture"', p.texture)}</div></div>`}`;
   return `
@@ -2853,8 +2864,8 @@ function syncSheet(fade){
   const st = sheetBody.scrollTop;
   $('#sheetTitle').textContent = {player:'Jogador', theme:'Tema', settings:'Ajustes', game:'Jogo', room:'Sala'}[win];
   const tabs = $('#tabs');
-  tabs.hidden = win !== 'settings' && win !== 'game';
-  if (win === 'settings') tabs.innerHTML = TABS.map(([k,l]) => `<button data-tab="${k}" ${pressed(k === tab)}>${l}</button>`).join('');
+  tabs.hidden = win !== 'theme' && win !== 'game';
+  if (win === 'theme') tabs.innerHTML = TABS.map(([k,l]) => `<button data-tab="${k}" ${pressed(k === tab)}>${l}</button>`).join('');
   if (win === 'game') tabs.innerHTML = GTABS.map(([k,l]) => `<button data-tab="${k}" ${pressed(k === gtab)}>${l}</button>`).join('');
   sheetBody.innerHTML = win === 'game' ? gameHTML() : win === 'room' ? roomHTML() : winHTML();
   afterGameRender();
@@ -2871,6 +2882,7 @@ function openSheet(w){
   hideToast();
   const same = win === w && document.body.classList.contains('settings');
   if (same){ closeSheet(); return; }
+  if (w === 'theme' && win !== 'theme') tab = 'tema';
   win = w; document.body.classList.add('settings'); document.body.classList.toggle('float', w === 'room' || w === 'game'); syncSheet(true);
   if (w !== 'room' && w !== 'game') modeMin = modeMin || !!G; renderMode();
 }
@@ -2942,6 +2954,7 @@ sheetBody.addEventListener('click', e => {
     else if (k === 'dur') S.g.timerDur = +v;
     else if (k === 'netmode') S.g.netMode = v;
     else if (k === 'peek'){ setSecret(v === '0'); }
+    else if (k === 'revmode'){ S.g.revMode = v; if (v === 'each') resetReady(); if (NET.role === 'host') pushRoster(); }
     else if (k === 'tend'){ S.g.tEnd = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'lockw'){ S.g.lockW = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'balf'){ S.g.balF = +v; if (+v) setTimeout(() => balloon({id:'demo', name:'Exemplo', accent:P().accent, icon:P().icon}, 'typing', true), 80); }
@@ -3168,6 +3181,7 @@ const PHRASES = {
   join:[['entrou na sala','chegou na festa','apareceu!','chegou chegando']],
   leave:[['saiu da sala','saiu de fininho','caiu da sala']],
   kick:[['foi removido da sala']],
+  show:[['mostrou a resposta','virou o celular','revelou o quadro']],
   dispute:[['pediu revisão','não concordou','quer recontar isso aí']],
 };
 const TAILS = {typing:[' com convicção',' a mil por hora',' sem tirar o olho do quadro'], drawing:[' com convicção',' com muita calma',' em silêncio total']};
@@ -3215,7 +3229,7 @@ function balloon(pl, kind, demo){
   if (!demo) addFeed(pl, kind, text);
   const bf = S.g.balF ?? 2, key = pl.id + kind, now = performance.now();
   if (presenting || (bf === 0 && !demo)) return;
-  if (bf === 1 && !demo && !['join','leave','ready','kick','dispute'].includes(kind)) return;
+  if (bf === 1 && !demo && !['join','leave','ready','kick','dispute','show'].includes(kind)) return;
   if (!demo && balLast[key] && now - balLast[key] < (bf === 3 ? 2400 : 7000) && !['join','leave','ready','unready'].includes(kind)) return;
   balLast[key] = now;
   const wrap = $('#bals');
@@ -3272,16 +3286,30 @@ function gCard(id){ return NET.roster.find(x => x.id === id) || {id, name:'Jogad
 function avChip(id, extra){ const r = gCard(id), c = /^#[0-9a-f]{6}$/i.test(r.accent || '') ? r.accent : '#ffad2a';
   return `<span class="mav" style="--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#fff'}">${avatarHTML(r)}</span>${extra || ''}`; }
 function act(a){ if (NET.role === 'host') gameAct(myId(), a); else if (NET.role === 'guest') hostSend({k:'ga', a}); }
-function gPush(){ if (!G){ netBroadcast({k:'gs', g:null}); renderMode(); return; } G.v = (G.v || 0) + 1; netBroadcast({k:'gs', g:G}); renderMode(); }
+function gPush(){ saveHostSess(); if (!G){ netBroadcast({k:'gs', g:null}); renderMode(); return; } G.v = (G.v || 0) + 1; netBroadcast({k:'gs', g:G}); renderMode(); }
 
 function startMode(kind){
   if (NET.role !== 'host') return;
   const n = gPlayers().length;
-  if (kind === 'stop') G = {mode:'stop', phase:'setup', cats: DEF_CATS.map((name, i) => ({id:'d' + i, name, by:[], votes:[], pin:false})), out:['K','W','X','Y'], lv:{}, cfg:{ncat:6, time:90, uniq:10, rep:5}, used:[], round:0, totals:{}, swap:[]};
-  if (kind === 'fluxo') G = {mode:'fluxo', phase:'setup', cfg:{pool: Math.max(12, n * 6), uniq2:true, tie:'none'}, fish:{}, round:0, left:0};
+  const sv = (S.g.modes || {})[kind];
+  if (kind === 'stop'){
+    // regras salvas da última partida: categorias aprovadas voltam já aprovadas, decisões do anfitrião continuam
+    const cats = sv && sv.cats ? sv.cats.map(c => ({id: c.id, name: c.name, by:[], yes:[], no:[], st: c.st || 'auto', def: c.def})) : DEF_CATS.map((name, i) => ({id:'d' + i, name, by:[], yes:[], no:[], st:'auto', def: i < 6}));
+    G = {mode:'stop', phase:'setup', cats, out: sv ? sv.out.slice() : ['K','W','X','Y'], lv:{}, cfg: Object.assign({ncat:8, time:90, uniq:10, rep:5, swapMax:0}, sv && sv.cfg), used:[], round:0, totals:{}, swap:[], swapped:0};
+  }
+  if (kind === 'fluxo') G = {mode:'fluxo', phase:'setup', cfg: Object.assign({pool: Math.max(12, n * 6), uniq2:true, tie:'none'}, sv && sv.cfg), fish:{}, round:0, left:0};
   modeMin = false; closeSheet(); gPush();
 }
 function endMode(){ if (NET.role !== 'host') return; G = null; gPush(); }
+/* regras perenes: o anfitrião não precisa configurar tudo de novo na próxima partida */
+function saveModeRules(){
+  if (!G || NET.role !== 'host') return;
+  const m = S.g.modes ||= {};
+  if (G.mode === 'stop'){ const inc = stopCats().map(c => c.id);
+    m.stop = {cfg: G.cfg, out: G.out, cats: G.cats.map(c => ({id: c.id, name: c.name, st: c.st, def: inc.includes(c.id)}))}; }
+  if (G.mode === 'fluxo') m.fluxo = {cfg: G.cfg};
+  save();
+}
 
 /* ---------- ações (só o anfitrião executa) ---------- */
 function gameAct(from, a){
@@ -3291,23 +3319,32 @@ function gameAct(from, a){
     if (a.t === 'catAdd' && G.phase === 'setup'){
       const name = String(a.name || '').trim().slice(0, 40); if (!name) return;
       const same = G.cats.find(c => similar(c.name, name) || (normT(c.name).length > 3 && normT(name).includes(normT(c.name))) || (normT(name).length > 3 && normT(c.name).includes(normT(name))));
-      if (same){ if (!same.by.includes(from)) same.by.push(from); if (!same.votes.includes(from)) same.votes.push(from); }
-      else G.cats.push({id: uid().slice(0, 6), name, by:[from], votes:[from], pin:false});
+      if (same){ if (!same.by.includes(from)) same.by.push(from); same.no = same.no.filter(x => x !== from); if (!same.yes.includes(from)) same.yes.push(from); }
+      else G.cats.push({id: uid().slice(0, 6), name, by:[from], yes:[from], no:[], st:'auto'});
     }
-    else if (a.t === 'catVote' && G.phase === 'setup'){ const c = G.cats.find(x => x.id === a.id); if (!c) return; const i = c.votes.indexOf(from); if (i >= 0) c.votes.splice(i, 1); else c.votes.push(from); }
-    else if (a.t === 'catPin' && host){ const c = G.cats.find(x => x.id === a.id); if (c) c.pin = !c.pin; }
+    else if (a.t === 'catVote' && G.phase === 'setup'){
+      const c = G.cats.find(x => x.id === a.id); if (!c) return;
+      const mine = a.v > 0 ? c.yes : c.no, other = a.v > 0 ? c.no : c.yes;
+      const i = mine.indexOf(from); if (i >= 0) mine.splice(i, 1); else { mine.push(from); const j = other.indexOf(from); if (j >= 0) other.splice(j, 1); }
+    }
+    else if (a.t === 'catSt' && host){ const c = G.cats.find(x => x.id === a.id); if (c) c.st = a.v; }
     else if (a.t === 'catDel' && host){ G.cats = G.cats.filter(x => x.id !== a.id); }
+    else if (a.t === 'reset' && host && G.phase === 'setup'){ S.g.modes && delete S.g.modes.stop; const keep = G.totals; startMode('stop'); G.totals = keep; return; }
     else if (a.t === 'letter' && G.phase === 'setup'){
       const L = a.L; if (!LETTERS.includes(L)) return;
       if (host){ const i = G.out.indexOf(L); if (i >= 0) G.out.splice(i, 1); else G.out.push(L); G.lv[L] = []; }
       else { const v = G.lv[L] ||= []; const i = v.indexOf(from); if (i >= 0) v.splice(i, 1); else v.push(from); }
     }
     else if (a.t === 'cfg' && host){ G.cfg[a.k] = a.v; }
-    else if (a.t === 'start' && host && G.phase === 'setup'){ G.final = stopCats().map(c => c.name); if (!G.final.length) return; drawLetter(); G.phase = 'draw'; }
+    else if (a.t === 'start' && host && G.phase === 'setup'){ saveModeRules(); G.final = stopCats().map(c => c.name); if (!G.final.length) return; drawLetter(); G.phase = 'draw'; }
     else if (a.t === 'draw' && host && G.phase === 'draw'){ drawLetter(); }
-    else if (a.t === 'swap' && G.phase === 'draw'){ const i = G.swap.indexOf(from); if (i >= 0) G.swap.splice(i, 1); else G.swap.push(from); if (G.swap.length >= half(n)){ G.used = G.used.filter(x => x !== G.letter); drawLetter(true); } }
+    else if (a.t === 'swap' && G.phase === 'draw'){
+      if (G.cfg.swapMax && G.swapped >= G.cfg.swapMax) return;
+      const i = G.swap.indexOf(from); if (i >= 0) G.swap.splice(i, 1); else G.swap.push(from);
+      if (G.swap.length >= half(n)) drawLetter(true);
+    }
     else if (a.t === 'go' && host && G.phase === 'draw'){ G.phase = 'play'; G.ans = {}; G.used.push(G.letter); G.round++; G.stopBy = null; startTimer(G.cfg.time * 1000); }
-    else if (a.t === 'ans' && G.ans && (G.phase === 'play' || G.phase === 'stopping' || G.phase === 'collect')){ G.ans[from] = a.a; return; }
+    else if (a.t === 'ans' && G.ans && (G.phase === 'play' || G.phase === 'stopping' || G.phase === 'collect')){ G.ans[from] = a.a; saveHostSess(); return; }
     else if (a.t === 'stop' && G.phase === 'play'){ stopNow(from); return; }
     else if (a.t === 'bad' && G.phase === 'review'){ const k = a.k, m = G.marks[k] ||= {bad:[], ov:null}; if (k.split('|')[0] === from) return; const i = m.bad.indexOf(from); if (i >= 0) m.bad.splice(i, 1); else m.bad.push(from); }
     else if (a.t === 'ov' && host && G.phase === 'review'){ const m = G.marks[a.k] ||= {bad:[], ov:null}; m.ov = a.v; }
@@ -3324,7 +3361,7 @@ function gameAct(from, a){
   }
   if (G.mode === 'fluxo'){
     if (a.t === 'cfg' && host && G.phase === 'setup'){ G.cfg[a.k] = a.v; }
-    else if (a.t === 'start' && host && G.phase === 'setup'){ G.left = G.cfg.pool; G.round = 1; G.fish = {}; G.phase = 'write'; newRound(); }
+    else if (a.t === 'start' && host && G.phase === 'setup'){ saveModeRules(); G.left = G.cfg.pool; G.round = 1; G.fish = {}; G.phase = 'write'; newRound(); }
     else if (a.t === 'move' && host && G.phase === 'judge'){
       for (const g of G.groups){ const i = g.ids.indexOf(a.id); if (i >= 0) g.ids.splice(i, 1); }
       if (a.to === 'new') G.groups.push({label: (G.ans[a.id] || '—'), ids:[a.id]}); else { const g = G.groups[a.to]; if (g) g.ids.push(a.id); }
@@ -3344,13 +3381,17 @@ function gameAct(from, a){
   }
 }
 /* ---------- Adedonha ---------- */
+/* entra quem tem mais Sim que Não (as da última partida começam aprovadas); o anfitrião pode fixar ou vetar */
+const catScore = c => c.yes.length - c.no.length + (c.def ? .5 : 0);
+function catState(c){ return c.st === 'in' ? 'in' : c.st === 'out' ? 'out' : catScore(c) > 0 ? 'in' : 'out'; }
 function stopCats(){
-  const n = gPlayers().length, K = G.cfg.ncat;
-  const ranked = G.cats.map((c, i) => ({c, i})).sort((a, b) => (b.c.pin - a.c.pin) || (b.c.votes.length - a.c.votes.length) || (a.i - b.i)).map(x => x.c);
-  return ranked.slice(0, K);
+  const ok = G.cats.map((c, i) => ({c, i})).filter(x => catState(x.c) === 'in')
+    .sort((a, b) => ((b.c.st === 'in') - (a.c.st === 'in')) || (catScore(b.c) - catScore(a.c)) || (a.i - b.i)).map(x => x.c);
+  return G.cfg.ncat ? ok.slice(0, G.cfg.ncat) : ok;
 }
 function lettersOut(){ const n = gPlayers().length; return LETTERS.filter(L => G.out.includes(L) || (G.lv[L] || []).length >= half(n)); }
 function drawLetter(isSwap){
+  if (isSwap && G.letter) G.used = G.used.concat(G.letter);
   const out = lettersOut();
   let pool = LETTERS.filter(L => !out.includes(L) && !G.used.includes(L) && L !== G.letter);
   if (!pool.length){ G.used = []; pool = LETTERS.filter(L => !out.includes(L) && L !== G.letter); }
@@ -3453,23 +3494,34 @@ function stopHTML(){
     const inc = stopCats().map(c => c.id), out = lettersOut();
     const tabs = `<div class="seg mtabs">${[['cats','Categorias'],['letters','Letras'],['rules','Regras']].map(([k, l]) => `<button data-mtab="${k}" ${pressed(MV.tab === k)}>${l}</button>`).join('')}</div>`;
     let body = '';
-    if (MV.tab === 'cats') body = `
+    if (MV.tab === 'cats'){
+      const shown = stopCats().map(c => c.id);
+      const yesI = '<path d="M5 12.5l4.5 4.5L19 7.5"/>', noI = '<path d="M6 6l12 12M18 6 6 18"/>';
+      body = `
       <form class="madd" data-m="catform"><input class="txt-in" id="catIn" maxlength="40" placeholder="Sugerir categoria" autocomplete="off" enterkeyhint="send"><button class="nbtn pri press" type="submit">Sugerir</button></form>
-      <div class="f-sub">Toque para votar. Entram as ${G.cfg.ncat} mais votadas${host ? '; segure para fixar ou tirar' : ''}. Sugestões parecidas viram uma só.</div>
-      <div class="cats">${G.cats.map(c => { const on = inc.includes(c.id), mine = c.votes.includes(myId());
-        return `<div class="cat press ${on ? 'in' : ''} ${mine ? 'mine' : ''}" data-cat="${c.id}" role="button"><span class="cn">${esc(c.name)}${c.pin ? ' <i class="pin">fixa</i>' : ''}</span>
-          <span class="cb">${c.by.length ? `<span class="by">${c.by.map(id => avChip(id)).join('')}</span>` : ''}<span class="vt">${svg('<path d="M7 11v9H4v-9zM7 11l4-7c1.5 0 2.5 1 2.2 2.6L12.6 10H19a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 17.8 20H7"/>', 1.8)}${c.votes.length}</span></span>${MV.catEdit === c.id ? `<span class="cact"><button class="nbtn press" data-cpin="${c.id}">${c.pin ? 'Desafixar' : 'Fixar'}</button><button class="nbtn press" data-cdel="${c.id}">Tirar</button></span>` : ''}</div>`; }).join('')}</div>`;
+      <div class="f-sub">Vote Sim ou Não. Entra quem tiver mais Sim${G.cfg.ncat ? `, até ${G.cfg.ncat} categorias` : ''}. Sugestões parecidas viram uma só, com os autores juntos.${host ? ' Toque no nome para fixar, vetar ou tirar.' : ' O anfitrião pode fixar ou vetar.'}</div>
+      <div class="ccount">${shown.length} ${shown.length === 1 ? 'categoria entra' : 'categorias entram'}</div>
+      <div class="cats">${G.cats.map(c => { const stt = catState(c), inn = shown.includes(c.id), y = c.yes.includes(myId()), no = c.no.includes(myId());
+        const tag = c.st === 'in' ? 'fixada' : c.st === 'out' ? 'vetada' : stt === 'in' ? (inn ? 'entra' : 'na fila') : 'fora';
+        return `<div class="cat ${inn ? 'in' : ''}" data-catrow="${c.id}">
+          <button class="cname press" ${host ? `data-catmenu="${c.id}"` : 'tabindex="-1"'}><span class="cn">${esc(c.name)}</span><span class="ctag ${tag.replace(' ', '')}">${tag}</span>${c.by.length ? `<span class="by">${c.by.map(id => avChip(id)).join('')}</span>` : ''}</button>
+          <span class="yn"><button class="vy press ${y ? 'on' : ''}" data-cv="${c.id}" data-v="1">${svg(yesI, 2.4)}${c.yes.length}</button><button class="vn press ${no ? 'on' : ''}" data-cv="${c.id}" data-v="-1">${svg(noI, 2.4)}${c.no.length}</button></span>
+          ${MV.catEdit === c.id ? `<span class="cact"><button class="nbtn press ${c.st === 'in' ? 'on' : ''}" data-cst="${c.id}" data-v="in">Fixar</button><button class="nbtn press ${c.st === 'auto' ? 'on' : ''}" data-cst="${c.id}" data-v="auto">Votação</button><button class="nbtn press ${c.st === 'out' ? 'on' : ''}" data-cst="${c.id}" data-v="out">Vetar</button><button class="nbtn press" data-cdel="${c.id}">Apagar</button></span>` : ''}</div>`; }).join('')}</div>`;
+    }
     if (MV.tab === 'letters') body = `
       <div class="f-sub" style="margin-top:0">${host ? 'Toque para tirar ou devolver uma letra.' : `Toque para votar e tirar uma letra. Sai com ${half(n)} ${half(n) === 1 ? 'voto' : 'votos'}.`}</div>
       <div class="lets">${LETTERS.map(L => { const v = (G.lv[L] || []).length, o = out.includes(L), mine = (G.lv[L] || []).includes(myId());
         return `<button class="let press ${o ? 'out' : ''} ${mine ? 'mine' : ''}" data-let="${L}">${L}${v && !G.out.includes(L) ? `<i>${v}</i>` : ''}</button>`; }).join('')}</div>
       <div class="f-sub">${26 - out.length} letras no sorteio.</div>`;
     if (MV.tab === 'rules') body = `
-      <div class="mrow"><span>Categorias por rodada</span>${host ? stepper('ncat', G.cfg.ncat) : `<b>${G.cfg.ncat}</b>`}</div>
+      <div class="mrow"><span>Limite de categorias</span>${host ? stepper('ncat', G.cfg.ncat, G.cfg.ncat || 'sem') : `<b>${G.cfg.ncat || 'sem limite'}</b>`}</div>
+      <div class="mrow"><span>Trocas de letra por partida</span>${host ? stepper('swapMax', G.cfg.swapMax, G.cfg.swapMax || '∞') : `<b>${G.cfg.swapMax || 'ilimitadas'}</b>`}</div>
       <div class="mrow"><span>Tempo da rodada</span>${host ? stepper('time', G.cfg.time, fmtT(G.cfg.time * 1000)) : `<b>${fmtT(G.cfg.time * 1000)}</b>`}</div>
       <div class="mrow"><span>Resposta única</span>${host ? stepper('uniq', G.cfg.uniq, G.cfg.uniq + ' pts') : `<b>${G.cfg.uniq} pts</b>`}</div>
       <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
-      <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>`;
+      <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
+      <div class="f-sub">Categorias, letras e regras ficam salvas para a próxima partida.</div>
+      ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-m="reset">Voltar ao padrão</button></div>' : ''}`;
     return `${mHead('Adedonha', 'preparação')}<div class="mb">${tabs}${body}</div>
       <div class="mf">${host ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="start">Sortear letra</button>` : `<span class="mwait">Combinem tudo; o anfitrião começa</span>`}</div>`;
   }
@@ -3478,13 +3530,13 @@ function stopHTML(){
     return `${mHead('Adedonha', `rodada ${G.round + 1}`)}<div class="mb mcenter">
       <div class="mlab">A letra é</div><div class="bigletter" data-spin="${G.spin}">${G.letter}</div>
       <div class="mcats">${G.final.map(c => `<span>${esc(c)}</span>`).join('')}</div>
-      <button class="nbtn press ${mine ? 'on' : ''}" data-m="swap">${mine ? 'Pediu troca' : 'Letra difícil? Pedir troca'} · ${sw}/${need}</button>
-      ${G.swapped ? `<div class="f-sub">Letra trocada ${G.swapped} ${G.swapped === 1 ? 'vez' : 'vezes'}.</div>` : ''}</div>
+      ${G.cfg.swapMax && G.swapped >= G.cfg.swapMax ? `<div class="f-sub">Sem trocas restantes nesta partida.</div>` : `<button class="nbtn press ${mine ? 'on' : ''}" data-m="swap">${mine ? 'Pediu troca' : 'Letra difícil? Pedir troca'} · ${sw}/${need}</button>`}
+      ${G.swapped ? `<div class="f-sub">Letra trocada ${G.swapped} ${G.swapped === 1 ? 'vez' : 'vezes'}${G.cfg.swapMax ? ` de ${G.cfg.swapMax}` : ''}.</div>` : ''}</div>
       <div class="mf">${host ? `<button class="nbtn press" data-m="redraw">Sortear de novo</button><button class="nbtn pri press" data-m="go">Valendo!</button>` : `<span class="mwait">Quando o anfitrião der o “valendo”, o tempo começa</span>`}</div>`;
   }
   if (G.phase === 'play' || G.phase === 'stopping' || G.phase === 'collect'){
     const lock = G.phase !== 'play' && G.phase !== 'stopping';
-    if (MV.ansKey !== G.round + G.letter){ MV.ans = {}; MV.ansKey = G.round + G.letter; }
+    if (MV.ansKey !== G.round + G.letter){ MV.ans = Object.assign({}, (G.ans && G.ans[myId()]) || {}); MV.ansKey = G.round + G.letter; }
     return `${mHead(`Letra <span class="hl">${G.letter}</span>`, `rodada ${G.round} · <i id="mTime">${TM.run ? fmtT(TM.end - performance.now()) : ''}</i>`)}<div class="mb">
       ${G.final.map((c, i) => `<label class="ans"><span>${esc(c)}</span><input class="txt-in" data-ans="${i}" maxlength="40" value="${esc(MV.ans[i] || '')}" placeholder="${G.letter}…" autocomplete="off" autocapitalize="sentences" spellcheck="false" enterkeyhint="next" ${lock ? 'disabled' : ''}></label>`).join('')}</div>
       <div class="mf"><span class="mfill" id="mFill"></span><button class="stopbtn press" data-m="stop" id="stopBtn" disabled>STOP!</button></div>
@@ -3576,16 +3628,17 @@ function afterMode(){
 }
 /* ---------- toques e digitação nas telas de modo ---------- */
 modeEl.addEventListener('click', e => {
-  const t = e.target.closest('button,[data-grp],[data-cat]'); if (!t || t.disabled) return;
+  const t = e.target.closest('button,[data-grp]'); if (!t || t.disabled) return;
   const d = t.dataset, host = NET.role === 'host';
   if (d.m === 'min'){ modeMin = true; renderMode(); return; }
   if (d.mtab){ MV.tab = d.mtab; renderMode(); return; }
-  if (d.cpin){ MV.catEdit = null; act({t:'catPin', id: d.cpin}); return; }
+  if (d.cst){ MV.catEdit = null; act({t:'catSt', id: d.cst, v: d.v}); return; }
   if (d.cdel){ MV.catEdit = null; act({t:'catDel', id: d.cdel}); return; }
-  if (d.cat){ act({t:'catVote', id: d.cat}); return; }
+  if (d.catmenu){ MV.catEdit = MV.catEdit === d.catmenu ? null : d.catmenu; renderMode(); return; }
+  if (d.cv){ act({t:'catVote', id: d.cv, v: +d.v}); return; }
   if (d.let){ act({t:'letter', L: d.let}); return; }
   if (d.mcfg){ const k = d.mcfg, dir = +d.d, c = G.cfg;
-    const step = {ncat:[1, 3, 15], time:[c.time < 60 ? 10 : 15, 20, 600], uniq:[5, 5, 50], rep:[5, 0, 50], pool:[2, 4, 200]}[k];
+    const step = {ncat:[1, 0, 15], swapMax:[1, 0, 9], time:[c.time < 60 ? 10 : 15, 20, 600], uniq:[5, 5, 50], rep:[5, 0, 50], pool:[2, 4, 200]}[k];
     act({t:'cfg', k, v: Math.min(step[2], Math.max(step[1], c[k] + dir * step[0]))}); return; }
   if (d.mtg){ act({t:'cfg', k: d.mtg, v: !G.cfg[d.mtg]}); return; }
   const sg = t.closest('[data-seg="mtie"]'); if (sg && d.v){ act({t:'cfg', k:'tie', v: d.v}); return; }
@@ -3611,13 +3664,8 @@ modeEl.addEventListener('click', e => {
   else if (m === 'confirm') act({t:'confirm'});
   else if (m === 'dispute'){ act({t:'dispute'}); toast('Pedido de revisão enviado'); }
   else if (m === 'again') act({t:'again'});
+  else if (m === 'reset') act({t:'reset'});
 });
-modeEl.addEventListener('contextmenu', e => { const c = e.target.closest('[data-cat]'); if (c && NET.role === 'host'){ e.preventDefault(); catMenu(c.dataset.cat); } });
-let catHold = 0;
-modeEl.addEventListener('pointerdown', e => { const c = e.target.closest('[data-cat]'); if (!c || NET.role !== 'host') return; clearTimeout(catHold); catHold = setTimeout(() => { catHold = -1; catMenu(c.dataset.cat); }, 520); });
-['pointerup','pointercancel','pointerleave'].forEach(ev => modeEl.addEventListener(ev, () => { if (catHold > 0) clearTimeout(catHold); }));
-modeEl.addEventListener('click', e => { if (catHold === -1 && e.target.closest('[data-cat]')){ e.stopImmediatePropagation(); catHold = 0; } }, true);
-function catMenu(id){ MV.catEdit = MV.catEdit === id ? null : id; if (navigator.vibrate) try{ navigator.vibrate(15); }catch(_){} renderMode(); }
 modeEl.addEventListener('submit', e => { e.preventDefault(); const i = $('#catIn'); if (!i || !i.value.trim()) return; act({t:'catAdd', name: i.value}); i.value = ''; i.focus(); });
 let ansT = 0;
 modeEl.addEventListener('input', e => {
@@ -3702,8 +3750,8 @@ function hostRoster(){
 function netBroadcast(obj){ for (const pe of NET.peers.values()) if (pe.open) pe.send(obj); }
 const hostSend = obj => { if (NET.host && NET.host.open) NET.host.send(obj); };
 function pushRoster(){
-  NET.roster = hostRoster();
-  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all'}});
+  NET.roster = hostRoster(); saveHostSess();
+  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together'}});
   syncRoom();
   renderScoreTag();
   if (S.g.autoAll !== false) checkAutoReveal();
@@ -3735,11 +3783,11 @@ function hostMsg(pe, m){
   if (m.k === 'hello'){
     const first = !pe.card;
     // o mesmo aparelho voltando substitui a entrada antiga
-    for (const [k, o] of NET.peers) if (o !== pe && o.card && o.card.id === m.p.id){ NET.peers.delete(k); }
+    for (const [k, o] of NET.peers) if (o !== pe && o.card && o.card.id === m.p.id){ pe.ready = o.ready; pe.st = o.st; pe.card = o.card; NET.peers.delete(k); }
     if (NET.banned && NET.banned.has(m.p.id)){ pe.send({k:'kick'}); pe.open = false; setTimeout(() => { try{ pe.close(); }catch(_){} }, 400); return; }
     pe.card = m.p;
-    if (first){
-      pe.st = 'idle'; pe.ready = false; balloon(pe.card, 'join'); sfx('show');
+    if (first && !pe.card0){
+      pe.st = pe.st || 'idle'; pe.ready = !!pe.ready; balloon(pe.card, 'join'); sfx('show');
       if ((S.g.balF ?? 2) === 0 || presenting) toast(`${pe.card.name || 'Jogador'} entrou na sala`);
     }
     pushRoster();
@@ -3765,7 +3813,7 @@ function hostMsg(pe, m){
 function roomPlayers(){ return NET.roster.filter(r => r.st !== 'off'); }
 function readyCount(){ const l = roomPlayers(); return [l.filter(r => r.ready).length, l.length]; }
 function checkAutoReveal(){
-  if (NET.role !== 'host' || NET.phase !== 'writing') return;
+  if (NET.role !== 'host' || NET.phase !== 'writing' || !revTogether()) return;
   const [r, n] = readyCount();
   if (n < 2 || r < n) return;
   if (S.g.autoAll === false){ if (!NET.allToast){ NET.allToast = true; toast('Todos prontos', 'Revelar', revealAll); sfx('show'); } return; }
@@ -3810,7 +3858,7 @@ function newRound(){
   roundClear();
 }
 function endRoom(){
-  netBroadcast({k:'bye'});
+  netBroadcast({k:'bye'}); clearSess();
   for (const pe of NET.peers.values()) try{ pe.close(); }catch(_){}
   if (NET.room){ const r = NET.room; NET.room = null; setTimeout(() => r.leave().catch(() => {}), 300); }
   for (const sl of NET.slots.values()) try{ sl.pc.close(); }catch(_){}
@@ -3849,22 +3897,32 @@ function openRoomOnline(code){
   NET.room = room; NET.act = act; NET.code = code;
   return {room, act};
 }
-function createRoomOnline(){
+function createRoomOnline(restore){
   if (!onlineOK()) return;
-  const code = genCode();
+  const code = restore ? restore.code : genCode();
   NET.role = 'host'; NET.mode = 'online'; NET.hostName = P().name || 'Anfitrião'; NET.phase = 'writing'; NET.gallery = null; NET.live = {}; NET.feed = []; roomAwake(true);
   const {room, act} = openRoomOnline(code);
   room.onPeerJoin(({peerId}) => act.send({k:'iam-host', name: NET.hostName}, {target: peerId}).catch(() => {}));
   room.onPeerLeave(({peerId}) => { const pe = NET.peers.get(peerId); if (pe && pe.open){ pe.open = false; if (pe.card){ balloon(pe.card, 'leave'); pushRoster(); } } });
   act.onMessage((m, ctx) => {
     if (NET.role !== 'host' || !m || typeof m !== 'object') return;
+    // quem volta depois de recarregar pode ter o mesmo id de antes: responde a quem está procurando a sala
+    if (m.k === 'seek'){ act.send({k:'iam-host', name: NET.hostName}, {target: ctx.peerId}).catch(() => {}); return; }
     let pe = NET.peers.get(ctx.peerId);
     if (!pe){ pe = {send: obj => act.send(obj, {target: ctx.peerId}).catch(() => {}), close: () => {}, open:true, st:'idle', card:null}; NET.peers.set(ctx.peerId, pe); }
     pe.open = true;
     hostMsg(pe, m);
     if (m.k === 'hello' && NV.mode === 'inviteOn') nvOnlineCount();
   });
-  pushRoster();
+  if (restore){
+    NET.scores = restore.scores || {}; NET.secret = restore.secret !== false; NET.phase = restore.phase || 'writing';
+    NET.banned = new Set(restore.banned || []); G = restore.G || null; NET.feed = [];
+    pushRoster(); renderMode(); armBack();
+    toast(`Sala ${code} reaberta. Quem estava nela volta sozinho`);
+    let k = 0; const iv = setInterval(() => { if (NET.role !== 'host' || NET.code !== code || ++k > 12){ clearInterval(iv); return; } act.send({k:'iam-host', name: NET.hostName}).catch(() => {}); }, 2500);
+    return;
+  }
+  pushRoster(); armBack();
   openInviteOnline();
 }
 let joinSeq = 0;
@@ -3896,27 +3954,50 @@ async function joinRoomOnline(raw){
     if (NET.host || my !== joinSeq) return;
     joinStop();
     joinSay('Sala não encontrada. Confira o código e se quem criou está com o app aberto na tela', true);
+    if (NV.resume && Date.now() < NV.resume.until){ setTimeout(() => { if (!NET.role && NV.resume) joinRoomOnline(NV.resume.code); }, 2500); }
+    else if (NV.resume){ NV.resume = null; clearSess(); toast('Não deu para voltar à sala'); }
     try{ room.leave(); }catch(_){} if (NET.room === room) NET.room = null;
   }, 20000);
+  const seekIv = setInterval(() => { if (my !== joinSeq || NET.host || !NET.room){ clearInterval(seekIv); return; } act.send({k:'seek'}).catch(() => {}); }, 2000);
   act.onMessage((m, ctx) => {
     if (!m || typeof m !== 'object') return;
+    if (m.k === 'iam-host' && NET.host && NET.role === 'guest' && NET.room === room){
+      // o anfitrião recarregou e reabriu a sala: apresenta-se de novo
+      NET.host.peerId = ctx.peerId; NET.host.send = obj => act.send(obj, {target: ctx.peerId}).catch(() => {});
+      hostSend({k:'hello', p: meCard()}); if (NET.myReady) hostSend({k:'ready', v:true});
+      return;
+    }
     if (m.k === 'iam-host' && !NET.host){
       if (my !== joinSeq) return;
       joinStop();
       NET.host = {peerId: ctx.peerId, open:true, send: obj => act.send(obj, {target: ctx.peerId}).catch(() => {}), close: () => { if (NET.room === room) NET.room = null; room.leave().catch(() => {}); }};
       NET.role = 'guest'; NET.hostName = m.name || 'Anfitrião'; NET.gallery = null; NET.live = {}; NET.feed = [];
       hostSend({k:'hello', p: meCard()});
-      nvClose(); toast(`Conectado à sala de ${NET.hostName}`); sfx('show'); roomAwake(true);
-      if (win === 'room') syncSheet(true); else openSheet('room');
+      const wasResume = !!NV.resume; NV.resume = null;
+      nvClose(); toast(wasResume ? `De volta à sala de ${NET.hostName}` : `Conectado à sala de ${NET.hostName}`); sfx('show'); roomAwake(true); armBack();
+      saveSess({role:'guest', code});
+      if (!wasResume){ if (win === 'room') syncSheet(true); else openSheet('room'); }
       renderScoreTag();
       return;
     }
     if (NET.host && ctx.peerId === NET.host.peerId) guestMsg(m);
   });
   room.onPeerJoin(() => { if (!NET.host && my === joinSeq) joinSay('Achei alguém na sala, entrando…'); });
-  room.onPeerLeave(({peerId}) => { if (NET.host && peerId === NET.host.peerId) guestLost(); });
+  room.onPeerLeave(({peerId}) => { if (NET.host && peerId === NET.host.peerId) guestDropped(code); });
   return true;
 }
+/* gesto de voltar do celular: fecha janela ou apresentação em vez de sair do app; na sala, avisa */
+let backArmed = false;
+function armBack(){ if (backArmed) return; try{ history.pushState({lousa:1}, ''); backArmed = true; }catch(_){} }
+addEventListener('popstate', () => {
+  backArmed = false;
+  if (!moreMenu.hidden){ toggleMore(false); armBack(); return; }
+  if (win){ closeSheet(); armBack(); return; }
+  if (presenting){ exitPresent(); armBack(); return; }
+  if (G && modeOpen()){ modeMin = true; renderMode(); armBack(); return; }
+  if (NET.role){ toast('Você está numa sala. Para sair, use Sair da sala'); armBack(); return; }
+});
+addEventListener('beforeunload', e => { if (NET.role){ e.preventDefault(); e.returnValue = ''; } });
 /* tela acesa enquanto estiver numa sala (celular apagado = sai da sala) */
 let roomLock = null;
 async function roomAwake(on){
@@ -3992,12 +4073,30 @@ async function guestJoin(code){
   pc.addEventListener('connectionstatechange', () => { if (['failed','closed'].includes(pc.connectionState)) guestLost(); });
   return ans;
 }
-function guestLost(msg){
+/* caiu a conexão (gesto de sair, tela apagada, rede): tenta voltar sozinho por um tempo */
+function guestDropped(code){
+  if (NET.role !== 'guest') return;
+  const keep = {code};
+  NET.role = 'guest'; guestLost('A conexão caiu. Tentando voltar…', true);
+  NV.resume = {code: keep.code, until: Date.now() + 90000};
+  setTimeout(() => { if (!NET.role && NV.resume) joinRoomOnline(keep.code); }, 1200);
+}
+const SESS = 'lousa.sess';
+function saveSess(o){ try{ localStorage.setItem(SESS, JSON.stringify(Object.assign({t: Date.now()}, o))); }catch(_){} }
+function clearSess(){ try{ localStorage.removeItem(SESS); }catch(_){} }
+let hostSaveT = 0;
+function saveHostSess(){
+  if (NET.role !== 'host' || NET.mode !== 'online') return;
+  clearTimeout(hostSaveT);
+  hostSaveT = setTimeout(() => saveSess({role:'host', code: NET.code, scores: NET.scores, secret: NET.secret, phase: NET.phase, banned: [...(NET.banned || [])], G}), 300);
+}
+function guestLost(msg, keepSess){
   if (NET.role !== 'guest') return;
   NET.lostMsg = msg;
   NET.role = null; NET.host = null; NET.roster = []; NET.myReady = false; NET.secret = true; NET.phase = 'writing'; G = null; setTimeout(renderMode, 0);
   if (NET.room){ const r = NET.room; NET.room = null; r.leave().catch(() => {}); }
   toast(NET.lostMsg || 'Conexão com a sala encerrada'); NET.lostMsg = null; roomAwake(false); setLock(null);
+  if (!keepSess) clearSess();
   syncRoom();
   renderScoreTag();
 }
@@ -4005,7 +4104,7 @@ function guestMsg(m){
   if (m.k === 'roster'){
     const wasSecret = NET.secret;
     NET.roster = m.list; NET.secret = m.room.secret;
-    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW};
+    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev};
     const mine = m.list.find(r => r.id === myId()); if (mine) NET.myReady = !!mine.ready;
     syncRoom();
     renderScoreTag();
@@ -4113,7 +4212,10 @@ rbar.addEventListener('click', e => { const b = e.target.closest('[data-rx]'); i
 function updateReactBar(){ rbar.hidden = !(NET.role && NET.myReady && !presenting && !win && !modeOpen()); if (!rbar.hidden) pill.hidden = true; else if (G && !modeOpen() && !presenting && !win && pill.innerHTML) pill.hidden = false; }
 
 /* ---------- Pronto ---------- */
-const roomWriting = () => !!NET.role && NET.phase === 'writing';
+/* revelação juntos (Pronto + contagem para todos) ou cada um mostra quando quiser */
+const revTogether = () => (NET.role === 'host' ? S.g.revMode : (NET.rules || {}).rev) !== 'each';
+const roomWriting = () => !!NET.role && NET.phase === 'writing' && revTogether();
+const hostNewRoundBtn = () => NET.role === 'host' && NET.phase === 'revealed' && !G;
 function setReady(v, quiet){
   if (!NET.role || NET.myReady === v) return;
   NET.myReady = v;
@@ -4131,6 +4233,7 @@ function stampReady(){
 /* tocar duas vezes / Mostrar: na sala, enquanto escrevem, vira o botão Pronto */
 function wantShow(){
   if (presenting) return;
+  if (hostNewRoundBtn()){ newRound(); return; }
   if (!roomWriting()){ present(); return; }
   if (NET.role === 'host' && NET.myReady){ revealAll(); return; }
   setReady(!NET.myReady);
@@ -4140,7 +4243,7 @@ function updateRoomUI(){
   let cnt = sb.querySelector('.cnt');
   const ic = sb.querySelector('svg');
   if (!ic.dataset.orig) ic.dataset.orig = ic.innerHTML;
-  const want = roomWriting() ? '<path d="M5 12.5l4.5 4.5L19 7.5"/>' : ic.dataset.orig;
+  const want = roomWriting() ? '<path d="M5 12.5l4.5 4.5L19 7.5"/>' : hostNewRoundBtn() ? '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4.5V11h-6.5"/>' : ic.dataset.orig;
   if (ic.innerHTML !== want) ic.innerHTML = want;
   if (roomWriting()){
     const [r, n] = readyCount();
@@ -4149,7 +4252,7 @@ function updateRoomUI(){
     sb.classList.toggle('ready', NET.myReady && !hostGo);
     if (!cnt){ cnt = document.createElement('span'); cnt.className = 'cnt'; sb.appendChild(cnt); }
     cnt.textContent = `${r}/${n}`;
-  } else { lb.textContent = 'Mostrar'; sb.classList.remove('ready'); if (cnt) cnt.remove(); }
+  } else { lb.textContent = hostNewRoundBtn() ? 'Nova rodada' : 'Mostrar'; sb.classList.remove('ready'); if (cnt) cnt.remove(); }
   const rb = $('#roomBtn');
   document.body.classList.toggle('inroom', !!NET.role);
   if (NET.role){
@@ -4337,7 +4440,7 @@ nv.addEventListener('click', e => {
 let gtab = 'modos';
 const GTABS = [['modos','Modos'],['rodada','Rodada'],['placar','Placar']];
 const DURS = [15, 30, 45, 60, 90, 120, 180, 300];
-const ST_LB = {idle:'parado', typing:'escrevendo', drawing:'desenhando', erasing:'apagando', ready:'pronto', off:'desconectado'};
+const ST_LB = {show:'mostrou', idle:'parado', typing:'escrevendo', drawing:'desenhando', erasing:'apagando', ready:'pronto', off:'desconectado'};
 function playerRow(r, canEdit, kick){
   return `<div class="prow"><span class="pi" style="color:${r.accent}">${r.icon && ICONS[r.icon] ? svg(ICONS[r.icon], 2) : '<i class="dot"></i>'}</span>
     <span class="pn">${esc(r.name || 'Jogador')}${r.host ? ' <span class="hostb">anfitrião</span>' : ''}${r.id === myId() ? ' <span class="youb">você</span>' : ''}</span>
@@ -4357,6 +4460,19 @@ function stepTimer(dir){
   sfx('ui'); syncSheet();
 }
 const fsub = t => `<div class="f-sub">${t}</div>`;
+/* controle da rodada: como revelar e nova rodada (fica no topo da janela Sala e em Jogo › Rodada) */
+function roundCtlHTML(){
+  const host = NET.role === 'host', tog = revTogether();
+  if (!host) return `<div class="sec"><div class="sec-t">Rodada</div>${fsub(tog
+      ? 'Revelação juntos: quando terminar, toque em Pronto (ou dois toques no quadro). Todos mostram ao mesmo tempo.'
+      : 'Cada um mostra quando quiser, como na mesa: dois toques no quadro ou Mostrar.')}</div>`;
+  return `<div class="sec"><div class="sec-t">Rodada</div>
+    ${seg('revmode', [['together','Revelar juntos'],['each','Cada um mostra']], tog ? 'together' : 'each')}
+    ${fsub(tog ? 'Cada um toca em Pronto quando terminar; a contagem começa para todos ao mesmo tempo.' : 'Sem Pronto e sem contagem: cada um vira a tela quando a mesa combinar.')}
+    ${tog ? `<div class="f-row" style="margin-top:6px"><span class="f-lb">Começar sozinho quando todos estiverem prontos</span>${tg('data-gtg="autoAll"', S.g.autoAll !== false)}</div>` : ''}
+    <div class="room-act">${tog ? '<button class="nbtn press" data-g="reveal">Revelar agora</button>' : ''}<button class="nbtn pri press" data-g="round">Nova rodada</button></div>
+    <div class="f-row"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div></div>`;
+}
 const TEND_LB = {warn:'Só avisar', lock:'Travar', reveal:'Revelar'};
 const MODES = [['stop','Adedonha','Letra sorteada, categorias votadas, STOP! e correção juntos.','<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M15.5 15.5l2 2"/>'],
   ['fluxo','Segue o Fluxo','Responda o que a maioria vai responder. Use as cartas do jogo; o resto fica no celular.', FISH]];
@@ -4387,13 +4503,10 @@ function gameHTML(){
       ${seg('tend', [['warn','Só avisar'],['lock','Travar'],['reveal', inRoom ? 'Revelar todos' : 'Mostrar']], te)}
       ${te === 'lock' ? `<div style="margin-top:8px">${seg('lockw', [['all','Escrita e desenho'],['text','Só a escrita']], lw)}</div>` : ''}
       ${fsub(teDesc)}`}</div>
-    <div class="sec"><div class="sec-t">Revelação</div>
-      ${host ? `<div class="f-row"><span class="f-lb">Revelar quando todos marcarem Pronto</span>${tg('data-gtg="autoAll"', S.g.autoAll !== false)}</div>` : ''}
-      ${guest ? fsub('Quando terminar, toque em Pronto (ou dois toques no quadro). Os quadros aparecem juntos quando o anfitrião revelar.') : ''}
+    ${inRoom ? roundCtlHTML() : ''}
+    <div class="sec"><div class="sec-t">Capa</div>
       <div class="f-row"><span class="f-lb">Capa antes de revelar</span>${tg('data-gtg="cover"', S.g.cover)}</div>
-      ${fsub('O quadro aparece coberto e vira como uma carta.')}
-      ${host ? `<div class="room-act"><button class="nbtn pri press" data-g="reveal">Revelar todos</button><button class="nbtn press" data-g="round">Nova rodada</button></div>
-      <div class="f-row"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div>` : ''}</div>`;
+      ${fsub('O quadro aparece coberto e vira como uma carta.')}</div>`;
   }
   // placar
   if (NET.role) return `<div class="sec"><div class="sec-t">Placar da sala</div><div class="plist">${NET.roster.map(r => playerRow(r, host)).join('')}</div>
@@ -4433,6 +4546,7 @@ function roomHTML(){
   return `<div class="sec">${host && NET.mode === 'online' ? `<div class="codebar"><span>Código</span><b>${NET.code}</b><button class="nbtn press" data-g="invite">Convidar</button></div>` : `<div class="sec-t">${host ? 'Sua sala' : 'Sala de ' + esc(NET.hostName)}</div>`}
       <div class="plist">${NET.roster.map(r => playerRow(r, false, host)).join('')}</div>
       <div class="nv-row" style="margin-top:12px">${host ? (NET.mode === 'online' ? '' : '<button class="nbtn press" data-g="invite">Convidar</button>') + '<button class="nbtn press" data-g="end">Encerrar sala</button>' : '<button class="nbtn press" data-g="leave">Sair da sala</button>'}</div></div>
+    ${G ? '' : roundCtlHTML()}
     <div class="sec"><div class="sec-t">Quadros dos outros</div>
       ${host ? seg('peek', [['0','Escondidos'],['1','Visíveis']], NET.secret ? '0' : '1') : ''}
       ${fsub(NET.secret ? (host ? 'Ninguém vê o quadro dos outros antes da revelação.' : 'O anfitrião deixou os quadros escondidos até a revelação.') : 'Todos podem espiar aqui, ao vivo, o que os outros estão fazendo.')}
@@ -4509,8 +4623,18 @@ updateFsBtn();
 updateMuteBtn();
 applyTheme(); applyLay();
 if (S.g.balS === 'bolhas') S.g.balS = 'live';
+armBack();
+// voltou depois de fechar sem querer: retoma a sala (só no modo com internet)
+setTimeout(() => {
+  let ss = null; try{ ss = JSON.parse(localStorage.getItem(SESS) || 'null'); }catch(_){}
+  if (!ss || NET.role || NV.mode === 'joinOn' || Date.now() - ss.t > 3 * 3600e3 || !onlineOK() || !ss.code) return;
+  if (ss.role === 'host'){ createRoomOnline(ss); return; }
+  NV.resume = {code: ss.code, until: Date.now() + 60000};
+  toast(`Voltando para a sala ${ss.code}…`, 'Cancelar', () => { NV.resume = null; joinStop(); joinSeq++; clearSess(); if (NET.room && !NET.role){ const r = NET.room; NET.room = null; r.leave().catch(() => {}); } });
+  joinRoomOnline(ss.code);
+}, 600);
 // o quadro guarda o que ficou da última vez; avisa para não confundir com uma partida em andamento
-if (P().text.trim() || P().strokes.length) setTimeout(() => toast('Quadro da última vez', 'Limpar', () => $('#clearBtn').click()), 900);
+if ((P().text.trim() || P().strokes.length) && !localStorage.getItem('lousa.sess')) setTimeout(() => toast('Quadro da última vez', 'Limpar', () => $('#clearBtn').click()), 900);
 // link de convite (#sala-CODIGO): abre direto a entrada na sala
 (function(){
   const m = (location.hash || '').match(/^#sala-([A-Za-z]{2,6}-\d{2}|\d{4})$/);
