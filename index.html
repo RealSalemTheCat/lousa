@@ -2921,7 +2921,7 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
-    <div class="sec">${fsub('Lousa · versão 23')}</div>`;
+    <div class="sec">${fsub('Lousa · versão 24')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -4128,7 +4128,7 @@ function relayCfg(){
 function openRoomOnline(code){
   const room = TrysteroLib.joinRoom({appId: APP_ID, password: code, relayConfig: relayCfg()}, 'sala-' + code);
   const act = room.makeAction('m');
-  NET.room = room; NET.act = act; NET.code = code;
+  NET.room = room; NET.act = act; NET.code = code; NET.usedRoom = true;
   return {room, act};
 }
 function createRoomOnline(restore){
@@ -4171,6 +4171,13 @@ async function joinRoomOnline(raw){
   if (!onlineOK()){ joinSay('Modo online indisponível aqui. Abra o app pelo endereço do site'); return false; }
   if (NET.role) return false;
   if (NV.joining === code) return true;
+  // esta página já abriu uma sala antes: as conexões antigas atrapalham. Entra numa página novinha, como pelo QR
+  if (NET.usedRoom && !NV.resume){
+    joinSay('Entrando…'); NV.joining = code;
+    try{ history.replaceState(null, '', location.pathname + location.search + '#sala-' + code); }catch(_){}
+    setTimeout(() => location.reload(), 150);
+    return true;
+  }
   joinStop(); NV.joining = code;
   const my = ++joinSeq;
   // uma tentativa anterior presa impede entrar de novo na mesma sala: sai dela antes
