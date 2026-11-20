@@ -2907,7 +2907,8 @@ function winHTML(){
       <div class="f-row" style="margin-top:10px"><span class="f-lb">Mudo</span>${tg('data-gtg="mute"', S.g.mute)}</div>
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
-    ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}`;
+    ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
+    <div class="sec">${fsub('Lousa · versão 19')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -4939,7 +4940,7 @@ if ((P().text.trim() || P().strokes.length) && !localStorage.getItem('lousa.sess
   if (onlineOK()) setTimeout(() => openJoinOnline(m[1].toUpperCase()), 400);
 })();
 // no site (https), guarda o app para abrir sem internet
-if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname)) navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(r => r.update()).catch(() => {});
 })();
 </script>
 </body>

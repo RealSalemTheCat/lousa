@@ -1,5 +1,5 @@
 // Lousa: guarda o app e as fontes para funcionar sem internet
-const VERSION = 'lousa-v18';
+const VERSION = 'lousa-v19';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -23,7 +23,7 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) return;
   // páginas: tenta a rede (para receber atualizações) e cai para a cópia guardada sem internet
   if (req.mode === 'navigate'){
-    e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', cp)); return r; })
+    e.respondWith(fetch(req, {cache:'no-cache'}).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', cp)); return r; })
       .catch(() => caches.match('./index.html')));
     return;
   }
