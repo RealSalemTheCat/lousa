@@ -592,12 +592,35 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .rt span{font-size:12.5px;color:var(--tx3);margin-top:2px}
 .rbad{display:flex;align-items:center;gap:3px;height:34px;padding:0 9px;border-radius:10px;color:var(--tx3);font-weight:700;font-size:13px}
 .rbad svg{width:17px;height:17px}.rbad.on{background:rgba(255,90,90,.15);color:#ff7a7a}
+.rbad[data-pick].on{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.rl{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:2px}
+.racts{display:flex;align-items:center;gap:4px;flex:none}
+.lks{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.lk{height:26px;padding:0 9px;border-radius:99px;background:var(--panel3);font-size:12px;font-weight:700;color:var(--tx2)}
+.lk.man{box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--tx)}
+.lk.pend{border:1px dashed var(--line2);background:none}.lk.pend.mine{border-color:var(--accent);color:var(--accent)}
+.lk i{font-style:normal;color:var(--accent)}
+.lk.opt{height:32px;background:var(--panel);border:1px solid var(--line2);color:var(--tx)}.lk.opt small{color:var(--tx3);font-weight:600;margin-left:4px}
+.lks.pick{padding:8px;border-radius:12px;background:var(--panel3)}.lks .none{color:var(--tx3);font-size:12px}
+.f-sub svg.inl{width:14px;height:14px;vertical-align:-2px}
+.mt b .mav{width:30px;height:30px;vertical-align:-5px;margin-right:4px}
 .rpts{min-width:44px;height:38px;border-radius:11px;background:var(--panel3);font:800 17px var(--uif);color:var(--tx)}
 .rpts.ov{box-shadow:inset 0 0 0 2px var(--accent)}
 .rpts:disabled{opacity:1}
 .stab{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .srow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
 .srow.me{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.srow{position:relative;overflow:hidden;animation:tilein .45s cubic-bezier(.3,1.5,.5,1) var(--d,0ms) backwards}
+.srow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:color-mix(in srgb,var(--accent) 12%,transparent);transform-origin:0 50%;animation:barw .9s cubic-bezier(.3,1,.4,1) calc(var(--d,0ms) + 200ms) backwards}
+.srow > *{position:relative}
+.srow.lead{border-color:color-mix(in srgb,var(--accent) 60%,transparent)}
+@keyframes barw{from{transform:scaleX(0)}}
+.srow .mv{font-style:normal;font-size:11px;font-weight:800;margin-left:6px}.srow .mv.up{color:#57e389}.srow .mv.dn{color:#ff7a7a}
+.srow .st.pop{animation:land .45s cubic-bezier(.2,1.8,.4,1)}
+.fishbar{display:flex;flex-wrap:wrap;gap:8px}
+.fishbar span{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:99px;background:var(--panel2);border:1px solid var(--line)}
+.fishbar b{font-weight:800}.fishbar i{font-style:normal;font-weight:800;font-size:12px;color:#3fb6ff}
+.pool{height:8px;border-radius:99px;background:var(--panel3);margin-top:14px;overflow:hidden}.pool span{display:block;height:100%;width:var(--p);background:linear-gradient(90deg,#3fb6ff,#2dd4bf);border-radius:99px;transition:width .6s}
 .srow .pos{width:18px;color:var(--tx3);font-weight:800}
 .srow .sn{flex:1;font-weight:700}.srow .sr{color:#57e389;font-weight:800;font-size:14px}
 .srow .st{display:flex;align-items:center;gap:4px;font:800 20px var(--uif);min-width:40px;justify-content:flex-end}.srow .st svg{width:18px;height:18px;color:var(--accent)}
@@ -657,26 +680,43 @@ body.inmode .dock{visibility:hidden}
 @keyframes latout{to{transform:translateX(120%);opacity:0}}
 @keyframes latbar{to{transform:scaleX(0)}}
 .bals.bs-live{top:auto;left:auto;right:12px;bottom:calc(92px + env(safe-area-inset-bottom));width:0;height:0}
-.bs-live .brow{left:auto;right:0;top:auto;bottom:0;display:block;padding:0;transition:none}
-.bs-live .bal{position:absolute;right:0;bottom:0;--sx:calc(var(--dx) * .25);animation:liveup 3.8s cubic-bezier(.25,.6,.4,1) forwards}
-.bs-live .bal-in{flex-direction:row-reverse;background:none;box-shadow:none;padding:0;gap:6px;color:#fff;animation:none;font-size:12.5px}
+.bs-live .brow{left:auto;right:0;top:auto;bottom:0;display:block;padding:0;transition:none;animation:rise var(--dur,3.6s) cubic-bezier(.22,.61,.36,1) forwards}
+.bs-live .bal{position:absolute;right:0;bottom:0;animation:sway var(--sw,1.1s) ease-in-out var(--sd,0s) infinite alternate}
+.bs-live .bal-in{flex-direction:row-reverse;background:none;box-shadow:none;padding:0;gap:6px;color:#fff;font-size:12.5px;animation:pop .6s cubic-bezier(.3,1.7,.5,1) both;transform-origin:100% 100%}
 .bs-live .bal-in::after{display:none}
 .bs-live .bal .av{width:40px;height:40px;font-size:17px;background:var(--c);color:var(--oc);box-shadow:0 6px 16px -4px color-mix(in srgb,var(--c) 70%,transparent),0 0 0 2.5px rgba(255,255,255,.9)}
 .bs-live .bal .av svg{width:21px;height:21px}
 .bs-live .bal .tx{background:rgba(0,0,0,.62);padding:4px 9px;border-radius:10px;white-space:nowrap;max-width:62vw;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.bs-live .bal.out{animation:liveup 3.8s cubic-bezier(.25,.6,.4,1) forwards}
 .bs-live .bal.out::before{display:none}
-@keyframes liveup{0%{transform:translate(0,30px) scale(.2);opacity:0}8%{transform:translate(0,0) scale(1.12);opacity:1}14%{transform:translate(0,-14px) scale(1)}35%{transform:translate(calc(var(--sx) - 12px),-90px)}60%{transform:translate(calc(var(--sx) + 10px),-170px);opacity:1}100%{transform:translate(calc(var(--sx) - 6px),-300px) scale(.9);opacity:0}}
+@keyframes rise{0%{transform:translateY(24px);opacity:0}7%{opacity:1}70%{opacity:1}100%{transform:translateY(-330px);opacity:0}}
+@keyframes sway{from{transform:translateX(calc(var(--amp,10px) * -1)) rotate(-4deg)}to{transform:translateX(var(--amp,10px)) rotate(4deg)}}
+@keyframes pop{0%{transform:scale(.1)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+/* saguão */
+body.inlobby .bals:not(.anchor-b):not(.bs-live){top:calc(124px + env(safe-area-inset-top))}
+.lobby{position:fixed;left:0;right:0;bottom:0;top:58px;z-index:61;display:flex;flex-direction:column;background:var(--ui);max-width:760px;margin:0 auto;animation:modein .4s cubic-bezier(.3,1.3,.5,1)}
+.lh{display:flex;align-items:center;gap:10px;padding:8px 16px 10px}
+.lwho{display:flex}.lwho .mav{margin-left:-6px}.lwho .mav:first-child{margin-left:0}
+.lwrap{flex:1;min-height:0;display:grid;place-items:center;padding:4px 14px 150px;position:relative}
+#lobCv{pointer-events:auto;border-radius:22px;background:radial-gradient(circle at 30% 20%,#1d1d22,#141417);box-shadow:inset 0 0 0 1px var(--line2);touch-action:none}
+.lhint{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);color:var(--tx3);font-weight:600;font-size:14px;pointer-events:none;transition:opacity .4s;text-align:center}
+.lhint.off{opacity:0}
+.lsz{position:absolute;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translate(-50%,50%);display:flex;gap:6px;padding:5px;border-radius:99px;background:var(--panel);border:1px solid var(--line2)}
+.lsz button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center}.lsz button.on{background:var(--panel3)}
+.lsz i{display:block;border-radius:50%;background:var(--accent)}
+.rbar .rlob{color:var(--tx);border-left:1px solid var(--line2);border-radius:0 50% 50% 0;margin-left:2px}
+.rbar .rlob svg{width:21px;height:21px}.rbar .rlob.on{color:var(--accent)}
 /* reações */
 .rx{position:fixed;right:18px;bottom:calc(92px + env(safe-area-inset-bottom));width:0;height:0;z-index:66;pointer-events:none}
-.rx > i{position:absolute;right:0;bottom:0;font-style:normal;font-size:34px;line-height:1;--sx:0px;animation:liveup 3s cubic-bezier(.25,.6,.4,1) forwards;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
-.rx > i b{position:absolute;right:-6px;bottom:-4px;width:18px;height:18px;border-radius:50%;background:var(--c);color:var(--oc);font:800 9px/18px var(--uif);text-align:center;box-shadow:0 0 0 2px rgba(0,0,0,.4);overflow:hidden}
-.rx > i b svg{width:11px;height:11px;margin-top:3.5px}
+.rx > i{position:absolute;right:0;bottom:0;font-style:normal;line-height:1;animation:rise var(--dur,3.2s) cubic-bezier(.22,.61,.36,1) forwards}
+.rx > i > span{display:block;animation:sway var(--sw,1s) ease-in-out var(--sd,0s) infinite alternate}
+.rx > i > span > span{display:block;position:relative;font-size:var(--fs,34px);animation:pop .55s cubic-bezier(.3,1.7,.5,1) both;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.rx b{position:absolute;right:-6px;bottom:-4px;width:18px;height:18px;border-radius:50%;background:var(--c);color:var(--oc);font:800 9px/18px var(--uif);text-align:center;box-shadow:0 0 0 2px rgba(0,0,0,.4);overflow:hidden}
+.rx b svg{width:11px;height:11px;margin-top:3.5px}
 .rbar{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:64;display:flex;gap:2px;padding:5px;border-radius:999px;background:rgba(22,22,25,.92);border:1px solid var(--line2);box-shadow:0 12px 30px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:rbarin .45s cubic-bezier(.3,1.5,.5,1)}
-.rbar button{width:42px;height:42px;border-radius:50%;font-size:24px;display:grid;place-items:center;transition:transform .12s}
+.rbar button{width:40px;height:42px;border-radius:50%;font-size:23px;display:grid;place-items:center;transition:transform .12s}
 .rbar button:active{transform:scale(1.35)}
 @keyframes rbarin{from{transform:translate(-50%,30px) scale(.8);opacity:0}}
-@media (max-width:380px){.rbar button{width:37px;height:37px;font-size:21px}}
+@media (max-width:400px){.rbar button{width:35px;height:38px;font-size:20px}}
 .bs-pensamento .bal-in{background:#fbfbfd;color:#2a2a30;border-radius:28px;box-shadow:0 10px 26px rgba(0,0,0,.28);font-style:italic;padding:8px 16px 8px 8px;animation:think 3s ease-in-out infinite}
 .bs-pensamento .bal-in::after{left:22px;bottom:-12px;width:12px;height:12px;border-radius:50%;background:#fbfbfd;clip-path:none;box-shadow:-9px 9px 0 -2px #fbfbfd}
 .bs-pensamento .bal b{font-style:normal}
@@ -1116,7 +1156,7 @@ function load(){
   try{
     const j = JSON.parse(localStorage.getItem(KEY));
     if (j && Array.isArray(j.profiles) && j.profiles.length){
-      j.g = Object.assign({rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
+      j.g = Object.assign({rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
       j.ui = Object.assign(defUI(), j.ui || {}); j.ui.sizes = Object.assign(defUI().sizes, j.ui.sizes || {});
       j.profiles.forEach(p => { const d = newProfile(p.name, p.accent); for (const k in d) if (!(k in p)) p[k] = d[k]; if (!THEMES[p.theme]) p.theme = 'lousa'; });
       return j;
@@ -2965,6 +3005,8 @@ sheetBody.addEventListener('click', e => {
     else if (k === 'dur') S.g.timerDur = +v;
     else if (k === 'netmode') S.g.netMode = v;
     else if (k === 'peek'){ setSecret(v === '0'); }
+    else if (k === 'tick'){ S.g.tick = v; if (NET.role === 'host') pushRoster(); if (v !== 'off') timerTick(1); }
+    else if (k === 'tickfrom'){ S.g.tickFrom = +v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'revmode'){ S.g.revMode = v; if (v === 'each') resetReady(); if (NET.role === 'host') pushRoster(); }
     else if (k === 'tend'){ S.g.tEnd = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'lockw'){ S.g.lockW = v; if (NET.role === 'host') pushRoster(); }
@@ -3035,7 +3077,7 @@ function tickTimer(){
   if (fg) fg.style.strokeDashoffset = (62.83 * (1 - Math.max(0, left) / TM.dur)).toFixed(2);
   const sec = Math.ceil(left/1000);
   timerEl.classList.toggle('hot', left > 0 && sec <= 5);
-  if (sec !== TM.lastSec && sec <= 5 && sec > 0){ TM.lastSec = sec; sfx('ui'); }
+  if (sec !== TM.lastSec && sec > 0){ TM.lastSec = sec; timerTick(sec); }
   if (left <= 0) timerDone();
 }
 /* trava do fim do tempo: 'all' (escrita e desenho) ou 'text' (só a escrita) */
@@ -3055,7 +3097,7 @@ function startTimer(ms, fromNet){
   timerEl.hidden = false; timerEl.classList.remove('done', 'hot');
   tickTimer(); TM.iv = setInterval(tickTimer, 200);
   render();
-  if (!fromNet && NET.role === 'host') netBroadcast({k:'timer', ms, dur:ms});
+  if (!fromNet && NET.role === 'host') netBroadcast({k:'timer', at: Date.now() + ms, ms, dur:ms});
   if (win) syncSheet();
 }
 function stopTimer(fromNet){
@@ -3279,30 +3321,33 @@ function balloon(pl, kind, demo){
     if (same){
       if (!same._pls.some(p => p.id === pl.id)) same._pls.push(pl);
       same._text = same._pls.length > 1 ? pick(PLURAL[kind]) : text;
-      balPaint(same); balLayout(); balArm(same, 3200);
+      balPaint(same); balLayout(); balArm(same, 2600);
       same.firstChild.classList.remove('bump'); void same.offsetWidth; same.firstChild.classList.add('bump');
       return;
     }
   }
-  // entrada escalonada: nunca dois balões aparecendo no mesmo instante
-  const wait = Math.max(0, BAL.last + 240 - now); BAL.last = now + wait;
-  setTimeout(() => {
-    if (presenting) return;
-    const max = style === 'live' ? 8 : bf === 3 ? 4 : 3;
+  // é um enfeite, não uma lista: se apareceu um há pouco, este simplesmente não aparece (nada fica esperando)
+  const important = ['join','leave','ready','kick','dispute'].includes(kind);
+  const spacing = style === 'live' ? [0, 2500, 900, 450][bf] : [0, 4000, 2200, 1100][bf];
+  if (!demo && !important && now - BAL.last < spacing) return;
+  if (!demo && now - BAL.last < 260) return;
+  BAL.last = now;
+  {
+    const max = style === 'live' ? 6 : bf === 3 ? 3 : 2;
     const rows = balRows(); if (rows.length >= max) balRetire(rows[0], true);
     const row = document.createElement('div'); row.className = 'brow';
     row._kind = kind; row._pls = [pl]; row._text = text; row._demo = !!demo;
     const b = document.createElement('div'); b.className = 'bal';
-    b.style.cssText = `--dx:${style === 'live' ? Math.round((Math.random() - .5) * 60) : Math.round((Math.random() - .5) * Math.min(70, innerWidth * .12))}px;--rz:${((Math.random() - .5) * 4).toFixed(1)}deg`;
+    b.style.cssText = `--dx:${Math.round((Math.random() - .5) * Math.min(70, innerWidth * .12))}px;--rz:${((Math.random() - .5) * 4).toFixed(1)}deg`;
+    if (style === 'live') row.style.cssText = `--dur:${(3.2 + Math.random() * .9).toFixed(2)}s;--sw:${(.9 + Math.random() * .6).toFixed(2)}s;--sd:-${Math.random().toFixed(2)}s;--amp:${Math.round(6 + Math.random() * 10)}px;right:${Math.round(Math.random() * 18)}px`;
     b.innerHTML = '<div class="bal-in"></div>';
     row.appendChild(b); balPaint(row);
     row.style.transition = 'none'; wrap.appendChild(row);
     balLayout();
-    // a nova entra direto no lugar; as outras deslizam
     void row.offsetWidth; row.style.transition = '';
-    if (style === 'live'){ setTimeout(() => row.remove(), 3900); return; }
-    balArm(row, 3400);
-  }, wait);
+    if (style === 'live'){ setTimeout(() => row.remove(), 4300); return; }
+    balArm(row, 2800);
+  }
 }
 
 /* ================= sala offline (WebRTC com troca de QR, sem servidor) ================= */
@@ -3356,7 +3401,7 @@ function startMode(kind){
   if (kind === 'stop'){
     // regras salvas da última partida: categorias aprovadas voltam já aprovadas, decisões do anfitrião continuam
     const cats = sv && sv.cats ? sv.cats.map(c => ({id: c.id, name: c.name, by:[], yes:[], no:[], st: c.st || 'auto', def: c.def})) : DEF_CATS.map((name, i) => ({id:'d' + i, name, by:[], yes:[], no:[], st:'auto', def: i < 6}));
-    G = {mode:'stop', phase:'setup', cats, out: sv ? sv.out.slice() : ['K','W','X','Y'], lv:{}, cfg: Object.assign({ncat:8, time:90, uniq:10, rep:5, swapMax:0, vote:'yn'}, sv && sv.cfg), used:[], round:0, totals:{}, swap:[], swapped:0};
+    G = {mode:'stop', phase:'setup', cats, out: sv ? sv.out.slice() : ['K','W','X','Y'], lv:{}, cfg: Object.assign({ncat:8, time:90, uniq:10, rep:5, swapMax:0, vote:'yn', review:'cat', order:'rand'}, sv && sv.cfg), used:[], round:0, totals:{}, swap:[], swapped:0};
   }
   if (kind === 'fluxo') G = {mode:'fluxo', phase:'setup', cfg: Object.assign({pool: Math.max(12, n * 6), uniq2:true, tie:'none'}, sv && sv.cfg), fish:{}, round:0, left:0};
   modeMin = false; closeSheet(); gPush();
@@ -3410,9 +3455,15 @@ function gameAct(from, a){
     else if (a.t === 'ans' && G.ans && (G.phase === 'play' || G.phase === 'stopping' || G.phase === 'collect')){ G.ans[from] = a.a; saveHostSess(); return; }
     else if (a.t === 'stop' && G.phase === 'play'){ stopNow(from); return; }
     else if (a.t === 'bad' && G.phase === 'review'){ const k = a.k, m = G.marks[k] ||= {bad:[], ov:null}; if (k.split('|')[0] === from) return; const i = m.bad.indexOf(from); if (i >= 0) m.bad.splice(i, 1); else m.bad.push(from); }
+    else if (a.t === 'link' && G.phase === 'review'){
+      const l = (G.links ||= {})[a.k] ||= {eq:[], neq:[], host:null};
+      if (host){ l.host = l.host === a.eq ? null : a.eq; }
+      else { const mine = a.eq ? l.eq : l.neq, other = a.eq ? l.neq : l.eq; const i = mine.indexOf(from); if (i >= 0) mine.splice(i, 1); else { mine.push(from); const j = other.indexOf(from); if (j >= 0) other.splice(j, 1); } }
+    }
+    else if (a.t === 'pi' && host && G.phase === 'review'){ G.pi = Math.max(0, Math.min(G.porder.length, G.pi + a.d)); if (G.pi >= G.porder.length) G.phase = 'summary'; }
     else if (a.t === 'ov' && host && G.phase === 'review'){ const m = G.marks[a.k] ||= {bad:[], ov:null}; m.ov = a.v; }
     else if (a.t === 'ci' && host && G.phase === 'review'){ G.ci = Math.max(0, Math.min(G.final.length, G.ci + a.d)); if (G.ci >= G.final.length) G.phase = 'summary'; }
-    else if (a.t === 'back' && host && G.phase === 'summary'){ G.phase = 'review'; G.ci = G.final.length - 1; }
+    else if (a.t === 'back' && host && G.phase === 'summary'){ G.phase = 'review'; G.ci = G.final.length - 1; G.pi = (G.porder || []).length - 1; }
     else if ((a.t === 'next' || a.t === 'finish') && host && G.phase === 'summary'){
       const r = stopScores();
       for (const id in r.tot){ G.totals[id] = (G.totals[id] || 0) + r.tot[id]; NET.scores[id] = (NET.scores[id] || 0) + r.tot[id]; }
@@ -3474,16 +3525,35 @@ function drawLetter(isSwap){
   G.letter = pick(pool.length ? pool : LETTERS); G.swap = []; G.spin = (G.spin || 0) + 1;
   if (isSwap) G.swapped = (G.swapped || 0) + 1;
 }
+/* ordem da correção por jogador: sorteada, alfabética, de quem tem mais pontos ou de quem tem menos */
+function reviewOrder(){
+  const ids = Object.keys(G.ans || {});
+  const o = G.cfg.order || 'rand';
+  if (o === 'alpha') return ids.sort((a, b) => gName(a).localeCompare(gName(b), 'pt'));
+  if (o === 'most' || o === 'least'){ const s = id => G.totals[id] || 0; return ids.sort((a, b) => o === 'most' ? s(b) - s(a) : s(a) - s(b)); }
+  return ids.map(id => [Math.random(), id]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+}
 function stopNow(by){
   if (!G || G.phase !== 'play') return;
   G.phase = 'stopping'; G.stopBy = by || null; stopTimer(); gPush();
   setTimeout(() => {
     if (!G || G.phase !== 'stopping') return;
     G.phase = 'collect'; gPush();
-    setTimeout(() => { if (!G || G.phase !== 'collect') return; G.ans[myId()] = MV.ans; G.phase = 'review'; G.ci = 0; G.marks = {}; gPush(); }, 1600);
+    setTimeout(() => { if (!G || G.phase !== 'collect') return; G.ans[myId()] = MV.ans; G.phase = 'review'; G.ci = 0; G.pi = 0; G.marks = {}; G.links = {}; G.porder = reviewOrder(); gPush(); }, 1600);
   }, 3000);
 }
 /* pontos da rodada: em branco ou letra errada 0; anulada pela maioria 0; repetida e única conforme a regra */
+/* "igual a…": a mesa pode juntar (ou separar) respostas que a comparação automática errou.
+   Vale na hora quando o anfitrião marca; quando outro jogador marca, vale com a maioria. */
+const pairKey = (ci, a, b) => ci + '|' + [a, b].sort().join('|');
+function linkState(k){
+  const l = (G.links || {})[k]; if (!l) return null;
+  if (l.host != null) return l.host;
+  const n = gPlayers().length;
+  const yes = l.eq.length, no = l.neq.length;
+  return yes > n / 2 ? true : no > n / 2 ? false : null;
+}
+function sameAns(ci, r, o){ const m = linkState(pairKey(ci, r.id, o.id)); return m != null ? m : similar(r.t, o.t); }
 function stopScores(){
   const ids = Object.keys(G.ans || {}).filter(id => gPlayers().some(p => p.id === id) || G.ans[id]);
   const res = [], tot = {}; ids.forEach(id => tot[id] = 0);
@@ -3497,7 +3567,7 @@ function stopScores(){
       else if (m.bad.length && m.bad.length > Math.max(1, ids.length - 1) / 2){ st = 'x'; why = 'anulada'; }
       return {id, t, st, why, bad: m.bad, ov: m.ov};
     });
-    rows.forEach(r => { if (r.st !== 'ok') return; r.dup = rows.filter(o => o !== r && o.st === 'ok' && similar(o.t, r.t)).map(o => o.id); });
+    rows.forEach(r => { if (r.st !== 'ok') return; r.dup = rows.filter(o => o !== r && o.st === 'ok' && sameAns(ci, r, o)).map(o => o.id); });
     rows.forEach(r => { r.auto = r.st !== 'ok' ? 0 : (r.dup.length ? G.cfg.rep : G.cfg.uniq); r.pts = r.ov != null ? r.ov : r.auto; tot[r.id] += r.pts; });
     res.push(rows);
   });
@@ -3551,7 +3621,7 @@ function renderMode(){
   if (!show) return;
   const top = $('.top').getBoundingClientRect().bottom;
   modeEl.style.top = Math.max(0, top) + 'px';
-  const key = [G.mode, G.phase, G.round, G.letter, G.ci].join('|');
+  const key = [G.mode, G.phase, G.round, G.letter, G.ci, G.pi].join('|');
   if (G.mode === 'stop' && G.phase === 'play' && MV.key === key){ stopPlayStatus(); return; }
   const sc = modeEl.querySelector('.mb') ? modeEl.querySelector('.mb').scrollTop : 0;
   modeEl.innerHTML = G.mode === 'stop' ? stopHTML() : fluxoHTML();
@@ -3598,6 +3668,8 @@ function stopHTML(){
       <div class="mrow"><span>Resposta única</span>${host ? stepper('uniq', G.cfg.uniq, G.cfg.uniq + ' pts') : `<b>${G.cfg.uniq} pts</b>`}</div>
       <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
       <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
+      <div class="mrow col"><span>Correção</span>${host ? seg('mreview', [['cat','Por categoria'],['player','Por jogador']], G.cfg.review || 'cat') : `<b>${G.cfg.review === 'player' ? 'por jogador' : 'por categoria'}</b>`}</div>
+      ${(G.cfg.review || 'cat') === 'player' ? `<div class="mrow col"><span>Ordem dos jogadores</span>${host ? seg('morder', [['rand','Sorteio'],['alpha','A a Z'],['most','Mais pontos'],['least','Menos pontos']], G.cfg.order || 'rand') : `<b>${{rand:'sorteio', alpha:'alfabética', most:'mais pontos primeiro', least:'menos pontos primeiro'}[G.cfg.order || 'rand']}</b>`}</div>` : ''}
       <div class="f-sub">Categorias, letras e regras ficam salvas para a próxima partida.</div>
       ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-m="reset">Voltar ao padrão</button></div>' : ''}`;
     return `${mHead('Adedonha', 'preparação')}<div class="mb">${tabs}${body}</div>
@@ -3621,26 +3693,51 @@ function stopHTML(){
       <div class="stopov" id="stopOv" hidden></div>`;
   }
   if (G.phase === 'review'){
-    const {res} = stopScores(), rows = res[G.ci] || [], ci = G.ci, cat = G.final[ci];
-    return `${mHead(esc(cat), `categoria ${ci + 1} de ${G.final.length} · letra ${G.letter}`)}<div class="mb">
-      <div class="f-sub" style="margin-top:0">Leiam em voz alta: aqui está o que cada um escreveu. Repetidas aparecem ligadas.</div>
-      <div class="rlist">${rows.map(r => {
-        const me = r.id === myId(), k = r.id + '|' + ci, badMine = r.bad.includes(myId());
-        return `<div class="rrow ${r.st === 'x' ? 'x' : ''} ${me ? 'me' : ''}">${avChip(r.id)}<div class="rt"><b>${r.t ? esc(r.t) : '<i>em branco</i>'}</b>
-          <span>${esc(gName(r.id))}${r.why ? ` · ${r.why}` : r.dup && r.dup.length ? ` · igual a ${r.dup.map(gName).map(esc).join(', ')}` : ''}</span></div>
-          ${!me && r.t ? `<button class="rbad press ${badMine ? 'on' : ''}" data-bad="${k}" aria-label="Contestar">${svg('<path d="M17 13V4h3v9zM17 13l-4 7c-1.5 0-2.5-1-2.2-2.6l.6-3.4H5a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 6.2 4H17"/>', 1.8)}${r.bad.length || ''}</button>` : ''}
-          <button class="rpts press ${r.ov != null ? 'ov' : ''}" ${host ? `data-ov="${k}" data-auto="${r.auto}" data-cur="${r.ov == null ? 'a' : r.ov}"` : 'disabled'}>${r.pts}</button></div>`; }).join('')}</div>
+    const {res, tot} = stopScores(), byP = (G.cfg.review || 'cat') === 'player';
+    const linkI = '<path d="M9 15l6-6M10.5 6.5l1.6-1.6a4 4 0 0 1 5.7 5.7l-1.6 1.6M13.5 17.5l-1.6 1.6a4 4 0 0 1-5.7-5.7l1.6-1.6"/>';
+    const rowHTML = (r, ci, label) => {
+      const me = r.id === myId(), k = r.id + '|' + ci, badMine = r.bad.includes(myId()), all = res[ci];
+      // ligações manuais pendentes ou aplicadas com este jogador
+      const chips = all.filter(o => o !== r && o.st === 'ok' && r.st === 'ok').map(o => {
+        const pk = pairKey(ci, r.id, o.id), l = (G.links || {})[pk], st = linkState(pk), auto = similar(r.t, o.t), eq = st != null ? st : auto;
+        const myEq = l && l.eq.includes(myId()), myNeq = l && l.neq.includes(myId());
+        if (eq) return `<button class="lk ${st === true ? 'man' : ''}" data-link="${pk}" data-eq="0" title="Separar">≈ ${esc(gName(o.id))}${l && l.neq.length && st == null ? ` <i>separar? ${l.neq.length}</i>` : ''}${myNeq ? ' ✓' : ''}</button>`;
+        if (l && l.eq.length && st == null) return `<button class="lk pend ${myEq ? 'mine' : ''}" data-link="${pk}" data-eq="1">igual a ${esc(gName(o.id))}? <i>${l.eq.length}</i></button>`;
+        return '';
+      }).join('');
+      const others = all.filter(o => o !== r && o.st === 'ok' && r.st === 'ok' && !(linkState(pairKey(ci, r.id, o.id)) ?? similar(r.t, o.t)));
+      const picking = MV.pick === k;
+      return `<div class="rrow ${r.st === 'x' ? 'x' : ''} ${me ? 'me' : ''}">${byP ? '' : avChip(r.id)}<div class="rt"><span class="rl">${label}</span><b>${r.t ? esc(r.t) : '<i>em branco</i>'}</b>
+        ${r.why ? `<span>${r.why}</span>` : ''}${chips ? `<span class="lks">${chips}</span>` : ''}
+        ${picking ? `<span class="lks pick">${others.length ? others.map(o => `<button class="lk opt" data-link="${pairKey(ci, r.id, o.id)}" data-eq="1">${esc(o.t)} <small>${esc(gName(o.id))}</small></button>`).join('') : '<small class="none">Nenhuma outra resposta para ligar</small>'}</span>` : ''}</div>
+        <div class="racts">${r.st === 'ok' && others.length ? `<button class="rbad press ${picking ? 'on' : ''}" data-pick="${k}" aria-label="Igual a outra">${svg(linkI, 1.9)}</button>` : ''}
+        ${!me && r.t ? `<button class="rbad press ${badMine ? 'on' : ''}" data-bad="${k}" aria-label="Contestar">${svg('<path d="M17 13V4h3v9zM17 13l-4 7c-1.5 0-2.5-1-2.2-2.6l.6-3.4H5a2 2 0 0 1-2-2.3l1.2-6A2 2 0 0 1 6.2 4H17"/>', 1.8)}${r.bad.length || ''}</button>` : ''}
+        <button class="rpts press ${r.ov != null ? 'ov' : ''}" ${host ? `data-ov="${k}" data-auto="${r.auto}" data-cur="${r.ov == null ? 'a' : r.ov}"` : 'disabled'}>${r.pts}</button></div></div>`;
+    };
+    const help = `<div class="f-sub" style="margin-top:0">${byP ? 'Cada um lê as suas; a mesa discute ali mesmo.' : 'Leiam em voz alta: aqui está o que cada um escreveu.'} A corrente liga a uma resposta igual que o app não pegou; tocar em “≈ nome” pede para separar.${host ? ' O que você marca vale na hora; o dos outros, com a maioria.' : ' Vale com a maioria ou quando o anfitrião marca.'}</div>`;
+    if (byP){
+      const pid = G.porder[G.pi], list = G.final.map((c, ci) => ({r: res[ci].find(x => x.id === pid), ci, c})).filter(x => x.r);
+      const pts = tot[pid] || 0;
+      return `${mHead(`${avChip(pid)} ${esc(gName(pid))}`, `jogador ${G.pi + 1} de ${G.porder.length} · letra ${G.letter} · ${pts} pts`)}<div class="mb">${help}
+        <div class="rlist">${list.map(x => rowHTML(x.r, x.ci, esc(x.c))).join('')}</div></div>
+        <div class="mf">${host ? `<button class="nbtn press" data-m="prevp" ${G.pi ? '' : 'disabled'}>Anterior</button><button class="nbtn pri press" data-m="nextp">${G.pi === G.porder.length - 1 ? 'Ver resultado' : 'Próximo jogador'}</button>` : `<span class="mwait">O anfitrião passa para o próximo</span>`}</div>`;
+    }
+    const rows = res[G.ci] || [], ci = G.ci, cat = G.final[ci];
+    return `${mHead(esc(cat), `categoria ${ci + 1} de ${G.final.length} · letra ${G.letter}`)}<div class="mb">${help}
+      <div class="rlist">${rows.map(r => rowHTML(r, ci, esc(gName(r.id)))).join('')}</div>
       ${host ? '<div class="f-sub">Toque nos pontos para ajustar (automático, únicos, repetidos ou zero).</div>' : ''}</div>
       <div class="mf">${host ? `<button class="nbtn press" data-m="prev" ${ci ? '' : 'disabled'}>Anterior</button><button class="nbtn pri press" data-m="nextc">${ci === G.final.length - 1 ? 'Ver resultado' : 'Próxima'}</button>` : `<span class="mwait">O anfitrião passa as categorias</span>`}</div>`;
   }
   if (G.phase === 'summary' || G.phase === 'end'){
     const {tot} = G.phase === 'summary' ? stopScores() : {tot:{}};
     const ids = [...new Set([...Object.keys(G.totals), ...Object.keys(tot)])];
-    const rows = ids.map(id => ({id, r: tot[id] || 0, t: (G.totals[id] || 0) + (tot[id] || 0)})).sort((a, b) => b.t - a.t);
+    const rows = ids.map(id => ({id, r: tot[id] || 0, t: (G.totals[id] || 0) + (tot[id] || 0), p: G.totals[id] || 0})).sort((a, b) => b.t - a.t);
+    const before = rows.slice().sort((a, b) => b.p - a.p).map(x => x.id), maxT = Math.max(1, ...rows.map(x => x.t));
     const end = G.phase === 'end';
     return `${mHead(end ? 'Fim de jogo' : `Resultado da rodada ${G.round}`, `Adedonha · letra ${G.letter}`)}<div class="mb">
       ${end && rows[0] ? `<div class="podium">${avChip(rows[0].id)}<b>${esc(gName(rows[0].id))}</b><span>venceu com ${rows[0].t} pontos</span></div>` : ''}
-      <div class="stab">${rows.map((x, i) => `<div class="srow ${x.id === myId() ? 'me' : ''}"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}</span>${end ? '' : `<span class="sr">+${x.r}</span>`}<b class="st">${x.t}</b></div>`).join('')}</div></div>
+      <div class="stab">${rows.map((x, i) => { const mv = G.round > 1 && !end ? before.indexOf(x.id) - i : 0;
+        return `<div class="srow ${x.id === myId() ? 'me' : ''} ${i === 0 ? 'lead' : ''}" style="--w:${(x.t / maxT * 100).toFixed(1)}%;--d:${i * 90}ms"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}${mv ? `<i class="mv ${mv > 0 ? 'up' : 'dn'}">${mv > 0 ? '▲' : '▼'}${Math.abs(mv)}</i>` : ''}</span>${end ? '' : `<span class="sr">+${x.r}</span>`}<b class="st" data-count="${x.t}" data-from="${end ? 0 : x.p}">${end ? 0 : x.p}</b></div>`; }).join('')}</div></div>
       <div class="mf">${host ? (end ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="restart">Nova partida</button>` : `<button class="nbtn press" data-m="back">Revisar</button><button class="nbtn press" data-m="finish">Encerrar</button><button class="nbtn pri press" data-m="next">Próxima letra</button>`) : `<span class="mwait">${end ? 'Boa partida!' : 'O anfitrião decide a próxima'}</span>`}</div>`;
   }
   return '';
@@ -3677,7 +3774,10 @@ function fluxoHTML(){
         return `<div class="grp ${gi === flow ? 'flow' : ''}" data-grp="${gi}">${gi === flow ? '<i class="fl">fluxo</i>' : ''}<div class="glab">${esc(g.label)}</div>
           <div class="gmem">${g.ids.map(id => `<button class="gp press ${MV.sel === id ? 'sel' : ''}" data-gp="${id}">${avChip(id)}<span>${esc(gName(id))}</span>${f[id] ? `<b class="fs" ${host ? `data-fov="${id}"` : ''}>${svg(FISH, 1.8)}${f[id] > 1 ? '×' + f[id] : ''}</b>` : (host ? `<b class="fs z" data-fov="${id}">0</b>` : '')}</button>`).join('')}</div></div>`; }).join('')}
         ${host && MV.sel ? `<div class="grp new" data-grp="new"><div class="glab">Separar em outro grupo</div></div>` : ''}</div>
-      <div class="f-sub">${host ? 'Para juntar respostas iguais, toque numa pessoa e depois no grupo certo. Toque no peixe para ajustar.' : 'Discordou? Peça revisão e combinem em voz alta; o anfitrião ajusta.'}</div></div>
+      <div class="f-sub">${host ? 'Para juntar respostas iguais, toque numa pessoa e depois no grupo certo. Toque no peixe para ajustar.' : 'Discordou? Peça revisão e combinem em voz alta; o anfitrião ajusta.'}</div>
+      <div class="sec-t" style="margin-top:18px">Peixes na mão</div>
+      <div class="fishbar">${gPlayers().map(p => ({id: p.id, n: (G.fish[p.id] || 0), add: f[p.id] || 0})).sort((a, b) => (a.n + a.add) - (b.n + b.add)).map(x => `<span>${avChip(x.id)}<b>${x.n}</b>${x.add ? `<i>+${x.add}</i>` : ''}</span>`).join('')}</div>
+      <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div><div class="f-sub">${G.left} de ${G.cfg.pool} peixes ainda no cardume</div></div>
       <div class="mf">${host ? `<button class="nbtn pri press" data-m="confirm">Confirmar peixes</button>` : `<button class="nbtn press" data-m="dispute">Pedir revisão</button>`}</div>`;
   }
   if (G.phase === 'end'){
@@ -3690,6 +3790,12 @@ function fluxoHTML(){
   return '';
 }
 function afterMode(){
+  modeEl.querySelectorAll('[data-count]').forEach((el, i) => {
+    const to = +el.dataset.count, from = +el.dataset.from, t0 = performance.now() + 250 + i * 90;
+    if (to === from){ el.textContent = to; return; }
+    const step = now => { const p = Math.min(1, Math.max(0, (now - t0) / 900)), e = 1 - (1 - p) ** 3; el.textContent = Math.round(from + (to - from) * e); if (p < 1) requestAnimationFrame(step); else if (to > from) el.classList.add('pop'); };
+    requestAnimationFrame(step);
+  });
   if (G.mode === 'stop' && G.phase === 'draw'){
     const el = modeEl.querySelector('.bigletter');
     if (el && MV.letterShown !== G.letter + G.spin){
@@ -3721,6 +3827,10 @@ modeEl.addEventListener('click', e => {
   if (d.mtg){ act({t:'cfg', k: d.mtg, v: !G.cfg[d.mtg]}); return; }
   const sg = t.closest('[data-seg="mtie"]'); if (sg && d.v){ act({t:'cfg', k:'tie', v: d.v}); return; }
   const sv = t.closest('[data-seg="mvote"]'); if (sv && d.v){ act({t:'cfg', k:'vote', v: d.v}); return; }
+  const sr = t.closest('[data-seg="mreview"]'); if (sr && d.v){ act({t:'cfg', k:'review', v: d.v}); return; }
+  const so = t.closest('[data-seg="morder"]'); if (so && d.v){ act({t:'cfg', k:'order', v: d.v}); return; }
+  if (d.pick){ MV.pick = MV.pick === d.pick ? null : d.pick; renderMode(); return; }
+  if (d.link){ MV.pick = null; act({t:'link', k: d.link, eq: d.eq === '1'}); return; }
   if (d.bad){ act({t:'bad', k: d.bad}); return; }
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
@@ -3736,6 +3846,8 @@ modeEl.addEventListener('click', e => {
   else if (m === 'stop') act({t:'stop'});
   else if (m === 'prev') act({t:'ci', d:-1});
   else if (m === 'nextc') act({t:'ci', d:1});
+  else if (m === 'prevp') act({t:'pi', d:-1});
+  else if (m === 'nextp') act({t:'pi', d:1});
   else if (m === 'back') act({t:'back'});
   else if (m === 'next') act({t:'next'});
   else if (m === 'finish') act({t:'finish'});
@@ -3830,7 +3942,7 @@ function netBroadcast(obj){ for (const pe of NET.peers.values()) if (pe.open) pe
 const hostSend = obj => { if (NET.host && NET.host.open) NET.host.send(obj); };
 function pushRoster(){
   NET.roster = hostRoster(); saveHostSess();
-  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together'}});
+  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, lobby: S.g.lobby !== false}});
   syncRoom();
   renderScoreTag();
   if (S.g.autoAll !== false) checkAutoReveal();
@@ -3859,6 +3971,7 @@ function hostAccept(slot){
   if (NV.mode === 'invite') nvInviteNext(true);
 }
 function hostMsg(pe, m){
+  if (m.k === 'ping'){ pe.send({k:'pong', t: m.t, h: Date.now()}); return; }
   if (m.k === 'hello'){
     const first = !pe.card;
     // o mesmo aparelho voltando substitui a entrada antiga
@@ -3872,13 +3985,15 @@ function hostMsg(pe, m){
     pushRoster();
     nvOnlineCount();
     if (NET.gallery) pe.send({k:'gallery', list: NET.gallery});
-    if (TM.run) pe.send({k:'timer', ms: TM.end - performance.now(), dur: TM.dur});
+    if (TM.run) pe.send({k:'timer', at: Date.now() + (TM.end - performance.now()), ms: TM.end - performance.now(), dur: TM.dur});
     if (G) pe.send({k:'gs', g:G});
     return;
   }
   if (!pe.card) return;
   if (m.k === 'st'){ const prev = pe.st; pe.st = m.s; if (PHRASES[m.s]) balloon(pe.card, m.s); if (m.s !== prev) pushRoster(); netBroadcast({k:'act', id: pe.card.id, s: m.s}); return; }
   if (m.k === 'snap'){ hostSnap(pe.card.id, m.d, m.final); return; }
+  if (m.k === 'ping'){ pe.send({k:'pong', t: m.t, h: Date.now()}); return; }
+  if (m.k === 'lob'){ lobAdd(m.id, m.c, m.w, m.p || [], m.n, pe.card.id); for (const o of NET.peers.values()) if (o !== pe && o.open) o.send(Object.assign({who: pe.card.id}, m)); return; }
   if (m.k === 'react'){ floatReact(pe.card, m.e); for (const o of NET.peers.values()) if (o !== pe && o.open) o.send({k:'react', id: pe.card.id, e: m.e}); return; }
   if (m.k === 'ga'){ gameAct(pe.card.id, m.a); return; }
   if (m.k === 'ready'){
@@ -4043,7 +4158,7 @@ async function joinRoomOnline(raw){
     if (m.k === 'iam-host' && NET.host && NET.role === 'guest' && NET.room === room){
       // o anfitrião recarregou e reabriu a sala: apresenta-se de novo
       NET.host.peerId = ctx.peerId; NET.host.send = obj => act.send(obj, {target: ctx.peerId}).catch(() => {});
-      hostSend({k:'hello', p: meCard()}); if (NET.myReady) hostSend({k:'ready', v:true});
+      hostSend({k:'hello', p: meCard()}); if (NET.myReady) hostSend({k:'ready', v:true}); NET.offOk = false; clockSync();
       return;
     }
     if (m.k === 'iam-host' && !NET.host){
@@ -4054,7 +4169,7 @@ async function joinRoomOnline(raw){
       hostSend({k:'hello', p: meCard()});
       const wasResume = !!NV.resume; NV.resume = null;
       nvClose(); toast(wasResume ? `De volta à sala de ${NET.hostName}` : `Conectado à sala de ${NET.hostName}`); sfx('show'); roomAwake(true); armBack();
-      saveSess({role:'guest', code});
+      saveSess({role:'guest', code}); NET.offOk = false; clockSync();
       if (!wasResume){ if (win === 'room') syncSheet(true); else openSheet('room'); }
       renderScoreTag();
       return;
@@ -4145,7 +4260,7 @@ async function guestJoin(code){
   dc.onopen = () => {
     NET.host.open = true; NET.role = 'guest'; NET.mode = 'offline'; NET.gallery = null; NET.live = {}; NET.feed = []; roomAwake(true);
     dcBind(dc, guestMsg, () => guestLost());
-    hostSend({k:'hello', p: meCard()});
+    hostSend({k:'hello', p: meCard()}); NET.offOk = false; clockSync();
     nvClose(); toast(`Conectado à sala de ${NET.hostName}`); sfx('show');
     if (win === 'room') syncSheet(true); else openSheet('room');
   };
@@ -4183,7 +4298,7 @@ function guestMsg(m){
   if (m.k === 'roster'){
     const wasSecret = NET.secret;
     NET.roster = m.list; NET.secret = m.room.secret;
-    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev};
+    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, lobby: m.room.lobby};
     const mine = m.list.find(r => r.id === myId()); if (mine) NET.myReady = !!mine.ready;
     syncRoom();
     renderScoreTag();
@@ -4191,9 +4306,11 @@ function guestMsg(m){
   }
   if (m.k === 'act'){ const pl = NET.roster.find(r => r.id === m.id); if (pl && m.id !== myId() && PHRASES[m.s]) balloon(pl, m.s); return; }
   if (m.k === 'lock'){ setLock(m.w); return; }
+  if (m.k === 'lob'){ if (m.who !== myId()) lobAdd(m.id, m.c, m.w, m.p || [], m.n, m.who); return; }
   if (m.k === 'react'){ if (m.id !== myId()) floatReact(NET.roster.find(r => r.id === m.id), m.e); return; }
   if (m.k === 'gs'){ G = m.g; renderMode(); return; }
-  if (m.k === 'timer'){ startTimer(Math.max(0, m.ms), true); TM.dur = m.dur; return; }
+  if (m.k === 'timer'){ const ms = m.at && NET.offOk ? m.at - NET.off - Date.now() : m.ms; startTimer(Math.max(0, ms), true); TM.dur = m.dur; return; }
+  if (m.k === 'pong'){ clockSample(m); return; }
   if (m.k === 'timerStop'){ stopTimer(true); return; }
   if (m.k === 'reveal'){ NET.phase = 'revealed'; NET.myReady = false; setLock(null); updateRoomUI(); countdownThenShow(); return; }
   if (m.k === 'gallery'){ NET.gallery = m.list; syncRoom(); return; }
@@ -4249,6 +4366,7 @@ function roundClear(){
   toast('Nova rodada', 'Desfazer', () => { Object.assign(P(), snap); txt.textContent = P().text; save(); applyTheme(true); });
 }
 function countdownThenShow(){
+  closeLobby();
   if (editing) txt.blur();
   closeSheet(); closeRing();
   if (presenting) finishExit();
@@ -4264,6 +4382,27 @@ function countdownThenShow(){
 }
 let forceUncover = false, forceCover = false;
 
+/* ---------- relógio da sala: todos contam o tempo pelo relógio do anfitrião ---------- */
+// mede a diferença de relógio com várias idas e voltas e fica com a mais rápida (a mais precisa)
+function clockSample(m){
+  const now = Date.now(), rtt = now - m.t; if (rtt < 0 || rtt > 5000) return;
+  if (!NET.offOk || rtt <= NET.rtt * 1.3 || now - NET.offAt > 60000){ NET.off = m.h + rtt / 2 - now; NET.rtt = rtt; NET.offOk = true; NET.offAt = now; }
+}
+function clockSync(){
+  if (NET.role !== 'guest') return;
+  let k = 0; const burst = () => { if (NET.role !== 'guest' || ++k > 6) return; hostSend({k:'ping', t: Date.now()}); setTimeout(burst, 350); };
+  burst();
+  clearInterval(NET.syncIv); NET.syncIv = setInterval(() => { if (NET.role === 'guest') hostSend({k:'ping', t: Date.now()}); else clearInterval(NET.syncIv); }, 15000);
+}
+/* aviso final do cronômetro: som e/ou vibração que aumentam nos últimos segundos */
+function timerTick(sec){
+  const R = NET.role === 'guest' ? (NET.rules || {}) : S.g, mode = R.tick || 'som', from = R.tickFrom || 5;
+  if (mode === 'off' || sec > from || sec <= 0) return;
+  const k = 1 - (sec - 1) / Math.max(1, from);
+  if ((mode === 'som' || mode === 'ambos') && !S.g.mute && ac()){ try{ tone({f: 520 + k * 520, type:'triangle', dur: .09 + k * .06, vol: .05 + k * .07}); if (sec <= 3) tone({f: 620 + k * 560, type:'triangle', dur:.08, vol:.06, delay:.16}); }catch(_){} }
+  if ((mode === 'vibra' || mode === 'ambos') && navigator.vibrate){ try{ navigator.vibrate(sec <= 3 ? [40 + k * 120, 70, 40 + k * 120] : 30 + k * 90); }catch(_){} }
+}
+
 /* ---------- reações (quem já terminou manda; quem ainda escreve vê no ritmo escolhido) ---------- */
 const REACTS = ['😂','🔥','👏','😱','🤔','❤️','💀','👀'];
 let rxLast = 0;
@@ -4276,9 +4415,10 @@ function floatReact(pl, e, own){
   const box = $('#rx'); if (box.children.length > 28) box.firstChild.remove();
   const c = /^#[0-9a-f]{6}$/i.test(pl.accent || '') ? pl.accent : '#ffad2a';
   const i = document.createElement('i');
-  i.style.cssText = `--sx:${Math.round((Math.random() - .5) * 60)}px;--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#fff'};right:${Math.round(Math.random()*26)}px`;
-  i.innerHTML = `${e}<b>${avatarHTML(pl)}</b>`;
-  box.appendChild(i); setTimeout(() => i.remove(), 3100);
+  const dur = 2.8 + Math.random() * 1.2;
+  i.style.cssText = `--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#fff'};right:${Math.round(Math.random()*30)}px;--dur:${dur.toFixed(2)}s;--sw:${(.8 + Math.random() * .7).toFixed(2)}s;--sd:-${(Math.random()).toFixed(2)}s;--amp:${Math.round(6 + Math.random() * 12)}px;--fs:${Math.round(28 + Math.random() * 12)}px`;
+  i.innerHTML = `<span><span>${e}<b>${avatarHTML(pl)}</b></span></span>`;
+  box.appendChild(i); setTimeout(() => i.remove(), dur * 1000 + 100);
 }
 function sendReact(e){
   floatReact(meCard(), e, true);
@@ -4286,9 +4426,83 @@ function sendReact(e){
   if (NET.role === 'host') netBroadcast({k:'react', id: myId(), e}); else hostSend({k:'react', e});
 }
 const rbar = $('#rbar');
-rbar.innerHTML = REACTS.map(e => `<button data-rx="${e}" aria-label="Reação">${e}</button>`).join('');
-rbar.addEventListener('click', e => { const b = e.target.closest('[data-rx]'); if (b) sendReact(b.dataset.rx); });
-function updateReactBar(){ rbar.hidden = !(NET.role && NET.myReady && !presenting && !win && !modeOpen()); if (!rbar.hidden) pill.hidden = true; else if (G && !modeOpen() && !presenting && !win && pill.innerHTML) pill.hidden = false; }
+rbar.innerHTML = REACTS.map(e => `<button data-rx="${e}" aria-label="Reação">${e}</button>`).join('') + `<button class="rlob" data-lob="1" aria-label="Saguão">${svg('<path d="M4 20l1-4.5L16 4.5a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="M14 6.5l3 3"/>', 2)}</button>`;
+rbar.addEventListener('click', e => { if (e.target.closest('[data-lob]')){ LOB.open ? closeLobby() : openLobby(); return; } const b = e.target.closest('[data-rx]'); if (b) sendReact(b.dataset.rx); });
+function updateReactBar(){ if (LOB.open && (!NET.role || !NET.myReady || presenting || !lobAllowed())) closeLobby(); rbar.hidden = !(NET.role && NET.myReady && !presenting && !win && !modeOpen()); const lb = rbar.querySelector('[data-lob]'); if (lb){ lb.hidden = !lobAllowed(); lb.classList.toggle('on', LOB.open); } if (!rbar.hidden) pill.hidden = true; else if (G && !modeOpen() && !presenting && !win && pill.innerHTML) pill.hidden = false; }
+
+
+/* ---------- saguão: enquanto esperam, quem já terminou desenha junto numa tela só (a tinta some sozinha) ---------- */
+const LOB = {open:false, strokes:new Map(), raf:0, cur:null, buf:[], sendT:0, w:6};
+const lobEl = document.createElement('section'); lobEl.className = 'lobby'; lobEl.hidden = true;
+lobEl.innerHTML = `<div class="lh"><div class="mt"><b>Saguão</b><span>desenhem juntos enquanto esperam</span></div><div class="lwho" id="lobWho"></div><button class="nbtn press" id="lobClose">Voltar</button></div>
+  <div class="lwrap"><canvas id="lobCv"></canvas><div class="lhint" id="lobHint">Desenhe com o dedo. A tinta some sozinha.</div></div>
+  <div class="lsz">${[3,6,12].map(w => `<button class="press ${w === 6 ? 'on' : ''}" data-lw="${w}"><i style="width:${w + 4}px;height:${w + 4}px"></i></button>`).join('')}</div>`;
+document.getElementById('app').appendChild(lobEl);
+const lobCv = lobEl.querySelector('#lobCv'), lctx = lobCv.getContext('2d');
+const lobAllowed = () => (NET.role === 'host' ? S.g.lobby : (NET.rules || {}).lobby) !== false;
+function lobSize(){
+  const wrap = lobEl.querySelector('.lwrap'), side = Math.max(100, Math.min(wrap.clientWidth - 28, wrap.clientHeight - 158)), d = Math.min(devicePixelRatio || 1, 2);
+  lobCv.style.width = lobCv.style.height = side + 'px'; lobCv.width = lobCv.height = Math.round(side * d);
+  LOB.k = side * d / 1000; LOB.side = side;
+}
+function openLobby(){
+  if (!NET.role || !lobAllowed()) return;
+  LOB.open = true; lobEl.hidden = false; document.body.classList.add('inlobby'); lobEl.style.top = Math.max(0, $('.top').getBoundingClientRect().bottom) + 'px';
+  lobSize(); lobLoop(); updateReactBar(); sfx('ui');
+}
+function closeLobby(){ if (!LOB.open) return; LOB.open = false; lobEl.hidden = true; document.body.classList.remove('inlobby'); cancelAnimationFrame(LOB.raf); LOB.raf = 0; updateReactBar(); }
+lobEl.querySelector('#lobClose').addEventListener('click', closeLobby);
+lobEl.querySelector('.lsz').addEventListener('click', e => { const b = e.target.closest('[data-lw]'); if (!b) return; LOB.w = +b.dataset.lw; lobEl.querySelectorAll('[data-lw]').forEach(x => x.classList.toggle('on', x === b)); });
+addEventListener('resize', () => { if (LOB.open) lobSize(); });
+function lobPt(e){ const r = lobCv.getBoundingClientRect(); return [Math.round((e.clientX - r.left) / r.width * 1000), Math.round((e.clientY - r.top) / r.height * 1000)]; }
+function lobAdd(id, c, w, pts, fresh, who){
+  let st = LOB.strokes.get(id);
+  if (!st || fresh){ st = {c, w, p:[], t:0, who}; LOB.strokes.set(id, st); }
+  for (let i = 0; i < pts.length; i += 2) st.p.push([pts[i], pts[i+1]]);
+  st.t = performance.now();
+  if (LOB.strokes.size > 200){ const k = LOB.strokes.keys().next().value; LOB.strokes.delete(k); }
+  if (LOB.open && !LOB.raf) lobLoop();
+}
+function lobFlush(){
+  LOB.sendT = 0; if (!LOB.cur || !LOB.buf.length) return;
+  const m = {k:'lob', id: LOB.cur.id, c: LOB.cur.c, w: LOB.cur.w, p: LOB.buf, n: LOB.cur.n};
+  LOB.buf = []; LOB.cur.n = false;
+  if (NET.role === 'host') netBroadcast(Object.assign({who: myId()}, m)); else hostSend(m);
+}
+lobCv.addEventListener('pointerdown', e => {
+  e.preventDefault(); try{ lobCv.setPointerCapture(e.pointerId); }catch(_){}
+  $('#lobHint').classList.add('off');
+  LOB.cur = {id: myId().slice(0, 4) + uid().slice(0, 5), c: /^#[0-9a-f]{6}$/i.test(P().accent || '') ? P().accent : '#ffad2a', w: LOB.w, n: true};
+  const pt = lobPt(e); lobAdd(LOB.cur.id, LOB.cur.c, LOB.cur.w, pt, true, myId()); LOB.buf.push(...pt);
+  LOB.sendT = setTimeout(lobFlush, 40);
+});
+lobCv.addEventListener('pointermove', e => {
+  if (!LOB.cur) return;
+  const pt = lobPt(e); lobAdd(LOB.cur.id, LOB.cur.c, LOB.cur.w, pt, false, myId()); LOB.buf.push(...pt);
+  if (!LOB.sendT) LOB.sendT = setTimeout(lobFlush, 40);
+});
+['pointerup','pointercancel'].forEach(ev => lobCv.addEventListener(ev, () => { if (!LOB.cur) return; clearTimeout(LOB.sendT); lobFlush(); LOB.cur = null; }));
+function lobLoop(){
+  const now = performance.now(), k = LOB.k || 1;
+  lctx.clearRect(0, 0, lobCv.width, lobCv.height);
+  lctx.lineCap = lctx.lineJoin = 'round';
+  const who = new Set();
+  for (const [id, st] of LOB.strokes){
+    const age = now - st.t, a = age < 6000 ? 1 : 1 - (age - 6000) / 3000;
+    if (a <= 0){ LOB.strokes.delete(id); continue; }
+    if (age < 8000 && st.who) who.add(st.who);
+    lctx.globalAlpha = a; lctx.strokeStyle = st.c; lctx.lineWidth = st.w * k * 1.6;
+    lctx.beginPath(); const p = st.p;
+    lctx.moveTo(p[0][0] * k, p[0][1] * k);
+    if (p.length === 1) lctx.lineTo(p[0][0] * k + .1, p[0][1] * k);
+    for (let i = 1; i < p.length - 1; i++){ const mx = (p[i][0] + p[i+1][0]) / 2, my = (p[i][1] + p[i+1][1]) / 2; lctx.quadraticCurveTo(p[i][0] * k, p[i][1] * k, mx * k, my * k); }
+    if (p.length > 1){ const l = p[p.length - 1]; lctx.lineTo(l[0] * k, l[1] * k); }
+    lctx.stroke();
+  }
+  lctx.globalAlpha = 1;
+  const wl = [...who].slice(0, 5).map(id => avChip(id)).join(''), el = $('#lobWho'); if (el && el._h !== wl){ el.innerHTML = wl; el._h = wl; }
+  LOB.raf = LOB.open && LOB.strokes.size ? requestAnimationFrame(lobLoop) : 0;
+}
 
 /* ---------- Pronto ---------- */
 /* revelação juntos (Pronto + contagem para todos) ou cada um mostra quando quiser */
@@ -4533,7 +4747,7 @@ function stepTimer(dir){
   if (TM.run){
     const left = TM.end - performance.now(), nl = Math.max(1000, left + dir * (left > 60000 ? 15000 : 5000));
     TM.end = performance.now() + nl; TM.dur = Math.max(TM.dur, nl); TM.lastSec = -1;
-    if (NET.role === 'host') netBroadcast({k:'timer', ms: nl, dur: TM.dur});
+    if (NET.role === 'host') netBroadcast({k:'timer', at: Date.now() + nl, ms: nl, dur: TM.dur});
     tickTimer();
   } else { S.g.timerDur = tStep(S.g.timerDur, dir); save(); }
   sfx('ui'); syncSheet();
@@ -4550,7 +4764,8 @@ function roundCtlHTML(){
     ${fsub(tog ? 'Cada um toca em Pronto quando terminar; a contagem começa para todos ao mesmo tempo.' : 'Sem Pronto e sem contagem: cada um vira a tela quando a mesa combinar.')}
     ${tog ? `<div class="f-row" style="margin-top:6px"><span class="f-lb">Começar sozinho quando todos estiverem prontos</span>${tg('data-gtg="autoAll"', S.g.autoAll !== false)}</div>` : ''}
     <div class="room-act">${tog ? '<button class="nbtn press" data-g="reveal">Revelar agora</button>' : ''}<button class="nbtn pri press" data-g="round">Nova rodada</button></div>
-    <div class="f-row"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div></div>`;
+    <div class="f-row"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div>
+    <div class="f-row"><span class="f-lb">Saguão de desenho para quem terminou</span>${tg('data-gtg="lobby"', S.g.lobby !== false)}</div></div>`;
 }
 const TEND_LB = {warn:'Só avisar', lock:'Travar', reveal:'Revelar'};
 const MODES = [['stop','Adedonha','Letra sorteada, categorias votadas, STOP! e correção juntos.','<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M15.5 15.5l2 2"/>'],
@@ -4576,7 +4791,9 @@ function gameHTML(){
       <div class="tstep"><button class="sbtn press" data-g="tminus" aria-label="Menos">−</button><span class="tv" id="tVal">${TM.run ? fmtT(TM.end - performance.now()) : fmtT(S.g.timerDur * 1000)}</span><button class="sbtn press" data-g="tplus" aria-label="Mais">+</button></div>
       <div class="opt-grid" data-seg="dur">${DURS.map(d => `<button class="press" data-v="${d}" ${pressed(d === S.g.timerDur)}>${d < 60 ? d + ' s' : d % 60 ? fmtT(d*1000) : (d/60) + ' min'}</button>`).join('')}</div>
       <div class="nv-row" style="margin-top:12px">${TM.run ? '<button class="nbtn press" data-g="stopT">Parar</button>' : '<button class="nbtn pri press" data-g="startT">Iniciar</button>'}</div>
-      ${host ? fsub('Vale para todos da sala. Com o tempo correndo, − e + ajustam para todos.') : ''}`}</div>
+      ${host ? fsub('Vale para todos da sala, pelo mesmo relógio. Com o tempo correndo, − e + ajustam para todos.') : ''}
+      <div class="f-stack" style="margin-top:12px"><span class="f-lb">Aviso nos últimos segundos</span>${seg('tick', [['off','Nenhum'],['som','Som'],['vibra','Vibração'],['ambos','Os dois']], S.g.tick || 'som')}</div>
+      <div class="f-stack"><span class="f-lb">Começa a avisar em</span>${seg('tickfrom', [['3','3 s'],['5','5 s'],['10','10 s'],['15','15 s']], String(S.g.tickFrom || 5))}</div>`}</div>
     <div class="sec"><div class="sec-t">Quando o tempo acabar</div>
       ${guest ? fsub(`${TEND_LB[R.tEnd || 'reveal']}${R.tEnd === 'lock' ? (R.lockW === 'text' ? ' só a escrita' : ' escrita e desenho') : ''}. Quem decide é o anfitrião.`) : `
       ${seg('tend', [['warn','Só avisar'],['lock','Travar'],['reveal', inRoom ? 'Revelar todos' : 'Mostrar']], te)}
