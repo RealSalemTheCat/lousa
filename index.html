@@ -2908,7 +2908,7 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
-    <div class="sec">${fsub('Lousa · versão 19')}</div>`;
+    <div class="sec">${fsub('Lousa · versão 20')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3368,7 +3368,7 @@ const FISH = '<path d="M2.5 12c3.4-4.6 9.4-6 14.2 0-4.8 6-10.8 4.6-14.2 0z"/><pa
 const modeOpen = () => !!(G && !modeMin && !presenting && !(G.mode === 'fluxo' && G.phase === 'write'));
 const modeEl = document.createElement('section'); modeEl.className = 'mode'; modeEl.hidden = true; document.getElementById('app').appendChild(modeEl);
 const pill = document.createElement('button'); pill.className = 'mpill press'; pill.hidden = true; document.body.appendChild(pill);
-pill.addEventListener('click', () => { modeMin = false; renderMode(); });
+pill.addEventListener('click', () => { if (G && G.mode === 'fluxo' && G.phase === 'write'){ gtab = 'placar'; openSheet('game'); return; } modeMin = false; renderMode(); });
 
 /* textos parecidos: ignora acentos, maiúsculas, artigos e plural simples */
 function normT(s){ return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -3404,7 +3404,7 @@ function startMode(kind){
     const cats = sv && sv.cats ? sv.cats.map(c => ({id: c.id, name: c.name, by:[], yes:[], no:[], st: c.st || 'auto', def: c.def})) : DEF_CATS.map((name, i) => ({id:'d' + i, name, by:[], yes:[], no:[], st:'auto', def: i < 6}));
     G = {mode:'stop', phase:'setup', cats, out: sv ? sv.out.slice() : ['K','W','X','Y'], lv:{}, cfg: Object.assign({ncat:8, time:90, uniq:10, rep:5, swapMax:0, vote:'yn', review:'cat', order:'rand'}, sv && sv.cfg), used:[], round:0, totals:{}, swap:[], swapped:0};
   }
-  if (kind === 'fluxo') G = {mode:'fluxo', phase:'setup', cfg: Object.assign({pool: Math.max(12, n * 6), uniq2:true, tie:'none'}, sv && sv.cfg), fish:{}, round:0, left:0};
+  if (kind === 'fluxo') G = {mode:'fluxo', phase:'setup', cfg: Object.assign({pool: Math.max(12, n * 6), tie:'none'}, sv && sv.cfg, {uniq2: !!(sv && sv.cfg && sv.cfg.uniq2v2)}), fish:{}, round:0, left:0};
   modeMin = false; closeSheet(); gPush();
 }
 function endMode(){ if (NET.role !== 'host') return; if (G && G.mode === 'stop' && TM.run) stopTimer(); G = null; gPush(); }
@@ -3475,7 +3475,7 @@ function gameAct(from, a){
     gPush(); return;
   }
   if (G.mode === 'fluxo'){
-    if (a.t === 'cfg' && host && G.phase === 'setup'){ G.cfg[a.k] = a.v; }
+    if (a.t === 'cfg' && host && G.phase === 'setup'){ G.cfg[a.k] = a.v; if (a.k === 'uniq2') G.cfg.uniq2v2 = a.v; }
     else if (a.t === 'start' && host && G.phase === 'setup'){ saveModeRules(); G.left = G.cfg.pool; G.round = 1; G.fish = {}; G.phase = 'write'; newRound(); }
     else if (a.t === 'move' && host && G.phase === 'judge'){
       for (const g of G.groups){ const i = g.ids.indexOf(a.id); if (i >= 0) g.ids.splice(i, 1); }
@@ -3488,7 +3488,7 @@ function gameAct(from, a){
       const f = fluxoFish(); let sum = 0;
       for (const id in f){ G.fish[id] = (G.fish[id] || 0) + f[id]; sum += f[id]; }
       G.left = Math.max(0, G.left - sum);
-      if (G.left <= 0) G.phase = 'end'; else { G.phase = 'write'; G.round++; newRound(); }
+      if (G.left <= 0) G.phase = 'end'; else { G.phase = 'write'; G.round++; newRound(); netBroadcast({k:'fishmsg', f}); fishToast(f); }
     }
     else if (a.t === 'again' && host){ G.phase = 'setup'; G.fish = {}; G.round = 0; }
     else return;
@@ -3601,6 +3601,7 @@ function fluxoFish(){
   }));
   return f;
 }
+function fishToast(f){ if (!G) return; const n = (f || {})[myId()] || 0; toast(n ? `Você pegou ${n} ${n === 1 ? 'peixe' : 'peixes'}. Total: ${G.fish[myId()] || 0}` : `Seguiu o fluxo! Total: ${G.fish[myId()] || 0} peixes`); }
 function fluxoAfterReveal(list){
   if (!G || G.mode !== 'fluxo' || G.phase !== 'write' || NET.role !== 'host') return;
   G.groups = fluxoGroups(list); G.fov = {}; G.phase = 'judge'; gPush();
@@ -3616,7 +3617,7 @@ function renderMode(){
   pill.hidden = !G || show || presenting || !!win || (NET.role && NET.myReady);
   if (G && !show && !presenting){
     pill.innerHTML = G.mode === 'fluxo' && G.phase === 'write'
-      ? `${svg(FISH, 1.8)}<span>Segue o Fluxo · rodada ${G.round} · ${G.left} no cardume</span>`
+      ? `${svg(FISH, 1.8)}<span>Rodada ${G.round} · você: ${G.fish[myId()] || 0} · cardume ${G.left}</span><b>placar</b>`
       : `<span>${G.mode === 'stop' ? 'Adedonha' : 'Segue o Fluxo'}</span><b>voltar</b>`;
   }
   if (!show) return;
@@ -3763,7 +3764,7 @@ function fluxoHTML(){
     <p>Quem fugiu do fluxo pega peixe do cardume. Quando o cardume acaba, vence quem tiver <b>menos peixes</b>.</p></div>
     <div class="mrow"><span>Peixes no cardume</span>${host ? stepper('pool', G.cfg.pool) : `<b>${G.cfg.pool}</b>`}</div>
     <div class="f-sub">Sugestão: 6 por jogador (${n * 6} para ${n}).</div>
-    <div class="mrow"><span>Resposta única leva 2 peixes</span>${host ? tg('data-mtg="uniq2"', G.cfg.uniq2) : `<b>${G.cfg.uniq2 ? 'sim' : 'não'}</b>`}</div>
+    <div class="mrow"><span>Resposta única leva 2 peixes (opcional)</span>${host ? tg('data-mtg="uniq2"', G.cfg.uniq2) : `<b>${G.cfg.uniq2 ? 'sim' : 'não'}</b>`}</div>
     <div class="mrow col"><span>Empate na resposta mais comum</span>${host ? seg('mtie', [['none','Ninguém leva'],['all','Todos levam']], G.cfg.tie) : `<b>${G.cfg.tie === 'all' ? 'todos levam peixe' : 'ninguém leva peixe'}</b>`}</div></div>
     <div class="mf">${host ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="start">Começar</button>` : '<span class="mwait">O anfitrião começa</span>'}</div>`;
   if (G.phase === 'judge'){
@@ -4310,6 +4311,7 @@ function guestMsg(m){
   if (m.k === 'lob'){ if (m.who !== myId()) lobAdd(m.id, m.c, m.w, m.p || [], m.n, m.who); return; }
   if (m.k === 'react'){ if (m.id !== myId()) floatReact(NET.roster.find(r => r.id === m.id), m.e); return; }
   if (m.k === 'gs'){ G = m.g; renderMode(); return; }
+  if (m.k === 'fishmsg'){ setTimeout(() => fishToast(m.f), 300); return; }
   if (m.k === 'timer'){ const ms = m.at && NET.offOk ? m.at - NET.off - Date.now() : m.ms; startTimer(Math.max(0, ms), true); TM.dur = m.dur; return; }
   if (m.k === 'pong'){ clockSample(m); return; }
   if (m.k === 'timerStop'){ stopTimer(true); return; }
@@ -4806,6 +4808,12 @@ function gameHTML(){
       ${fsub('O quadro aparece coberto e vira como uma carta.')}</div>`;
   }
   // placar
+  if (G && G.mode === 'fluxo'){
+    const rows = gPlayers().map(p => ({id: p.id, f: G.fish[p.id] || 0})).sort((a, b) => a.f - b.f);
+    return `<div class="sec"><div class="sec-t">Segue o Fluxo · rodada ${G.round}</div>
+      <div class="stab">${rows.map((x, i) => `<div class="srow ${x.id === myId() ? 'me' : ''}"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}</span><b class="st">${svg(FISH, 1.8)}${x.f}</b></div>`).join('')}</div>
+      <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div>${fsub(`${G.left} de ${G.cfg.pool} peixes ainda no cardume. Vence quem tiver menos.`)}</div>`;
+  }
   if (NET.role) return `<div class="sec"><div class="sec-t">Placar da sala</div><div class="plist">${NET.roster.map(r => playerRow(r, host)).join('')}</div>
       ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-g="zeroNet">Zerar placar</button></div>' : fsub('Só o anfitrião muda os pontos.')}</div>
       <div class="sec"><div class="f-row"><span class="f-lb">Exibir meus pontos no quadro</span>${tg('data-gtg="showScore"', S.g.showScore)}</div></div>`;
