@@ -484,7 +484,15 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .board.rvl #layer{animation:cardOn .6s .58s cubic-bezier(.2,1.35,.4,1) both;transform-origin:50% 50%}
 @keyframes cardOn{0%{transform:perspective(1600px) rotateY(-90deg) scale(1.04);filter:brightness(1.6)}100%{transform:perspective(1600px) rotateY(0) scale(1)}}
 @keyframes qbob{50%{transform:translateY(-6%) rotate(4deg)}}
-.bals{position:fixed;left:0;right:0;top:calc(62px + env(safe-area-inset-top));z-index:65;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+.bals{position:fixed;left:0;right:0;top:calc(62px + env(safe-area-inset-top));height:0;z-index:65;pointer-events:none}
+.bals.anchor-b{top:auto;bottom:calc(86px + env(safe-area-inset-bottom))}
+.brow{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;padding:0 12px;transition:transform .45s cubic-bezier(.3,1.2,.45,1)}
+.anchor-b .brow{top:auto;bottom:0}
+.bal .avg{display:flex;flex:none}.bal .avg .av + .av{margin-left:-11px}
+.bal .avg .av{box-shadow:0 0 0 2px var(--ring,var(--c))}
+.bs-pensamento{--ring:#fbfbfd}.bs-quadrinho{--ring:#fff}.bs-postit{--ring:#fff3a0}.bs-lateral{--ring:#16161a}
+.bal.bump .bal-in{animation:balbump .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes balbump{40%{transform:scale(1.07)}}
 .bal{--dx:0px;--rz:0deg;position:relative;transform:translate(var(--dx)) rotate(var(--rz));animation:balin .62s cubic-bezier(.2,1.6,.35,1) both}
 .bal-in{display:flex;align-items:center;gap:9px;padding:6px 15px 6px 6px;border-radius:22px;background:var(--c);color:var(--oc);font:500 14px/1.25 var(--uif);max-width:min(84vw,360px);
   box-shadow:0 10px 26px -6px color-mix(in srgb,var(--c) 55%,transparent),0 2px 0 rgba(0,0,0,.12) inset,0 -3px 0 rgba(0,0,0,.14) inset;animation:balbob 2.4s ease-in-out .6s infinite}
@@ -548,7 +556,11 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:7px;margin-top:10px}
 .let{position:relative;height:50px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font:800 21px 'Bricolage Grotesque',var(--uif);color:var(--tx)}
 .let.out{color:var(--tx3);text-decoration:line-through;opacity:.45}
-.let.mine{border-color:#ff7a7a}
+.let.mine{box-shadow:inset 0 0 0 2px #ff7a7a}
+.let.forced::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.lkey{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12px;color:var(--tx3)}
+.lkey span{display:flex;align-items:center;gap:6px}.lkey b{width:14px;height:14px;border-radius:4px;background:var(--panel2);border:1px solid var(--line)}
+.lkey .k2{opacity:.45;background:var(--panel)}.lkey .k3{box-shadow:inset 0 0 0 2px #ff7a7a}
 .let i{position:absolute;right:4px;top:3px;font:700 10px var(--uif);font-style:normal;color:#ff7a7a}
 .mrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600}
 .mrow.col{flex-direction:column;align-items:stretch;padding:10px 0;gap:8px}
@@ -613,7 +625,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .mpill{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:58;display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:99px;background:rgba(22,22,25,.94);border:1px solid var(--line2);color:var(--tx);font-size:13px;font-weight:700;box-shadow:0 8px 22px rgba(0,0,0,.4);white-space:nowrap;max-width:92vw;animation:rbarin .4s cubic-bezier(.3,1.5,.5,1)}
 .mpill svg{width:18px;height:18px;color:#3fb6ff}.mpill b{color:var(--accent)}
 body.inmode .dock{visibility:hidden}
-body.inmode .bals:not(.bs-live):not(.bs-lateral){top:auto;bottom:calc(86px + env(safe-area-inset-bottom));flex-direction:column-reverse}
+
 /* estilos de balão */
 .bs-quadrinho .bal-in{background:#fff;color:#111;border:3px solid #111;border-radius:20px 20px 20px 6px;font:400 17px/1.1 'Bangers',var(--uif);letter-spacing:.05em;box-shadow:5px 6px 0 #111;padding:6px 15px 6px 6px}
 .bs-quadrinho .bal-in::after{background:#111;bottom:-12px;left:18px;width:16px;height:14px}
@@ -634,7 +646,7 @@ body.inmode .bals:not(.bs-live):not(.bs-lateral){top:auto;bottom:calc(86px + env
 @keyframes swing{50%{transform:rotate(1.6deg)}}
 @keyframes postin{0%{transform:translate(var(--dx),-80px) rotate(-18deg);opacity:0}}
 @keyframes postout{to{transform:translate(var(--dx),40px) rotate(14deg) scale(.9);opacity:0}}
-.bals.bs-lateral{left:auto;right:10px;align-items:flex-end;gap:8px}
+.bs-lateral .brow{justify-content:flex-end;padding-right:10px}
 .bs-lateral .bal{--dx:0px!important;--rz:0deg!important;animation:latin .5s cubic-bezier(.2,1.25,.4,1) both}
 .bs-lateral .bal-in{background:rgba(22,22,25,.94);color:var(--tx);border-radius:14px;border:1px solid var(--line2);border-left:4px solid var(--c);box-shadow:0 12px 28px rgba(0,0,0,.4);padding:8px 14px 10px 8px;font-size:13.5px;max-width:min(72vw,300px);animation:none;overflow:hidden;position:relative}
 .bs-lateral .bal-in::after{left:0;bottom:0;top:auto;width:100%;height:3px;background:var(--c);clip-path:none;border-radius:0;transform-origin:0 50%;animation:latbar 3.2s linear forwards}
@@ -644,7 +656,8 @@ body.inmode .bals:not(.bs-live):not(.bs-lateral){top:auto;bottom:calc(86px + env
 @keyframes latin{from{transform:translateX(120%);opacity:0}}
 @keyframes latout{to{transform:translateX(120%);opacity:0}}
 @keyframes latbar{to{transform:scaleX(0)}}
-.bals.bs-live{top:auto;left:auto;right:12px;bottom:calc(92px + env(safe-area-inset-bottom));width:0;height:0;display:block}
+.bals.bs-live{top:auto;left:auto;right:12px;bottom:calc(92px + env(safe-area-inset-bottom));width:0;height:0}
+.bs-live .brow{left:auto;right:0;top:auto;bottom:0;display:block;padding:0;transition:none}
 .bs-live .bal{position:absolute;right:0;bottom:0;--sx:calc(var(--dx) * .25);animation:liveup 3.8s cubic-bezier(.25,.6,.4,1) forwards}
 .bs-live .bal-in{flex-direction:row-reverse;background:none;box-shadow:none;padding:0;gap:6px;color:#fff;animation:none;font-size:12.5px}
 .bs-live .bal-in::after{display:none}
@@ -819,7 +832,6 @@ body.inmode .bals:not(.bs-live):not(.bs-lateral){top:auto;bottom:calc(86px + env
     <div class="more" id="moreMenu" hidden>
     <button class="mi press" id="secretBtn" hidden></button>
     <button class="mi press" id="muteBtn"></button>
-    <button class="mi press" id="profBtn"></button>
     <button class="mi press" id="settingsBtn"></button>
     </div>
   </header>
@@ -1234,13 +1246,12 @@ $('#themeBtn').innerHTML = svg(UI.palette, 1.8);
 $('#gameBtn').innerHTML = svg('<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/>', 1.8);
 $('#settingsBtn').innerHTML = svg(UI.sliders, 1.8) + '<span>Ajustes</span>';
 $('#moreBtn').innerHTML = svg('<circle cx="5.5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="18.5" cy="12" r="1.4" fill="currentColor"/>', 1.6);
-$('#profBtn').innerHTML = svg('<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/>', 1.8) + '<span>Jogador</span>';
 const moreMenu = $('#moreMenu');
 function toggleMore(on){ moreMenu.hidden = !(on ?? moreMenu.hidden); $('#moreBtn').classList.toggle('on', !moreMenu.hidden); }
 $('#moreBtn').addEventListener('click', e => { e.stopPropagation(); toggleMore(); });
 moreMenu.addEventListener('click', e => { if (e.target.closest('.mi') && e.target.closest('.mi').id !== 'muteBtn' && e.target.closest('.mi').id !== 'secretBtn') toggleMore(false); });
 document.addEventListener('pointerdown', e => { if (!moreMenu.hidden && !e.target.closest('#moreMenu,#moreBtn')) toggleMore(false); }, true);
-$('#profBtn').addEventListener('click', () => openSheet('player'));
+
 
 /* ================= tema ================= */
 let lastPid = null;
@@ -3223,6 +3234,34 @@ function demoText(kind){ return pick(PHRASES[kind][PHRASES[kind].length - 1]); }
 function avatarHTML(pl){
   return pl.icon && ICONS[pl.icon] ? svg(ICONS[pl.icon], 2.3) : esc(((pl.name || 'J').trim()[0] || 'J').toUpperCase());
 }
+/* ---------- motor dos balões: fila, espaço fixo entre eles, agrupamento e saída suave ---------- */
+const PLURAL = {typing:['estão escrevendo','estão tramando algo','escrevem sem parar'], drawing:['estão desenhando','viraram artistas','rabiscam com convicção'],
+  erasing:['estão apagando','apagaram tudo de novo'], ready:['terminaram','já estão prontos'], join:['chegaram','entraram na sala'], leave:['saíram da sala'], show:['mostraram a resposta']};
+const BAL = {last:0, gap:10};
+const balNames = l => { const n = l.map(p => esc(p.name || 'Jogador')); return n.length === 1 ? n[0] : n.length === 2 ? `${n[0]} e ${n[1]}` : n.length === 3 ? `${n[0]}, ${n[1]} e ${n[2]}` : `${n[0]}, ${n[1]} e mais ${n.length - 2}`; };
+function balRows(){ return [...$('#bals').children].filter(r => !r.dataset.gone); }
+function balLayout(){
+  const wrap = $('#bals'); if (wrap.classList.contains('bs-live')) return;
+  const rows = balRows().reverse(), up = wrap.classList.contains('anchor-b') ? -1 : 1;
+  let y = 0;
+  for (const r of rows){ r.style.transform = `translateY(${up * y}px)`; r._y = up * y; y += r.offsetHeight + BAL.gap; }
+}
+function balPaint(row){
+  const pls = row._pls, c0 = /^#[0-9a-f]{6}$/i.test(pls[0].accent || '') ? pls[0].accent : '#ffad2a';
+  const b = row.firstChild;
+  b.style.setProperty('--c', c0); b.style.setProperty('--oc', lum(c0) > .45 ? '#161616' : '#ffffff');
+  const solid = (S.g.balS || 'fala') === 'fala' || (S.g.balS || 'fala') === 'live';
+  const avs = pls.slice(0, 3).map(p => { const c = /^#[0-9a-f]{6}$/i.test(p.accent || '') ? p.accent : '#ffad2a', k = lum(c) > .45 ? '#161616' : '#fff'; return `<span class="av" style="background:${solid ? (lum(c0) > .45 ? '#161616' : '#fff') : c};color:${solid ? c : k}">${avatarHTML(p)}</span>`; }).join('');
+  b.firstChild.innerHTML = `<span class="avg">${pls.length > 1 ? avs : `<span class="av">${avatarHTML(pls[0])}</span>`}</span><span class="tx"><b>${balNames(pls)}</b> ${row._text}</span>`;
+}
+function balRetire(row, fast){
+  if (row.dataset.gone) return;
+  row.dataset.gone = '1'; clearTimeout(row._t);
+  row.firstChild.classList.add('out');
+  balLayout();
+  setTimeout(() => row.remove(), fast ? 300 : 520);
+}
+function balArm(row, ms){ clearTimeout(row._t); row._t = setTimeout(() => balRetire(row), ms); }
 function balloon(pl, kind, demo){
   if (!pl) return;
   const text = demo ? demoText(kind) : phraseFor(pl.id, kind); if (!text) return;
@@ -3232,16 +3271,38 @@ function balloon(pl, kind, demo){
   if (bf === 1 && !demo && !['join','leave','ready','kick','dispute','show'].includes(kind)) return;
   if (!demo && balLast[key] && now - balLast[key] < (bf === 3 ? 2400 : 7000) && !['join','leave','ready','unready'].includes(kind)) return;
   balLast[key] = now;
-  const wrap = $('#bals');
-  wrap.className = 'bals bs-' + (S.g.balS || 'fala');
-  while (wrap.children.length >= (bf === 3 ? 4 : 3)){ const o = wrap.firstChild; o.remove(); }
-  const c = /^#[0-9a-f]{6}$/i.test(pl.accent || '') ? pl.accent : '#ffad2a';
-  const b = document.createElement('div');
-  b.className = 'bal';
-  b.style.cssText = `--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#ffffff'};--dx:${Math.round((Math.random() - .5) * Math.min(120, innerWidth * .2))}px;--rz:${((Math.random() - .5) * 5).toFixed(1)}deg`;
-  b.innerHTML = `<div class="bal-in"><span class="av">${avatarHTML(pl)}</span><span class="tx"><b>${esc(pl.name || 'Jogador')}</b> ${text}</span></div>`;
-  wrap.appendChild(b);
-  setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 360); }, 3200);
+  const wrap = $('#bals'), style = S.g.balS || 'fala';
+  wrap.className = 'bals bs-' + style + (document.body.classList.contains('inmode') && style !== 'lateral' && style !== 'live' ? ' anchor-b' : '');
+  // mesmo tipo de aviso já na tela: junta as pessoas num balão só, em vez de empilhar
+  if (style !== 'live' && PLURAL[kind]){
+    const same = balRows().find(r => r._kind === kind && !r._demo === !demo);
+    if (same){
+      if (!same._pls.some(p => p.id === pl.id)) same._pls.push(pl);
+      same._text = same._pls.length > 1 ? pick(PLURAL[kind]) : text;
+      balPaint(same); balLayout(); balArm(same, 3200);
+      same.firstChild.classList.remove('bump'); void same.offsetWidth; same.firstChild.classList.add('bump');
+      return;
+    }
+  }
+  // entrada escalonada: nunca dois balões aparecendo no mesmo instante
+  const wait = Math.max(0, BAL.last + 240 - now); BAL.last = now + wait;
+  setTimeout(() => {
+    if (presenting) return;
+    const max = style === 'live' ? 8 : bf === 3 ? 4 : 3;
+    const rows = balRows(); if (rows.length >= max) balRetire(rows[0], true);
+    const row = document.createElement('div'); row.className = 'brow';
+    row._kind = kind; row._pls = [pl]; row._text = text; row._demo = !!demo;
+    const b = document.createElement('div'); b.className = 'bal';
+    b.style.cssText = `--dx:${style === 'live' ? Math.round((Math.random() - .5) * 60) : Math.round((Math.random() - .5) * Math.min(70, innerWidth * .12))}px;--rz:${((Math.random() - .5) * 4).toFixed(1)}deg`;
+    b.innerHTML = '<div class="bal-in"></div>';
+    row.appendChild(b); balPaint(row);
+    row.style.transition = 'none'; wrap.appendChild(row);
+    balLayout();
+    // a nova entra direto no lugar; as outras deslizam
+    void row.offsetWidth; row.style.transition = '';
+    if (style === 'live'){ setTimeout(() => row.remove(), 3900); return; }
+    balArm(row, 3400);
+  }, wait);
 }
 
 /* ================= sala offline (WebRTC com troca de QR, sem servidor) ================= */
@@ -3295,18 +3356,18 @@ function startMode(kind){
   if (kind === 'stop'){
     // regras salvas da última partida: categorias aprovadas voltam já aprovadas, decisões do anfitrião continuam
     const cats = sv && sv.cats ? sv.cats.map(c => ({id: c.id, name: c.name, by:[], yes:[], no:[], st: c.st || 'auto', def: c.def})) : DEF_CATS.map((name, i) => ({id:'d' + i, name, by:[], yes:[], no:[], st:'auto', def: i < 6}));
-    G = {mode:'stop', phase:'setup', cats, out: sv ? sv.out.slice() : ['K','W','X','Y'], lv:{}, cfg: Object.assign({ncat:8, time:90, uniq:10, rep:5, swapMax:0}, sv && sv.cfg), used:[], round:0, totals:{}, swap:[], swapped:0};
+    G = {mode:'stop', phase:'setup', cats, out: sv ? sv.out.slice() : ['K','W','X','Y'], lv:{}, cfg: Object.assign({ncat:8, time:90, uniq:10, rep:5, swapMax:0, vote:'yn'}, sv && sv.cfg), used:[], round:0, totals:{}, swap:[], swapped:0};
   }
   if (kind === 'fluxo') G = {mode:'fluxo', phase:'setup', cfg: Object.assign({pool: Math.max(12, n * 6), uniq2:true, tie:'none'}, sv && sv.cfg), fish:{}, round:0, left:0};
   modeMin = false; closeSheet(); gPush();
 }
-function endMode(){ if (NET.role !== 'host') return; G = null; gPush(); }
+function endMode(){ if (NET.role !== 'host') return; if (G && G.mode === 'stop' && TM.run) stopTimer(); G = null; gPush(); }
 /* regras perenes: o anfitrião não precisa configurar tudo de novo na próxima partida */
 function saveModeRules(){
   if (!G || NET.role !== 'host') return;
   const m = S.g.modes ||= {};
   if (G.mode === 'stop'){ const inc = stopCats().map(c => c.id);
-    m.stop = {cfg: G.cfg, out: G.out, cats: G.cats.map(c => ({id: c.id, name: c.name, st: c.st, def: inc.includes(c.id)}))}; }
+    m.stop = {cfg: G.cfg, out: lettersOut().filter(L => (G.lf || {})[L] !== 'in'), cats: G.cats.map(c => ({id: c.id, name: c.name, st: c.st, def: inc.includes(c.id)}))}; }
   if (G.mode === 'fluxo') m.fluxo = {cfg: G.cfg};
   save();
 }
@@ -3332,9 +3393,11 @@ function gameAct(from, a){
     else if (a.t === 'reset' && host && G.phase === 'setup'){ S.g.modes && delete S.g.modes.stop; const keep = G.totals; startMode('stop'); G.totals = keep; return; }
     else if (a.t === 'letter' && G.phase === 'setup'){
       const L = a.L; if (!LETTERS.includes(L)) return;
-      if (host){ const i = G.out.indexOf(L); if (i >= 0) G.out.splice(i, 1); else G.out.push(L); G.lv[L] = []; }
+      G.lf ||= {};
+      if (host){ G.out.forEach(x => { G.lf[x] ||= 'out'; }); G.out = []; G.lf[L] = letterOut(L) ? 'in' : 'out'; }
       else { const v = G.lv[L] ||= []; const i = v.indexOf(from); if (i >= 0) v.splice(i, 1); else v.push(from); }
     }
+    else if (a.t === 'letterAuto' && host && G.phase === 'setup'){ G.lf ||= {}; G.out.forEach(x => { G.lf[x] ||= 'out'; }); G.out = []; delete G.lf[a.L]; }
     else if (a.t === 'cfg' && host){ G.cfg[a.k] = a.v; }
     else if (a.t === 'start' && host && G.phase === 'setup'){ saveModeRules(); G.final = stopCats().map(c => c.name); if (!G.final.length) return; drawLetter(); G.phase = 'draw'; }
     else if (a.t === 'draw' && host && G.phase === 'draw'){ drawLetter(); }
@@ -3383,13 +3446,26 @@ function gameAct(from, a){
 /* ---------- Adedonha ---------- */
 /* entra quem tem mais Sim que Não (as da última partida começam aprovadas); o anfitrião pode fixar ou vetar */
 const catScore = c => c.yes.length - c.no.length + (c.def ? .5 : 0);
-function catState(c){ return c.st === 'in' ? 'in' : c.st === 'out' ? 'out' : catScore(c) > 0 ? 'in' : 'out'; }
+function catState(c){ if (c.st === 'in' || c.st === 'out') return c.st; if (G.cfg.vote === 'rank') return rankIn().includes(c.id) ? 'in' : 'out'; return catScore(c) > 0 ? 'in' : 'out'; }
+/* mais votadas: as N com mais votos entram (as da última partida desempatam) */
+function rankIn(){
+  const K = G.cfg.ncat || 6, fixed = G.cats.filter(c => c.st === 'in').length;
+  return G.cats.map((c, i) => ({c, i})).filter(x => x.c.st === 'auto')
+    .sort((a, b) => (b.c.yes.length - a.c.yes.length) || ((b.c.def ? 1 : 0) - (a.c.def ? 1 : 0)) || (a.i - b.i))
+    .slice(0, Math.max(0, K - fixed)).map(x => x.c.id);
+}
 function stopCats(){
   const ok = G.cats.map((c, i) => ({c, i})).filter(x => catState(x.c) === 'in')
     .sort((a, b) => ((b.c.st === 'in') - (a.c.st === 'in')) || (catScore(b.c) - catScore(a.c)) || (a.i - b.i)).map(x => x.c);
   return G.cfg.ncat ? ok.slice(0, G.cfg.ncat) : ok;
 }
-function lettersOut(){ const n = gPlayers().length; return LETTERS.filter(L => G.out.includes(L) || (G.lv[L] || []).length >= half(n)); }
+/* letra sai com maioria dos votos (mais da metade); o anfitrião pode forçar dentro ou fora */
+function letterOut(L){
+  const f = (G.lf || {})[L] || (G.out.includes(L) ? 'out' : null);
+  if (f) return f === 'out';
+  return (G.lv[L] || []).length > gPlayers().length / 2;
+}
+function lettersOut(){ return LETTERS.filter(letterOut); }
 function drawLetter(isSwap){
   if (isSwap && G.letter) G.used = G.used.concat(G.letter);
   const out = lettersOut();
@@ -3495,23 +3571,25 @@ function stopHTML(){
     const tabs = `<div class="seg mtabs">${[['cats','Categorias'],['letters','Letras'],['rules','Regras']].map(([k, l]) => `<button data-mtab="${k}" ${pressed(MV.tab === k)}>${l}</button>`).join('')}</div>`;
     let body = '';
     if (MV.tab === 'cats'){
-      const shown = stopCats().map(c => c.id);
+      const shown = stopCats().map(c => c.id), rank = G.cfg.vote === 'rank';
       const yesI = '<path d="M5 12.5l4.5 4.5L19 7.5"/>', noI = '<path d="M6 6l12 12M18 6 6 18"/>';
       body = `
       <form class="madd" data-m="catform"><input class="txt-in" id="catIn" maxlength="40" placeholder="Sugerir categoria" autocomplete="off" enterkeyhint="send"><button class="nbtn pri press" type="submit">Sugerir</button></form>
-      <div class="f-sub">Vote Sim ou Não. Entra quem tiver mais Sim${G.cfg.ncat ? `, até ${G.cfg.ncat} categorias` : ''}. Sugestões parecidas viram uma só, com os autores juntos.${host ? ' Toque no nome para fixar, vetar ou tirar.' : ' O anfitrião pode fixar ou vetar.'}</div>
+      ${host ? `<div style="margin-top:12px">${seg('mvote', [['yn','Sim ou Não'],['rank','Mais votadas']], rank ? 'rank' : 'yn')}</div>` : ''}
+      <div class="f-sub">${rank ? `Marque as que você quer. Entram as ${G.cfg.ncat || 6} com mais votos.` : `Vote Sim ou Não. Entra quem tiver mais Sim${G.cfg.ncat ? `, até ${G.cfg.ncat} categorias` : ''}.`} Sugestões parecidas viram uma só, com os autores juntos.${host ? ' Toque no nome para fixar, vetar ou apagar.' : ' O anfitrião pode fixar ou vetar.'}</div>
       <div class="ccount">${shown.length} ${shown.length === 1 ? 'categoria entra' : 'categorias entram'}</div>
       <div class="cats">${G.cats.map(c => { const stt = catState(c), inn = shown.includes(c.id), y = c.yes.includes(myId()), no = c.no.includes(myId());
         const tag = c.st === 'in' ? 'fixada' : c.st === 'out' ? 'vetada' : stt === 'in' ? (inn ? 'entra' : 'na fila') : 'fora';
         return `<div class="cat ${inn ? 'in' : ''}" data-catrow="${c.id}">
           <button class="cname press" ${host ? `data-catmenu="${c.id}"` : 'tabindex="-1"'}><span class="cn">${esc(c.name)}</span><span class="ctag ${tag.replace(' ', '')}">${tag}</span>${c.by.length ? `<span class="by">${c.by.map(id => avChip(id)).join('')}</span>` : ''}</button>
-          <span class="yn"><button class="vy press ${y ? 'on' : ''}" data-cv="${c.id}" data-v="1">${svg(yesI, 2.4)}${c.yes.length}</button><button class="vn press ${no ? 'on' : ''}" data-cv="${c.id}" data-v="-1">${svg(noI, 2.4)}${c.no.length}</button></span>
+          <span class="yn"><button class="vy press ${y ? 'on' : ''}" data-cv="${c.id}" data-v="1">${svg(yesI, 2.4)}${c.yes.length}</button>${rank ? '' : `<button class="vn press ${no ? 'on' : ''}" data-cv="${c.id}" data-v="-1">${svg(noI, 2.4)}${c.no.length}</button>`}</span>
           ${MV.catEdit === c.id ? `<span class="cact"><button class="nbtn press ${c.st === 'in' ? 'on' : ''}" data-cst="${c.id}" data-v="in">Fixar</button><button class="nbtn press ${c.st === 'auto' ? 'on' : ''}" data-cst="${c.id}" data-v="auto">Votação</button><button class="nbtn press ${c.st === 'out' ? 'on' : ''}" data-cst="${c.id}" data-v="out">Vetar</button><button class="nbtn press" data-cdel="${c.id}">Apagar</button></span>` : ''}</div>`; }).join('')}</div>`;
     }
     if (MV.tab === 'letters') body = `
-      <div class="f-sub" style="margin-top:0">${host ? 'Toque para tirar ou devolver uma letra.' : `Toque para votar e tirar uma letra. Sai com ${half(n)} ${half(n) === 1 ? 'voto' : 'votos'}.`}</div>
-      <div class="lets">${LETTERS.map(L => { const v = (G.lv[L] || []).length, o = out.includes(L), mine = (G.lv[L] || []).includes(myId());
-        return `<button class="let press ${o ? 'out' : ''} ${mine ? 'mine' : ''}" data-let="${L}">${L}${v && !G.out.includes(L) ? `<i>${v}</i>` : ''}</button>`; }).join('')}</div>
+      <div class="f-sub" style="margin-top:0">${host ? 'Você decide: toque para tirar ou devolver. Os números mostram quantos querem tirar a letra.' : `Toque para votar e tirar uma letra. Sai com ${Math.floor(n / 2) + 1} ${Math.floor(n / 2) + 1 === 1 ? 'voto' : 'votos'}; o anfitrião decide no fim.`}</div>
+      <div class="lets">${LETTERS.map(L => { const v = (G.lv[L] || []).length, o = out.includes(L), mine = (G.lv[L] || []).includes(myId()), forced = (G.lf || {})[L] || (G.out.includes(L) ? 'out' : '');
+        return `<button class="let press ${o ? 'out' : ''} ${mine ? 'mine' : ''} ${forced ? 'forced' : ''}" data-let="${L}">${L}${v ? `<i>${v}</i>` : ''}</button>`; }).join('')}</div>
+      <div class="lkey"><span><b class="k1"></b>vai para o sorteio</span><span><b class="k2"></b>fora</span><span><b class="k3"></b>seu voto para tirar</span></div>
       <div class="f-sub">${26 - out.length} letras no sorteio.</div>`;
     if (MV.tab === 'rules') body = `
       <div class="mrow"><span>Limite de categorias</span>${host ? stepper('ncat', G.cfg.ncat, G.cfg.ncat || 'sem') : `<b>${G.cfg.ncat || 'sem limite'}</b>`}</div>
@@ -3642,6 +3720,7 @@ modeEl.addEventListener('click', e => {
     act({t:'cfg', k, v: Math.min(step[2], Math.max(step[1], c[k] + dir * step[0]))}); return; }
   if (d.mtg){ act({t:'cfg', k: d.mtg, v: !G.cfg[d.mtg]}); return; }
   const sg = t.closest('[data-seg="mtie"]'); if (sg && d.v){ act({t:'cfg', k:'tie', v: d.v}); return; }
+  const sv = t.closest('[data-seg="mvote"]'); if (sv && d.v){ act({t:'cfg', k:'vote', v: d.v}); return; }
   if (d.bad){ act({t:'bad', k: d.bad}); return; }
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
@@ -4213,7 +4292,7 @@ function updateReactBar(){ rbar.hidden = !(NET.role && NET.myReady && !presentin
 
 /* ---------- Pronto ---------- */
 /* revelação juntos (Pronto + contagem para todos) ou cada um mostra quando quiser */
-const revTogether = () => (NET.role === 'host' ? S.g.revMode : (NET.rules || {}).rev) !== 'each';
+const revTogether = () => (G && G.mode === 'fluxo') || (NET.role === 'host' ? S.g.revMode : (NET.rules || {}).rev) !== 'each';
 const roomWriting = () => !!NET.role && NET.phase === 'writing' && revTogether();
 const hostNewRoundBtn = () => NET.role === 'host' && NET.phase === 'revealed' && !G;
 function setReady(v, quiet){
