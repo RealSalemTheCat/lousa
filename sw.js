@@ -1,5 +1,5 @@
 // Lousa: guarda o app e as fontes para funcionar sem internet
-const VERSION = 'lousa-v13';
+const VERSION = 'lousa-v14';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
