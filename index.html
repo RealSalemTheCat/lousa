@@ -530,6 +530,7 @@ body.settings .bals:not(.demo){opacity:0}
 @keyframes balbump{40%{transform:scale(1.07)}}
 .bal{--dx:0px;--rz:0deg;--to:30px 100%;position:relative;transform:translate(var(--dx)) rotate(var(--rz));transform-origin:var(--to);animation:balin .7s linear both}
 /* encostados nas margens: um à esquerda, outro à direita, cada lado com a sua pilha */
+.brow.free{justify-content:flex-start;padding:0}
 .brow.sl{justify-content:flex-start;padding:0 0 0 14px}
 .brow.sr{justify-content:flex-end;padding:0 14px 0 0}
 .brow.sr .bal{--to:calc(100% - 30px) 100%}
@@ -576,7 +577,10 @@ body.settings .bals:not(.demo){opacity:0}
 .mt span{font-size:12.5px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
 .mt span i{font-style:normal;color:var(--accent)}
 .mt b .hl{font:inherit;color:var(--accent);letter-spacing:inherit;text-transform:none;margin:0}
-.mb{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 18px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.mb{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 18px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;overflow-anchor:none}
+.mb::-webkit-scrollbar{display:none}
+/* a mesma tela sendo atualizada (votos chegando) não repete as animações de entrada */
+.mode.same .srow,.mode.same .srow::before,.mode.same .rrow,.mode.same .cat,.mode.same .frow,.mode.same .vcard,.mode.same .vans{animation:none!important}
 .mf{flex:none;display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--ui)}
 .mf .nbtn{flex:1;max-width:220px}
 .mwait{flex:1;text-align:center;color:var(--tx3);font-size:13.5px;font-weight:600}
@@ -587,13 +591,15 @@ body.settings .bals:not(.demo){opacity:0}
 .ccount{margin-top:10px;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
 .cat{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 8px 8px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);color:var(--tx2);text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none}
 .cat.in{border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--tx);background:color-mix(in srgb,var(--accent) 9%,var(--panel2))}
-.cat .cname{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;text-align:left;color:inherit;padding:4px 0}
+.cat .cname{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:5px 8px;text-align:left;color:inherit;padding:4px 0}
+.cat .cname .cn{grid-column:1 / -1}
+.cat .cname .by{min-height:20px}
 .cat .cn{font-weight:700;font-size:15px}
-.ctag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:99px;background:var(--panel3);color:var(--tx3)}
+.ctag{min-width:58px;text-align:center;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:99px;background:var(--panel3);color:var(--tx3)}
 .ctag.entra{background:color-mix(in srgb,#57e389 18%,transparent);color:#57e389}.ctag.fixada{background:var(--accent);color:var(--on-accent)}
 .ctag.vetada{background:rgba(255,90,90,.16);color:#ff7a7a}.ctag.nafila{color:var(--accent)}
 .yn{display:flex;gap:6px}
-.yn button{display:flex;align-items:center;gap:4px;height:36px;min-width:52px;padding:0 10px;border-radius:11px;background:var(--panel3);font-weight:800;font-size:14px;color:var(--tx2)}
+.yn button{display:flex;align-items:center;justify-content:center;gap:4px;height:38px;width:60px;padding:0 8px;border-radius:11px;background:var(--panel3);font-weight:800;font-size:14px;color:var(--tx2);font-variant-numeric:tabular-nums}
 .yn svg{width:15px;height:15px}
 .yn .vy.on{background:#57e389;color:#0d2a17}.yn .vn.on{background:#ff6b6b;color:#2a0d0d}
 .cact .nbtn.on{border-color:var(--accent);color:var(--accent)}
@@ -637,13 +643,34 @@ body.settings .bals:not(.demo){opacity:0}
 .stopov b{font:800 min(28vw,140px)/1 'Bricolage Grotesque',var(--uif);color:#ff4d5e;animation:land .5s cubic-bezier(.2,1.8,.4,1)}
 .stopov span{font-size:17px;font-weight:700}.stopov em{font-style:normal;color:var(--tx3);font-size:14px}
 .rlist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.vbody{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.vprog{height:4px;border-radius:3px;background:var(--panel3);overflow:hidden;flex:none}.vprog b{display:block;height:100%;background:var(--accent);border-radius:inherit;transition:width .5s ease}
+.vcard{position:relative;flex:none;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px 18px;border-radius:22px;background:var(--panel2);border:1px solid var(--line);text-align:center;overflow:hidden;animation:tilein .45s cubic-bezier(.3,1.5,.5,1) both;transition:border-color .3s,box-shadow .3s}
+.vwho{display:flex;align-items:center;gap:8px;font:700 15px var(--uif);color:var(--tx2)}.vwho .mav{width:30px;height:30px}
+.vans{font:800 clamp(30px,9vw,46px)/1.08 'Bricolage Grotesque',var(--uif);color:var(--tx);word-break:break-word;max-width:100%}
+.vdup{min-height:18px;font:600 13px var(--uif);color:var(--tx3)}
+.vstamp{position:absolute;right:14px;top:14px;padding:6px 12px;border-radius:10px;font:800 15px var(--uif);letter-spacing:.06em;text-transform:uppercase;opacity:0;transform:scale(1.6) rotate(-8deg);transition:opacity .25s,transform .35s cubic-bezier(.2,1.8,.4,1)}
+.vcard.ok{border-color:#57e389;box-shadow:0 0 0 1px #57e389,0 10px 30px -12px #57e389}.vcard.ok .vstamp{opacity:1;transform:rotate(-8deg);color:#57e389;border:2px solid #57e389}
+.vcard.no{border-color:#ff6b6b;box-shadow:0 0 0 1px #ff6b6b,0 10px 30px -12px #ff6b6b}.vcard.no .vstamp{opacity:1;transform:rotate(-8deg);color:#ff6b6b;border:2px solid #ff6b6b}
+.vcard.no .vans{text-decoration:line-through;text-decoration-thickness:3px;color:var(--tx3)}
+.vbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
+.vbig{height:96px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--panel2);border:1px solid var(--line);font:800 16px var(--uif);color:var(--tx);position:relative}
+.vbig svg{width:28px;height:28px}.vbig i{position:absolute;right:12px;top:10px;font:800 13px var(--uif);font-style:normal;color:var(--tx3);font-variant-numeric:tabular-nums}
+.vbig.ok svg{color:#57e389}.vbig.no svg{color:#ff6b6b}
+.vbig.ok.on{background:#57e389;border-color:#57e389;color:#0d2a17}.vbig.ok.on svg,.vbig.ok.on i{color:#0d2a17}
+.vbig.no.on{background:#ff6b6b;border-color:#ff6b6b;color:#2a0d0d}.vbig.no.on svg,.vbig.no.on i{color:#2a0d0d}
+.vwait{height:96px;display:grid;place-items:center;border-radius:20px;border:1px dashed var(--line2);color:var(--tx2);font:600 15px var(--uif);flex:none}
+.vstat{display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 13px var(--uif);color:var(--tx3);min-height:30px}
+.vavs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}.vavs > span{opacity:.3;transition:opacity .25s}.vavs > span.on{opacity:1}.vavs .mav{width:24px;height:24px;font-size:10px}
+.srow .sbtn{width:30px;height:30px;flex:none}
+.srow .sr small{color:var(--tx3);font-weight:700}
 .rrow{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
 .rrow.me{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
 .rrow.x .rt b{text-decoration:line-through;color:var(--tx3)}
 .rt{flex:1;min-width:0;display:flex;flex-direction:column}
 .rt b{font-size:18px;font-weight:800;overflow-wrap:anywhere}.rt b i{font-weight:500;color:var(--tx3)}
 .rt span{font-size:12.5px;color:var(--tx3);margin-top:2px}
-.rbad{display:flex;align-items:center;gap:3px;height:34px;padding:0 9px;border-radius:10px;color:var(--tx3);font-weight:700;font-size:13px}
+.rbad{display:flex;align-items:center;justify-content:center;gap:3px;height:34px;min-width:38px;padding:0 7px;font-variant-numeric:tabular-nums;border-radius:10px;color:var(--tx3);font-weight:700;font-size:13px}
 .rbad svg{width:17px;height:17px}.rbad.on{background:rgba(255,90,90,.15);color:#ff7a7a}
 .rbad[data-pick].on{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
 .rl{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);margin-bottom:2px}
@@ -666,7 +693,8 @@ body.settings .bals:not(.demo){opacity:0}
 .frow{position:relative;overflow:hidden}
 .srow.me::after,.frow.me::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.16) 48%,rgba(255,255,255,.05) 55%,transparent 70%);transform:translateX(-130%);animation:meshine 5s ease-in-out 1.2s infinite}
 @keyframes meshine{0%,72%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
-.srow.me .sn::after{content:"você";margin-left:8px;padding:2px 7px;border-radius:999px;font:800 10px var(--uif);letter-spacing:.08em;text-transform:uppercase;vertical-align:2px;background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--tx)}
+.srow .sn.col{display:flex;flex-direction:column;min-width:0;gap:1px}.srow .sn.col .sr{font-size:12px}
+.srow.me .snm::after,.srow.me .sn:not(.col)::after{content:"você";margin-left:8px;padding:2px 7px;border-radius:999px;font:800 10px var(--uif);letter-spacing:.08em;text-transform:uppercase;vertical-align:2px;background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--tx)}
 @media (prefers-reduced-motion:reduce){.srow.me::after,.frow.me::after{animation:none}}
 .srow{position:relative;overflow:hidden;animation:tilein .45s cubic-bezier(.3,1.5,.5,1) var(--d,0ms) backwards}
 .srow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:color-mix(in srgb,var(--accent) 12%,transparent);transform-origin:0 50%;animation:barw .9s cubic-bezier(.3,1,.4,1) calc(var(--d,0ms) + 200ms) backwards}
@@ -3201,7 +3229,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 39')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 40')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3718,6 +3746,12 @@ function balRetire(row, fast){
   balLayout();
   setTimeout(() => row.remove(), fast ? 300 : 520);
 }
+// balão que cresceu (mais gente no mesmo aviso) volta para dentro da tela
+function balClamp(row){
+  if (!row.classList.contains('free')) return;
+  const b = row.firstChild, W = $('#bals').clientWidth || innerWidth, x = parseFloat(b.style.getPropertyValue('--dx')) || 0;
+  const max = Math.max(12, W - b.offsetWidth - 12); if (x > max) b.style.setProperty('--dx', Math.round(max) + 'px');
+}
 function balArm(row, ms){ clearTimeout(row._t); row._t = setTimeout(() => balRetire(row), ms); }
 /* os balões ficam onde não há conteúdo: se o texto ou o desenho ocupa o alto do quadro, eles vão para baixo */
 function balZoneBottom(){
@@ -3750,7 +3784,7 @@ function balloon(pl, kind, demo){
     if (same){
       if (!same._pls.some(p => p.id === pl.id)) same._pls.push(pl);
       same._text = same._pls.length > 1 ? pick(PLURAL[kind]) : text;
-      balPaint(same); balLayout(); balArm(same, 2600);
+      balPaint(same); balClamp(same); balLayout(); balArm(same, 2600);
       same.firstChild.classList.remove('bump'); void same.offsetWidth; same.firstChild.classList.add('bump');
       return;
     }
@@ -3767,17 +3801,20 @@ function balloon(pl, kind, demo){
     const row = document.createElement('div'); row.className = 'brow';
     row._kind = kind; row._pls = [pl]; row._text = text; row._demo = !!demo;
     const b = document.createElement('div'); b.className = 'bal';
-    if (style !== 'live' && style !== 'lateral'){
-      // alterna os lados: o novo fica na margem oposta à do último
-      const last = balRows().slice(-1)[0];
-      BAL.side = last && last._side ? (last._side === 'sl' ? 'sr' : 'sl') : (BAL.side === 'sl' ? 'sr' : 'sl');
-      row._side = BAL.side; row.classList.add(BAL.side);
-    }
-    b.style.cssText = `--dx:${Math.round(Math.random() * 10) * (row._side === 'sr' ? -1 : 1)}px;--rz:${((Math.random() - .5) * 3).toFixed(1)}deg`;
+    const free = style !== 'live' && style !== 'lateral';
+    if (free) row.classList.add('free');
+    b.style.cssText = `--dx:0px;--rz:${((Math.random() - .5) * 4).toFixed(1)}deg`;
     if (style === 'live') row.style.cssText = `--dur:${(3.2 + Math.random() * .9).toFixed(2)}s;--sw:${(.9 + Math.random() * .6).toFixed(2)}s;--sd:-${Math.random().toFixed(2)}s;--amp:${Math.round(6 + Math.random() * 10)}px;right:${Math.round(Math.random() * 18)}px`;
     b.innerHTML = '<div class="bal-in"></div>';
     row.appendChild(b); balPaint(row);
     row.style.transition = 'none'; wrap.appendChild(row);
+    if (free){
+      // posição solta: cada balão cai num ponto diferente da largura, longe do anterior (nem sempre no centro)
+      const W = wrap.clientWidth || innerWidth, bw = b.offsetWidth, span = Math.max(0, W - bw - 24);
+      let x = 12 + Math.random() * span;
+      for (let i = 0; i < 5 && BAL.lastX != null && Math.abs(x - BAL.lastX) < W * .22 && span > W * .3; i++) x = 12 + Math.random() * span;
+      BAL.lastX = x; b.style.setProperty('--dx', Math.round(x) + 'px');
+    }
     balLayout();
     void row.offsetWidth; row.style.transition = '';
     if (style === 'live'){ setTimeout(() => row.remove(), 4300); return; }
@@ -3889,7 +3926,7 @@ function gameAct(from, a){
       const i = G.swap.indexOf(from); if (i >= 0) G.swap.splice(i, 1); else G.swap.push(from);
       if (G.swap.length >= half(n)) drawLetter(true);
     }
-    else if (a.t === 'go' && host && G.phase === 'draw'){ G.phase = 'play'; G.ans = {}; G.used.push(G.letter); G.round++; G.stopBy = null; startTimer(G.cfg.time * 1000); }
+    else if (a.t === 'go' && host && G.phase === 'draw'){ G.phase = 'play'; G.ans = {}; G.radj = {}; G.seq = null; G.used.push(G.letter); G.round++; G.stopBy = null; startTimer(G.cfg.time * 1000); }
     else if (a.t === 'ans' && G.ans && (G.phase === 'play' || G.phase === 'stopping' || G.phase === 'collect')){ G.ans[from] = a.a; saveHostSess(); return; }
     else if (a.t === 'stop' && G.phase === 'play'){ stopNow(from); return; }
     else if (a.t === 'bad' && G.phase === 'review'){ const k = a.k, m = G.marks[k] ||= {bad:[], ov:null}; if (k.split('|')[0] === from) return; const i = m.bad.indexOf(from); if (i >= 0) m.bad.splice(i, 1); else m.bad.push(from); }
@@ -3898,13 +3935,25 @@ function gameAct(from, a){
       if (host){ l.host = l.host === a.eq ? null : a.eq; }
       else { const mine = a.eq ? l.eq : l.neq, other = a.eq ? l.neq : l.eq; const i = mine.indexOf(from); if (i >= 0) mine.splice(i, 1); else { mine.push(from); const j = other.indexOf(from); if (j >= 0) other.splice(j, 1); } }
     }
+    else if (a.t === 'vote' && G.phase === 'review' && G.seq){
+      const k = String(a.k || ''); if (k.split('|')[0] === from) return;
+      const m = G.marks[k] ||= {bad:[], ok:[], ov:null}; m.ok ||= [];
+      const was = m.ok.includes(from) ? 1 : m.bad.includes(from) ? -1 : 0;
+      m.ok = m.ok.filter(x => x !== from); m.bad = m.bad.filter(x => x !== from);
+      if (was !== a.v) (a.v > 0 ? m.ok : m.bad).push(from);
+      gPush(); voteMaybeAdvance(); return;
+    }
+    else if (a.t === 'si' && host && G.phase === 'review' && G.seq){ clearTimeout(voteAdvT); voteAdvT = 0; G.si = Math.max(0, Math.min(G.seq.length, G.si + a.d)); if (G.si >= G.seq.length) G.phase = 'summary'; }
+    else if (a.t === 'radj' && host && G.phase === 'summary'){ G.radj ||= {}; G.radj[a.id] = (G.radj[a.id] || 0) + a.d; }
     else if (a.t === 'pi' && host && G.phase === 'review'){ G.pi = Math.max(0, Math.min(G.porder.length, G.pi + a.d)); if (G.pi >= G.porder.length) G.phase = 'summary'; }
     else if (a.t === 'ov' && host && G.phase === 'review'){ const m = G.marks[a.k] ||= {bad:[], ov:null}; m.ov = a.v; }
     else if (a.t === 'ci' && host && G.phase === 'review'){ G.ci = Math.max(0, Math.min(G.final.length, G.ci + a.d)); if (G.ci >= G.final.length) G.phase = 'summary'; }
-    else if (a.t === 'back' && host && G.phase === 'summary'){ G.phase = 'review'; G.ci = G.final.length - 1; G.pi = (G.porder || []).length - 1; }
+    else if (a.t === 'back' && host && G.phase === 'summary'){ G.phase = 'review'; G.ci = G.final.length - 1; G.pi = (G.porder || []).length - 1; if (G.seq) G.si = G.seq.length - 1; }
     else if ((a.t === 'next' || a.t === 'finish') && host && G.phase === 'summary'){
-      const r = stopScores();
-      for (const id in r.tot){ G.totals[id] = (G.totals[id] || 0) + r.tot[id]; NET.scores[id] = (NET.scores[id] || 0) + r.tot[id]; }
+      const r = stopScores(), adj = G.radj || {};
+      for (const id in adj) if (!(id in r.tot)) r.tot[id] = 0;
+      for (const id in r.tot){ const v = r.tot[id] + (adj[id] || 0); G.totals[id] = (G.totals[id] || 0) + v; NET.scores[id] = (NET.scores[id] || 0) + v; }
+      G.radj = {};
       if (a.t === 'finish'){ G.phase = 'end'; G.v0 = Date.now(); } else { G.phase = 'draw'; G.swap = []; drawLetter(); }
       pushRoster();
     }
@@ -3982,13 +4031,32 @@ function reviewOrder(){
   if (o === 'most' || o === 'least'){ const s = id => G.totals[id] || 0; return ids.sort((a, b) => o === 'most' ? s(b) - s(a) : s(a) - s(b)); }
   return ids.map(id => [Math.random(), id]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 }
+/* correção "uma resposta por vez": categoria por categoria, um jogador por vez; respostas em branco ou com a
+   letra errada nem entram (já valem 0). Depois de cada categoria, um resumo para o anfitrião conferir. */
+function voteSeq(){
+  const L = (G.letter || '').toLowerCase(), items = [];
+  G.final.forEach((c, ci) => {
+    G.porder.forEach(id => { const t = String((G.ans[id] || {})[ci] || '').trim(); if (t && normT(t)[0] === L) items.push({ci, id}); });
+    items.push({ci, recap: 1});
+  });
+  return items;
+}
+function voteVoters(author){ return gPlayers().filter(p => p.id !== author && !p.spect).map(p => p.id); }
+function voteDone(k, author){ const m = (G.marks || {})[k] || {}; return voteVoters(author).every(id => (m.ok || []).includes(id) || (m.bad || []).includes(id)); }
+let voteAdvT = 0, voteAdvSi = -1;
+function voteMaybeAdvance(){
+  const it = G.seq && G.seq[G.si]; if (!it || it.recap) return;
+  const k = it.id + '|' + it.ci; if (!voteDone(k, it.id)) return;
+  const si = G.si; if (voteAdvSi === si && voteAdvT) return; clearTimeout(voteAdvT); voteAdvSi = si;
+  voteAdvT = setTimeout(() => { voteAdvT = 0; if (G && G.mode === 'stop' && G.phase === 'review' && G.si === si){ G.si++; if (G.si >= G.seq.length) G.phase = 'summary'; gPush(); } }, 1700);
+}
 function stopNow(by){
   if (!G || G.phase !== 'play') return;
   G.phase = 'stopping'; G.stopBy = by || null; stopTimer(); gPush();
   setTimeout(() => {
     if (!G || G.phase !== 'stopping') return;
     G.phase = 'collect'; gPush();
-    setTimeout(() => { if (!G || G.phase !== 'collect') return; G.ans[myId()] = MV.ans; G.phase = 'review'; G.ci = 0; G.pi = 0; G.marks = {}; G.links = {}; G.porder = reviewOrder(); gPush(); }, 1600);
+    setTimeout(() => { if (!G || G.phase !== 'collect') return; G.ans[myId()] = MV.ans; G.phase = 'review'; G.ci = 0; G.pi = 0; G.marks = {}; G.links = {}; G.porder = reviewOrder(); G.seq = (G.cfg.review || 'cat') === 'player' ? voteSeq() : null; G.si = 0; gPush(); }, 1600);
   }, 3000);
 }
 /* pontos da rodada: em branco ou letra errada 0; anulada pela maioria 0; repetida e única conforme a regra */
@@ -4013,7 +4081,7 @@ function stopScores(){
       let st = 'ok', why = '';
       if (!t){ st = 'x'; why = 'em branco'; }
       else if (normT(t)[0] !== L){ st = 'x'; why = `não começa com ${G.letter}`; }
-      else if (m.bad.length && m.bad.length > Math.max(1, ids.length - 1) / 2){ st = 'x'; why = 'anulada'; }
+      else if (G.seq ? m.bad.length > (m.ok || []).length : (m.bad.length && m.bad.length > Math.max(1, ids.length - 1) / 2)){ st = 'x'; why = 'anulada'; }
       return {id, t, st, why, bad: m.bad, ov: m.ov};
     });
     rows.forEach(r => { if (r.st !== 'ok') return; r.dup = rows.filter(o => o !== r && o.st === 'ok' && sameAns(ci, r, o)).map(o => o.id); });
@@ -4085,6 +4153,8 @@ function renderMode(){
   const ph = G ? G.mode + G.phase + G.round : ''; if (ph !== MV.ph){ MV.ph = ph; modeMin = false; }
   if (G && G.mode === 'fluxo' && G.phase === 'write' && MV.flashed !== G.round){ const first = MV.flashed == null && G.round > 1 && false; MV.flashed = G.round; if (!presenting) roundFlash(G.round); }
   updateRoomUI();
+  // alguém saiu no meio da votação: se os que ficaram já votaram, segue
+  if (NET.role === 'host' && G && G.mode === 'stop' && G.phase === 'review' && G.seq) voteMaybeAdvance();
   const show = modeOpen();
   if (modeEl.hidden !== !show && typeof refitVV === 'function') refitVV();
   modeEl.hidden = !show;
@@ -4099,10 +4169,14 @@ function renderMode(){
   if (!show) return;
   const top = $('.top').getBoundingClientRect().bottom;
   modeEl.style.top = Math.max(0, top) + 'px';
-  const key = [G.mode, G.phase, G.round, G.letter, G.ci, G.pi].join('|');
+  const key = [G.mode, G.phase, G.round, G.letter, G.ci, G.pi, G.si].join('|');
   if (G.mode === 'stop' && G.phase === 'play' && MV.key === key){ stopPlayStatus(); return; }
   const sc = modeEl.querySelector('.mb') ? modeEl.querySelector('.mb').scrollTop : 0;
+  // quem está digitando (ex.: sugerindo categoria) não perde o texto quando outro jogador vota
+  const fe = document.activeElement, keep = fe && modeEl.contains(fe) && fe.id ? {id: fe.id, v: fe.value, a: fe.selectionStart, b: fe.selectionEnd} : null;
+  modeEl.classList.toggle('same', MV.key === key);
   modeEl.innerHTML = G.mode === 'stop' ? stopHTML() : fluxoHTML();
+  if (keep){ const ni = document.getElementById(keep.id); if (ni){ ni.value = keep.v; try{ ni.focus({preventScroll:true}); ni.setSelectionRange(keep.a, keep.b); }catch(_){} } }
   const mb = modeEl.querySelector('.mb'); if (mb && MV.key === key) mb.scrollTop = sc;
   if (MV.key !== key) modeEl.classList.remove('min');
   MV.key = key;
@@ -4147,7 +4221,8 @@ function stopHTML(){
       <div class="mrow"><span>Resposta única</span>${host ? stepper('uniq', G.cfg.uniq, G.cfg.uniq + ' pts') : `<b>${G.cfg.uniq} pts</b>`}</div>
       <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
       <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
-      <div class="mrow col"><span>Correção</span>${host ? seg('mreview', [['cat','Por categoria'],['player','Por jogador']], G.cfg.review || 'cat') : `<b>${G.cfg.review === 'player' ? 'por jogador' : 'por categoria'}</b>`}</div>
+      <div class="mrow col"><span>Correção</span>${host ? seg('mreview', [['cat','Lista por categoria'],['player','Uma resposta por vez']], G.cfg.review || 'cat') : `<b>${G.cfg.review === 'player' ? 'uma resposta por vez' : 'lista por categoria'}</b>`}</div>
+      <div class="f-sub" style="margin-top:-4px">${(G.cfg.review || 'cat') === 'player' ? 'Como na mesa: em cada categoria, um jogador por vez mostra o que escreveu e todos votam Vale ou Não vale. Quando todos votam, segue sozinho.' : 'Todas as respostas da categoria aparecem juntas; quem discordar contesta.'}</div>
       ${(G.cfg.review || 'cat') === 'player' ? `<div class="mrow col"><span>Ordem dos jogadores</span>${host ? seg('morder', [['rand','Sorteio'],['alpha','A a Z'],['most','Mais pontos'],['least','Menos pontos']], G.cfg.order || 'rand') : `<b>${{rand:'sorteio', alpha:'alfabética', most:'mais pontos primeiro', least:'menos pontos primeiro'}[G.cfg.order || 'rand']}</b>`}</div>` : ''}
       <div class="f-sub">Categorias, letras e regras ficam salvas para a próxima partida.</div>
       ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-m="reset">Voltar ao padrão</button></div>' : ''}`;
@@ -4194,12 +4269,35 @@ function stopHTML(){
         <button class="rpts press ${r.ov != null ? 'ov' : ''}" ${host ? `data-ov="${k}" data-auto="${r.auto}" data-cur="${r.ov == null ? 'a' : r.ov}"` : 'disabled'}>${r.pts}</button></div></div>`;
     };
     const help = `<div class="f-sub" style="margin-top:0">${byP ? 'Cada um lê as suas; a mesa discute ali mesmo.' : 'Leiam em voz alta: aqui está o que cada um escreveu.'} A corrente liga a uma resposta igual que o app não pegou; tocar em “≈ nome” pede para separar.${host ? ' O que você marca vale na hora; o dos outros, com a maioria.' : ' Vale com a maioria ou quando o anfitrião marca.'}</div>`;
-    if (byP){
-      const pid = G.porder[G.pi], list = G.final.map((c, ci) => ({r: res[ci].find(x => x.id === pid), ci, c})).filter(x => x.r);
-      const pts = tot[pid] || 0;
-      return `${mHead(`${avChip(pid)} ${esc(gName(pid))}`, `jogador ${G.pi + 1} de ${G.porder.length} · letra ${G.letter} · ${pts} pts`)}<div class="mb">${help}
-        <div class="rlist">${list.map(x => rowHTML(x.r, x.ci, esc(x.c))).join('')}</div></div>
-        <div class="mf">${host ? `<button class="nbtn press" data-m="prevp" ${G.pi ? '' : 'disabled'}>Anterior</button><button class="nbtn pri press" data-m="nextp">${G.pi === G.porder.length - 1 ? 'Ver resultado' : 'Próximo jogador'}</button>` : `<span class="mwait">O anfitrião passa para o próximo</span>`}</div>`;
+    if (G.seq){
+      const it = G.seq[G.si];
+      if (!it) return '';
+      const N = G.final.length, ci = it.ci, cat = G.final[ci], prog = (G.si / G.seq.length * 100).toFixed(1);
+      const navHost = (last) => `<button class="nbtn press" data-m="prevs" ${G.si ? '' : 'disabled'}>Anterior</button><button class="nbtn pri press" data-m="nexts">${last}</button>`;
+      if (it.recap){
+        const rows = res[ci] || [];
+        return `${mHead(esc(cat), `resumo · categoria ${ci + 1} de ${N} · letra ${G.letter}`)}<div class="mb"><div class="vprog"><b style="width:${prog}%"></b></div>
+          <div class="f-sub" style="margin-top:0">${host ? 'Confira antes de seguir: toque nos pontos para ajustar ou na corrente para juntar respostas iguais.' : 'Assim ficou esta categoria.'}</div>
+          <div class="rlist">${rows.map(r => rowHTML(r, ci, esc(gName(r.id)))).join('')}</div></div>
+          <div class="mf">${host ? navHost(ci === N - 1 ? 'Ver resultado' : 'Próxima categoria') : `<span class="mwait">O anfitrião confere e segue</span>`}</div>`;
+      }
+      const r = (res[ci] || []).find(x => x.id === it.id) || {t:'', dup:[], st:'ok'}, k = it.id + '|' + ci, m = (G.marks || {})[k] || {ok:[], bad:[]};
+      const mine = it.id === myId(), myV = (m.ok || []).includes(myId()) ? 1 : (m.bad || []).includes(myId()) ? -1 : 0;
+      const voters = voteVoters(it.id), nv = voters.filter(id => (m.ok || []).includes(id) || (m.bad || []).includes(id)).length;
+      const done = voteDone(k, it.id), verdict = r.why === 'anulada' ? 'no' : 'ok';
+      const inCat = G.seq.filter(x => x.ci === ci && !x.recap), pos = inCat.findIndex(x => x === it) + 1;
+      const okI = '<path d="M5 12.5l4.5 4.5L19 7.5"/>', noI = '<path d="M6 6l12 12M18 6 6 18"/>';
+      return `${mHead(esc(cat), `letra ${G.letter} · resposta ${pos}/${inCat.length} · categoria ${ci + 1}/${N}`)}<div class="mb vbody"><div class="vprog"><b style="width:${prog}%"></b></div>
+        <div class="vcard ${done ? verdict : ''}">
+          <div class="vwho">${avChip(it.id)}<span>${esc(gName(it.id))}</span></div>
+          <div class="vans">${esc(r.t)}</div>
+          <div class="vdup">${r.dup && r.dup.length ? `igual a ${r.dup.map(id => esc(gName(id))).join(', ')} · vale ${G.cfg.rep}` : `única · vale ${G.cfg.uniq}`}</div>
+          <div class="vstamp">${verdict === 'ok' ? 'Vale!' : 'Anulada'}</div>
+        </div>
+        ${mine ? `<div class="vwait">É a sua resposta: a mesa está votando</div>`
+          : `<div class="vbtns"><button class="vbig ok press ${myV === 1 ? 'on' : ''}" data-vote="${k}" data-v="1">${svg(okI, 2.6)}<span>Vale</span><i>${(m.ok || []).length}</i></button><button class="vbig no press ${myV === -1 ? 'on' : ''}" data-vote="${k}" data-v="-1">${svg(noI, 2.6)}<span>Não vale</span><i>${(m.bad || []).length}</i></button></div>`}
+        <div class="vstat"><span>${nv} de ${voters.length} votaram</span><span class="vavs">${voters.map(id => `<span class="${(m.ok || []).includes(id) || (m.bad || []).includes(id) ? 'on' : ''}">${avChip(id)}</span>`).join('')}</span></div></div>
+        <div class="mf">${host ? navHost('Próximo') : `<span class="mwait">Quando todos votarem, segue sozinho</span>`}</div>`;
     }
     const rows = res[G.ci] || [], ci = G.ci, cat = G.final[ci];
     return `${mHead(esc(cat), `categoria ${ci + 1} de ${G.final.length} · letra ${G.letter}`)}<div class="mb">${help}
@@ -4208,16 +4306,18 @@ function stopHTML(){
       <div class="mf">${host ? `<button class="nbtn press" data-m="prev" ${ci ? '' : 'disabled'}>Anterior</button><button class="nbtn pri press" data-m="nextc">${ci === G.final.length - 1 ? 'Ver resultado' : 'Próxima'}</button>` : `<span class="mwait">O anfitrião passa as categorias</span>`}</div>`;
   }
   if (G.phase === 'summary' || G.phase === 'end'){
-    const {tot} = G.phase === 'summary' ? stopScores() : {tot:{}};
+    const {tot} = G.phase === 'summary' ? stopScores() : {tot:{}}, adj = G.phase === 'summary' ? (G.radj || {}) : {};
     const ids = [...new Set([...Object.keys(G.totals), ...Object.keys(tot)])];
-    const rows = ids.map(id => ({id, r: tot[id] || 0, t: (G.totals[id] || 0) + (tot[id] || 0), p: G.totals[id] || 0})).sort((a, b) => b.t - a.t);
+    const rows = ids.map(id => { const r = (tot[id] || 0) + (adj[id] || 0); return {id, r, a: adj[id] || 0, t: (G.totals[id] || 0) + r, p: G.totals[id] || 0}; }).sort((a, b) => b.t - a.t);
     const before = rows.slice().sort((a, b) => b.p - a.p).map(x => x.id), maxT = Math.max(1, ...rows.map(x => x.t));
-    const end = G.phase === 'end';
+    const end = G.phase === 'end', step = 5;
     return `${mHead(end ? 'Fim de jogo' : `Resultado da rodada ${G.round}`, `Adedonha · letra ${G.letter}`)}<div class="mb">
       ${end && rows[0] ? `<div class="podium">${avChip(rows[0].id)}<b>${esc(gName(rows[0].id))}</b><span>venceu com ${rows[0].t} pontos</span></div>` : ''}
+      ${!end ? `<div class="rhint" style="margin:2px auto 10px">${host ? 'Confira o placar: ajuste pontos com − e +, revise a correção ou siga para a próxima letra.' : 'O anfitrião está conferindo o placar. A próxima letra sai em seguida.'}</div>` : ''}
       <div class="stab">${rows.map((x, i) => { const mv = G.round > 1 && !end ? before.indexOf(x.id) - i : 0;
-        return `<div class="srow ${x.id === myId() ? 'me' : ''} ${i === 0 ? 'lead' : ''}" style="--w:${(x.t / maxT * 100).toFixed(1)}%;--d:${i * 90}ms"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}${mv ? `<i class="mv ${mv > 0 ? 'up' : 'dn'}">${mv > 0 ? '▲' : '▼'}${Math.abs(mv)}</i>` : ''}</span>${end ? '' : `<span class="sr">+${x.r}</span>`}<b class="st" data-count="${x.t}" data-from="${end ? 0 : x.p}">${end ? 0 : x.p}</b></div>`; }).join('')}</div></div>
-      <div class="mf">${host ? (end ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="restart">Nova partida</button>` : `<button class="nbtn press" data-m="back">Revisar</button><button class="nbtn press" data-m="finish">Encerrar</button><button class="nbtn pri press" data-m="next">Próxima letra</button>`) : `<span class="mwait">${end ? 'Boa partida!' : 'O anfitrião decide a próxima'}</span>`}</div>`;
+        return `<div class="srow ${x.id === myId() ? 'me' : ''} ${i === 0 ? 'lead' : ''}" style="--w:${(x.t / maxT * 100).toFixed(1)}%;--d:${i * 90}ms"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn col"><span class="snm">${esc(gName(x.id))}${mv ? `<i class="mv ${mv > 0 ? 'up' : 'dn'}">${mv > 0 ? '▲' : '▼'}${Math.abs(mv)}</i>` : ''}</span>${end ? '' : `<small class="sr">+${x.r} nesta rodada${x.a ? ` (ajuste ${x.a > 0 ? '+' : ''}${x.a})` : ''}</small>`}</span>${host && !end ? `<button class="sbtn press" data-radj="${x.id}" data-d="-${step}" aria-label="Menos">−</button>` : ''}<b class="st" data-count="${x.t}" data-from="${end ? 0 : x.p}">${x.t}</b>${host && !end ? `<button class="sbtn press" data-radj="${x.id}" data-d="${step}" aria-label="Mais">+</button>` : ''}</div>`; }).join('')}</div>
+      ${host && !end ? `<div class="mrow" style="margin-top:14px"><span>Tempo da próxima rodada</span>${stepper('time', G.cfg.time, fmtT(G.cfg.time * 1000))}</div>` : ''}</div>
+      <div class="mf">${host ? (end ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="restart">Nova partida</button>` : `<button class="nbtn press" data-m="back">Revisar</button><button class="nbtn press" data-m="finish">Encerrar</button><button class="nbtn pri press" data-m="next">Próxima letra</button>`) : `<span class="mwait">${end ? 'Boa partida!' : 'Aguardando o anfitrião'}</span>`}</div>`;
   }
   return '';
 }
@@ -4300,7 +4400,7 @@ function afterMode(){
   if (G.phase === 'end' && MV.party !== G.v0){ MV.party = G.v0; confetti(); }
   modeEl.querySelectorAll('[data-count]').forEach((el, i) => {
     const to = +el.dataset.count, from = +el.dataset.from, t0 = performance.now() + 250 + i * 90;
-    if (to === from){ el.textContent = to; return; }
+    if (to === from || modeEl.classList.contains('same')){ el.textContent = to; return; }
     const step = now => { const p = Math.min(1, Math.max(0, (now - t0) / 900)), e = 1 - (1 - p) ** 3; el.textContent = Math.round(from + (to - from) * e); if (p < 1) requestAnimationFrame(step); else if (to > from) el.classList.add('pop'); };
     requestAnimationFrame(step);
   });
@@ -4341,6 +4441,8 @@ modeEl.addEventListener('click', e => {
   if (d.pick){ MV.pick = MV.pick === d.pick ? null : d.pick; renderMode(); return; }
   if (d.link){ MV.pick = null; act({t:'link', k: d.link, eq: d.eq === '1'}); return; }
   if (d.bad){ act({t:'bad', k: d.bad}); return; }
+  if (d.vote){ if (navigator.vibrate) try{ navigator.vibrate(12); }catch(_){} act({t:'vote', k: d.vote, v: +d.v}); return; }
+  if (d.radj){ act({t:'radj', id: d.radj, d: +d.d}); return; }
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
   if (d.fadj){ act({t:'fishAdj', id: d.fadj, d: +d.d}); return; }
@@ -4364,6 +4466,8 @@ modeEl.addEventListener('click', e => {
   else if (m === 'stop') act({t:'stop'});
   else if (m === 'prev') act({t:'ci', d:-1});
   else if (m === 'nextc') act({t:'ci', d:1});
+  else if (m === 'prevs') act({t:'si', d:-1});
+  else if (m === 'nexts') act({t:'si', d:1});
   else if (m === 'prevp') act({t:'pi', d:-1});
   else if (m === 'nextp') act({t:'pi', d:1});
   else if (m === 'back') act({t:'back'});
@@ -5664,7 +5768,7 @@ function botRecv(b, m){
 /* cada jogador de mentira olha o estado do jogo e decide o que fazer, uma vez por situação */
 function botThink(b){
   if (b.dead) return;
-  const g = G, phase = g ? g.mode + ':' + g.phase + ':' + (g.round || 0) + ':' + (g.letter || '') : 'free:' + NET.phase;
+  const g = G, phase = g ? g.mode + ':' + g.phase + ':' + (g.round || 0) + ':' + (g.letter || '') + ':' + (g.si || 0) : 'free:' + NET.phase;
   if (phase === b.key) return;
   b.key = phase;
   if (!g || (g.mode === 'fluxo' && (g.phase === 'write'))){
@@ -5697,6 +5801,11 @@ function botThink(b){
       return;
     }
     if (g.phase === 'stopping' || g.phase === 'collect'){ ga({t:'ans', a: Object.assign({}, b.ans)}); return; }
+    if (g.phase === 'review' && g.seq){
+      const it = g.seq[g.si];
+      if (it && !it.recap && it.id !== b.card.id) botLater(b, brnd(700, 3200), () => { if (G && G.seq && G.si === g.si) ga({t:'vote', k: it.id + '|' + it.ci, v: Math.random() < .82 ? 1 : -1}); });
+      return;
+    }
     if (g.phase === 'review' && g.marks){ if (Math.random() < .15){ const others = Object.keys(g.ans || {}).filter(id => id !== b.card.id); if (others.length) botLater(b, brnd(1000, 4000), () => ga({t:'bad', k: pick(others) + '|' + Math.floor(Math.random() * g.final.length)})); } b.key = phase + ':' + (g.ci || 0) + ':' + (g.pi || 0); return; }
   }
 }
