@@ -280,6 +280,7 @@ body.back .board{animation:boardin .45s cubic-bezier(.2,.9,.3,1.1)}
 @keyframes dropin{from{transform:translateY(-24px);opacity:0}}
 @keyframes risein{from{transform:translateY(28px);opacity:0}}
 @keyframes boardin{from{transform:scale(.9);opacity:0}}
+.mlink{display:block;width:100%;text-align:left;margin:4px 0 10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--tx) 6%,transparent);color:var(--accent);font:600 14px var(--uif)}
 .rsum{font:600 13px/1.35 var(--uif);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:12px;padding:9px 12px;margin:2px 0 14px}
 .fold summary{list-style:none;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
 .fold summary::-webkit-details-marker{display:none}
@@ -3149,7 +3150,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 35')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 36')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -4070,6 +4071,7 @@ function stopHTML(){
       <div class="mrow"><span>Limite de categorias</span>${host ? stepper('ncat', G.cfg.ncat, G.cfg.ncat || 'sem') : `<b>${G.cfg.ncat || 'sem limite'}</b>`}</div>
       <div class="mrow"><span>Trocas de letra por partida</span>${host ? stepper('swapMax', G.cfg.swapMax, G.cfg.swapMax || '∞') : `<b>${G.cfg.swapMax || 'ilimitadas'}</b>`}</div>
       <div class="mrow"><span>Tempo da rodada</span>${host ? stepper('time', G.cfg.time, fmtT(G.cfg.time * 1000)) : `<b>${fmtT(G.cfg.time * 1000)}</b>`}</div>
+      ${host ? `<button class="mlink press" data-m="tlook">Som e visual do tempo ›</button>` : ''}
       <div class="mrow"><span>Resposta única</span>${host ? stepper('uniq', G.cfg.uniq, G.cfg.uniq + ' pts') : `<b>${G.cfg.uniq} pts</b>`}</div>
       <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
       <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
@@ -4168,6 +4170,8 @@ function fluxoHTML(){
     <p>Quem fugiu do fluxo pega peixe do cardume. Quando o cardume acaba, vence quem tiver <b>menos peixes</b>.</p></div>
     <div class="mrow col"><span>Como cada rodada termina</span>${host ? seg('frev', [['together','Pronto'],['timer','Com tempo'],['each','Cada um']], revModeNow()) : `<b>${{together:'cada um toca em Pronto; quando todos estiverem prontos, contagem e todos mostram', timer:'tempo igual para todos; quando acaba, todos mostram', each:'cada um mostra quando quiser; o anfitrião confere'}[revModeNow()]}</b>`}</div>
     ${host && revModeNow() === 'timer' ? `<div class="mrow"><span>Tempo para pensar</span>${stepper('ftime', S.g.timerDur, fmtT(S.g.timerDur * 1000))}</div>` : ''}
+    ${revModeNow() !== 'each' ? `<div class="mrow col"><span>Na hora de revelar</span>${host ? seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], rvlNow()) : `<b>${RVL_LB[rvlNow()]}</b>`}</div><div class="f-sub" style="margin-top:-4px">${RVL_TX[rvlNow()]}</div>` : ''}
+    ${host ? `<button class="mlink press" data-m="tlook">Som e visual do tempo ›</button>` : ''}
     <div class="mrow"><span>Peixes no cardume</span>${host ? stepper('pool', G.cfg.pool) : `<b>${G.cfg.pool}</b>`}</div>
     <div class="f-sub">${fishHint(n)}${host && G.cfg.pool !== fishSuggest(n) ? ` <button class="lnk" data-m="fishsug">Usar ${fishSuggest(n)}</button>` : ''}</div>
     <div class="mrow"><span>Resposta única leva 2 peixes (opcional)</span>${host ? tg('data-mtg="uniq2"', G.cfg.uniq2) : `<b>${G.cfg.uniq2 ? 'sim' : 'não'}</b>`}</div>
@@ -4266,6 +4270,8 @@ modeEl.addEventListener('click', e => {
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
   if (d.fadj){ act({t:'fishAdj', id: d.fadj, d: +d.d}); return; }
+  const rv = t.closest('[data-seg="rvl"]'); if (rv && d.v){ S.g.rvl = d.v; save(); pushRoster(); renderMode(); return; }
+  if (d.m === 'tlook'){ gtab = 'rodada'; foldT = true; openSheet('game'); return; }
   const fr = t.closest('[data-seg="frev"]'); if (fr && d.v){ S.g.revMode = d.v; save(); resetReady(); pushRoster(); updateRoomUI(); renderMode(); return; }
   if (d.fov){ e.stopPropagation(); const cur = fluxoFish()[d.fov]; act({t:'fov', id: d.fov, v: (cur + 1) % 3}); return; }
   if (d.gmerge){ act({t:'merge', from: +d.gmerge, to: +d.to}); return; }
@@ -5316,6 +5322,10 @@ function rodadaSummary(){
 function rodadaHTML(){
   const inRoom = !!NET.role, guest = NET.role === 'guest', host = NET.role === 'host', R = NET.rules || {};
   const rm = inRoom ? revModeNow() : null, tog = inRoom && rm !== 'each';
+  if (G && G.mode === 'stop') return `<div class="rsum">Adedonha · tempo da rodada ${fmtT(G.cfg.time * 1000)}</div>
+    ${fsub('Na Adedonha, a duração fica nas Regras do modo e a rodada acaba com o STOP ou quando o tempo zera. Aqui ficam os avisos e o visual do tempo.')}
+    ${host ? '<div class="nv-row" style="margin:8px 0 14px"><button class="nbtn press" data-g="modeopen">Voltar ao jogo</button></div>' : ''}
+    ${guest ? '' : tLookHTML(host, true)}`;
   const te = S.g.tEnd || 'reveal', lw = S.g.lockW || 'all';
   const teDesc = {warn:'Toca o alarme e o jogo segue.', lock: lw === 'all' ? 'Ninguém mexe mais no quadro até a próxima rodada.' : 'A escrita trava; ainda dá para desenhar.', reveal: inRoom ? 'Os quadros de todos aparecem juntos.' : 'O quadro é mostrado na hora.'}[te];
   const sum = `<div class="rsum">${esc(rodadaSummary())}</div>`;
@@ -5348,7 +5358,10 @@ function rodadaHTML(){
         : `<div class="f-row"><span class="f-lb">Capa antes de revelar</span>${tg('data-gtg="cover"', S.g.cover)}</div>${fsub('O quadro aparece coberto e vira como uma carta.')}`}
       <div class="f-row" style="margin-top:6px"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div>
       ${inRoom ? `<div class="f-row"><span class="f-lb">Saguão de desenho para quem terminou</span>${tg('data-gtg="lobby"', S.g.lobby !== false)}</div>` : ''}</div>
-    <details class="fold sec" ${foldT ? 'open' : ''} data-fold="t"><summary><span class="sec-t">Avisos e visual do tempo</span>${svg('<path d="M6 9l6 6 6-6"/>', 2)}</summary>
+    ${tLookHTML(host)}`;
+}
+function tLookHTML(host, open){
+  return `<details class="fold sec" ${open || foldT ? 'open' : ''} data-fold="t"><summary><span class="sec-t">Avisos e visual do tempo</span>${svg('<path d="M6 9l6 6 6-6"/>', 2)}</summary>
       <div class="f-stack" style="margin-top:6px"><span class="f-lb">Aviso nos últimos segundos</span>${seg('tick', [['off','Nenhum'],['som','Som'],['vibra','Vibração'],['ambos','Os dois']], S.g.tick || 'som')}</div>
       <div class="f-stack"><span class="f-lb">Começa a avisar em</span>${seg('tickfrom', [['3','3 s'],['5','5 s'],['10','10 s'],['15','15 s']], String(S.g.tickFrom || 5))}</div>
       <div class="f-stack"><span class="f-lb">Som do aviso</span>${seg('tsnd', [['bip','Bipe'],['relogio','Relógio'],['tambor','Tambor'],['sino','Sino']], S.g.tSnd || 'bip')}</div>
