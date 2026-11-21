@@ -175,7 +175,8 @@ canvas{left:0;top:0;width:100%;height:100%;pointer-events:none}
 .led-wrap canvas{position:absolute}
 #drawCv{z-index:4}
 .board.drawing #drawCv{pointer-events:auto;cursor:crosshair}
-.empty{inset:0;display:flex;align-items:center;justify-content:center;z-index:2;font:500 15px var(--uif);color:var(--ink);opacity:.32;letter-spacing:.02em}
+.empty{inset:0;display:flex;align-items:center;justify-content:center;z-index:6;font:500 14.5px var(--uif);color:color-mix(in srgb,var(--ink) 62%,transparent);letter-spacing:.02em;pointer-events:none}
+.empty span{padding:.4em .9em;border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);text-transform:none;font-family:var(--uif)}
 
 /* animações de efeito */
 @keyframes pulse{0%,100%{opacity:1;filter:brightness(1)}50%{opacity:.6;filter:brightness(.85)}}
@@ -279,6 +280,9 @@ body.back .board{animation:boardin .45s cubic-bezier(.2,.9,.3,1.1)}
 @keyframes dropin{from{transform:translateY(-24px);opacity:0}}
 @keyframes risein{from{transform:translateY(28px);opacity:0}}
 @keyframes boardin{from{transform:scale(.9);opacity:0}}
+.rotlayer{position:fixed;left:50%;top:50%;z-index:70;pointer-events:none}
+.rotlayer[hidden]{display:none}
+.rotlayer > .rbar{pointer-events:auto}
 .backmsg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;padding:10px 16px 10px 13px;border-radius:999px;background:rgba(20,20,22,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font:600 14px var(--uif);z-index:80;pointer-events:none;opacity:0;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .backmsg svg{width:17px;height:17px;color:var(--accent)}
 .backmsg.on{animation:backmsg 1.15s cubic-bezier(.2,.9,.3,1.2) forwards}
@@ -1471,7 +1475,8 @@ function render(){
   const has = p.text.trim() || p.strokes.length;
   empty.hidden = presenting || editing || (!!has && !sample) || (mode === 'draw' && !!has) || document.body.classList.contains('settings');
   empty.classList.toggle('below', sample);
-  empty.textContent = mode === 'draw' ? 'Desenhe com o dedo' : 'Toque para escrever · dois toques para mostrar';
+  const etx = mode === 'draw' ? 'Desenhe com o dedo' : 'Toque para escrever · dois toques para mostrar';
+  if (empty.textContent !== etx) empty.innerHTML = `<span>${etx}</span>`;
   placePanel();
   updateTools();
 }
@@ -2693,6 +2698,21 @@ function placePresent(){
   board.style.width = (rot ? vh : vw) + 'px';
   board.style.height = (rot ? vw : vh) + 'px';
   board.style.setProperty('--rot', rot ? (S.g.rotDir === 'left' ? '90deg' : '-90deg') : '0deg');
+  rotOverlays(presenting && rot ? (S.g.rotDir === 'left' ? '90deg' : '-90deg') : null);
+}
+/* com o quadro deitado na apresentação, avisos, balões e reações giram junto, para ler na mesma direção */
+const rotLayer = document.createElement('div'); rotLayer.className = 'rotlayer'; rotLayer.hidden = true; document.body.appendChild(rotLayer);
+const rotHome = new Map();
+function rotOverlays(rot){
+  const els = ['#toast', '#bals', '#rx', '#rbar', '#hint'].map(q => $(q)).concat([bigEl]).filter(Boolean);
+  if (rot){
+    els.forEach(el => { if (!rotHome.has(el)) rotHome.set(el, [el.parentNode, el.nextSibling]); rotLayer.appendChild(el); });
+    rotLayer.style.cssText = `width:${innerHeight}px;height:${innerWidth}px;transform:translate(-50%,-50%) rotate(${rot})`;
+    rotLayer.hidden = false;
+  } else {
+    for (const [el, [par, nx]] of rotHome){ if (nx && nx.parentNode === par) par.insertBefore(el, nx); else par.appendChild(el); }
+    rotHome.clear(); rotLayer.hidden = true;
+  }
 }
 /* prévia da transição no próprio quadro (sem entrar na apresentação) */
 let pvT = 0;
@@ -2909,7 +2929,7 @@ async function finishExit(){
   leaving = false;
   presenting = false;
   board.classList.remove('present', 'enter', 'leave', 'prep', ...TRANS.map(x => 't-' + x[0]));
-  board.style.width = board.style.height = ''; board.style.removeProperty('--rot');
+  board.style.width = board.style.height = ''; board.style.removeProperty('--rot'); rotOverlays(null);
   document.body.classList.remove('presenting', 'settled');
   try{ wakeLock && wakeLock.release(); }catch(_){} wakeLock = null;
   setOrientation('portrait');
@@ -3066,7 +3086,7 @@ function winHTML(){
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 30')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 31')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
