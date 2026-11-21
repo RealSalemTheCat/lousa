@@ -206,6 +206,7 @@ canvas{left:0;top:0;width:100%;height:100%;pointer-events:none}
 @keyframes wipe{to{opacity:0;transform:translateY(-6%) scale(.96);filter:blur(4px)}}
 
 /* apresentação */
+.board.ledit .txt-box,.board.ledit .txt-box *{-webkit-text-fill-color:transparent!important;color:transparent!important;text-shadow:none!important;filter:none!important;background:none!important;caret-color:var(--ink)}
 body.editing .txt{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 body.presenting{background:#0b0b0c;transition:background-color .25s}
 body.presenting.settled{background:var(--bg)}
@@ -487,6 +488,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 @keyframes cardOn{0%{transform:perspective(1600px) rotateY(-90deg) scale(1.04);filter:brightness(1.6)}100%{transform:perspective(1600px) rotateY(0) scale(1)}}
 @keyframes qbob{50%{transform:translateY(-6%) rotate(4deg)}}
 .bals{position:fixed;left:0;right:0;top:calc(62px + env(safe-area-inset-top));height:0;z-index:65;pointer-events:none}
+.bals.tdown{top:calc(112px + env(safe-area-inset-top))}
 .bals.anchor-b{top:auto;bottom:calc(86px + env(safe-area-inset-bottom))}
 .brow{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;padding:0 12px;transition:transform .45s cubic-bezier(.3,1.2,.45,1)}
 .anchor-b .brow{top:auto;bottom:0}
@@ -732,7 +734,7 @@ body.inmode .dock{visibility:hidden}
 .confetti{position:fixed;inset:0;z-index:97;pointer-events:none;overflow:hidden}
 .confetti i{position:absolute;top:-20px;border-radius:2px;animation:confall linear forwards}
 @keyframes confall{to{transform:translate(var(--x),110vh) rotate(var(--r))}}
-.timer.paused{animation:tpaus 1.2s ease-in-out infinite}
+.timer.paused{color:#e6b64e;background:color-mix(in srgb,#f2c25a 14%,transparent);box-shadow:0 0 14px rgba(255,200,90,.25)}
 .timer{transition:transform .35s var(--spring),color .3s,background-color .3s}
 .timer.warn{transform:scale(1.14);transform-origin:right center;color:#ff9a1f;background:color-mix(in srgb,#ff9a1f 16%,transparent)}
 .timer.hot{transform:scale(1.22);transform-origin:right center;background:color-mix(in srgb,#ff4d4d 16%,transparent)}
@@ -743,7 +745,19 @@ body.inmode .dock{visibility:hidden}
 .trim .fg{stroke:var(--accent);filter:drop-shadow(0 0 4px var(--accent));transition:stroke-dasharray .25s linear,stroke .5s}
 .trim.warn .fg{stroke:#ff9a1f;filter:drop-shadow(0 0 6px #ff9a1f)}
 .trim.hot .fg{stroke:#ff4d4d;filter:drop-shadow(0 0 9px #ff4d4d)}
-.trim.paused .fg{animation:tpaus 1.2s ease-in-out infinite}
+.trim.paused .fg{stroke:#f2c25a;filter:drop-shadow(0 0 7px rgba(255,200,90,.8))}
+/* tempo pausado: halo dourado discreto, como se o tempo tivesse congelado */
+@property --fa{syntax:'<angle>';inherits:false;initial-value:0deg}
+.tfreeze{position:fixed;inset:0;z-index:94;pointer-events:none;opacity:0;transition:opacity 1.1s ease;border-radius:calc(18px + env(safe-area-inset-top));overflow:hidden}
+.tfreeze.on{opacity:1}
+.tfreeze::before{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 46px 6px rgba(255,196,84,.2),inset 0 0 10px 1px rgba(255,220,140,.28);animation:frzb 5.5s ease-in-out infinite}
+.tfreeze::after{content:"";position:absolute;inset:0;background:conic-gradient(from var(--fa),transparent 0 8%,rgba(255,206,104,.5) 17%,transparent 29%,rgba(255,168,60,.34) 50%,transparent 62%,rgba(255,228,150,.46) 79%,transparent 92%);filter:blur(16px);
+  -webkit-mask:linear-gradient(90deg,#000,transparent 34px,transparent calc(100% - 34px),#000),linear-gradient(#000,transparent 34px,transparent calc(100% - 34px),#000);
+  mask:linear-gradient(90deg,#000,transparent 34px,transparent calc(100% - 34px),#000),linear-gradient(#000,transparent 34px,transparent calc(100% - 34px),#000);
+  opacity:.75;animation:frzr 16s linear infinite}
+@keyframes frzr{to{--fa:360deg}}
+@keyframes frzb{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.tfreeze::after,.tfreeze::before{animation:none}}
 .tbig{position:fixed;left:50%;top:50%;z-index:64;pointer-events:none;font:800 min(46vw,46vh)/1 var(--uif);color:#ff4d4d;opacity:0;transform:translate(-50%,-50%);font-variant-numeric:tabular-nums;text-shadow:0 0 40px rgba(255,60,60,.5)}
 .tbig.go{animation:tbig .95s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes tbig{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}18%{opacity:.34;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.82)}}
@@ -891,6 +905,7 @@ body.inlobby .bals:not(.anchor-b):not(.bs-live){top:calc(124px + env(safe-area-i
 .ring.open .ring-disc{transform:scale(1) rotate(0);opacity:1}
 .ring-item{position:absolute;left:0;top:0;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:var(--panel3);color:var(--tx);display:grid;place-items:center;transform:translate(0,0) scale(.3);opacity:0;transition:transform .38s var(--spring),opacity .2s,background-color .15s,box-shadow .15s;transition-delay:calc(var(--i) * 22ms)}
 .ring-item svg{width:22px;height:22px}
+.ring-item .rtx.emo{font-size:23px;letter-spacing:0}
 .ring-item .rtx{font-size:13px;font-weight:750;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .ring.open .ring-item{transform:translate(var(--x),var(--y)) scale(1);opacity:1}
 .ring.open .ring-item.hot{transform:translate(var(--x),var(--y)) scale(1.16);background:var(--accent);color:var(--on-accent);transition-delay:0s}
@@ -1441,13 +1456,15 @@ function render(){
   stopTicker();
   const sample = isSample();
   const roll = E('anim') === 'roll' && !editing && !!shownText().trim();
-  const ledMode = isLed() && !editing;
-  ledWrap.hidden = !isLed() || editing;
+  // no LED, digitar continua mostrando os pontinhos: o texto real fica invisível, só com o cursor
+  const ledMode = isLed();
+  ledWrap.hidden = !isLed();
+  board.classList.toggle('ledit', isLed() && editing);
   ledBase.style.display = p.texture ? '' : 'none';
   tickBox.hidden = !(roll && !ledMode);
   tickBox.style.opacity = '1';
   // a caixa de texto continua no lugar (para tocar e editar), mas invisível quando outro modo desenha
-  txtBox.style.opacity = (ledMode || roll) ? '0' : '1';
+  txtBox.style.opacity = ((ledMode && !editing) || roll) ? '0' : '1';
   renderDom(fr);
   if (roll && !ledMode) renderTicker(fr);
   if (ledMode) renderLED(fr);
@@ -1705,9 +1722,8 @@ function renderLED(fr){
   lb.fillStyle = lum(bg) > .4 ? rgba('#000000', .07) : mix(bg, ink, .09);
   dotPath(lb, cb => { for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) cb(x, y); }, .36);
   lb.fill();
-  ledGlow.style.filter = `blur(${Math.max(2, pitch*.6)}px) saturate(1.6) brightness(1.35)`;
-  ledGlow.style.opacity = Math.min(1, E('glow')/100*1.5).toFixed(2);
-  ledGlow.style.mixBlendMode = lum(bg) > .4 ? 'normal' : 'screen';
+  ledGlow.style.filter = `blur(${Math.max(2, pitch*.55)}px) saturate(1.35)`;
+  ledGlow.style.opacity = (E('glow')/100).toFixed(2);
   ldx.setTransform(1,0,0,1,0,0); ldx.clearRect(0,0,cols,rows);
   if (p.strokes.length){
     const mp = mapping(), k = mp.s / pitch;
@@ -1724,7 +1740,7 @@ function renderLED(fr){
   ledWrap.style.opacity = '1';
   if (!text.trim()){ ledFrame(null); return; }
   const gphase = now => gs && gs.anim ? (now/1000/(gs.speed||3)) % 1 : 0;
-  if (E('anim') === 'roll'){
+  if (E('anim') === 'roll' && !editing){
     const rb = rollBox(fr), ry = (rb.y - oy)/pitch, rH = rb.h/pitch;
     const line = rollLine(raw, sample).replace(/   ·   /g, '  ·  ');
     let t;
@@ -1916,21 +1932,14 @@ function ledFrame(t){
   ll.setTransform(dpr,0,0,dpr,0,0); ll.clearRect(0,0,bw,bh);
   for (const g of groups.values()){
     ll.fillStyle = g.c;
-    dotPath(ll, cb => { for (let k = 0; k < g.pts.length; k += 2) cb(g.pts[k], g.pts[k+1]); }, .43);
+    dotPath(ll, cb => { for (let k = 0; k < g.pts.length; k += 2) cb(g.pts[k], g.pts[k+1]); }, .4);
     ll.fill();
   }
-  // núcleo quente: o centro do LED aceso quase branco, como luz de verdade
-  ll.fillStyle = 'rgba(255,255,255,.5)';
-  dotPath(ll, cb => { for (let k = 0; k < all.length; k += 2) cb(all[k], all[k+1]); }, .2);
-  ll.fill();
-  ll.fillStyle = 'rgba(255,255,255,.35)';
-  dotPath(ll, cb => { for (let k = 0; k < all.length; k += 2) cb(all[k], all[k+1]); }, .1);
+  ll.fillStyle = 'rgba(255,255,255,.32)';
+  dotPath(ll, cb => { for (let k = 0; k < all.length; k += 2) cb(all[k], all[k+1]); }, .17);
   ll.fill();
   lg.setTransform(1,0,0,1,0,0); lg.clearRect(0,0,ledGlow.width,ledGlow.height);
-  lg.globalCompositeOperation = 'lighter';
   lg.drawImage(ledLit, 0, 0, ledGlow.width, ledGlow.height);
-  lg.drawImage(ledLit, 0, 0, ledGlow.width, ledGlow.height);
-  lg.globalCompositeOperation = 'source-over';
 }
 
 /* ================= entrada de desenho ================= */
@@ -2404,6 +2413,7 @@ const RI = {
   stop:'<rect x="6.5" y="6.5" width="11" height="11" rx="2"/>',
   clock:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 1.8M9.5 2.5h5M12 2.5V6"/>',
   eye:'<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/>',
 };
 function ringDefs(kind){
@@ -2437,27 +2447,44 @@ function ringDefs(kind){
     L.push({label:'Voltar', icon:RI.back, sub: back});
     return L;
   }
-  const P0 = P(), boss = NET.role !== 'guest';
-  const list = [{label:'Mostrar', icon:RI.show, act: present}];
-  if (boss){
-    if (TM.run) list.push({label:'Pausar tempo', icon:RI.pause, act(){ pauseTimer(); }});
-    else if (TM.paused) list.push({label:'Continuar tempo', icon:RI.play, act(){ resumeTimer(); }});
-    list.push({label:'Cronômetro', icon:RI.clock, on: TM.run || TM.paused, sub:'timer'});
+  if (kind === 'react') return [...REACTS.map(e => ({label:'Reagir ' + e, emo:e, stay:true, act(){ sendReact(e); }})), {label:'Voltar', icon:RI.back, sub: RG.base || 'text'}];
+  if (kind === 'more'){
+    const L = [{label:'Tema', icon:UI.palette, act(){ openSheet('theme'); }}, {label:'Ajustes', icon:UI.sliders, act(){ openSheet('settings'); }}];
+    if (NET.role) L.push({label:'Sala', icon:RI.user, act(){ openSheet('room'); }});
+    if (fsOK) L.push({label: fsEl() ? 'Sair da tela cheia' : 'Tela cheia', icon: fsEl() ? UI.fsOff : UI.fsOn, act(){ $('#fsBtn').click(); }});
+    L.push({label:'Voltar', icon:RI.back, sub: RG.base || 'text'});
+    return L;
   }
+  const P0 = P(), boss = NET.role !== 'guest';
+  if (!boss){
+    // convidado: o que ele mais precisa durante a rodada, sem repetir os botões da tela
+    const L = [{label:'Mostrar', icon:RI.show, act: present}];
+    if (roomWriting() && revTogether() && !(NET.myReady && !canUndoReady())) L.push({label: NET.myReady ? 'Desfazer Pronto' : 'Pronto', icon: NET.myReady ? RI.undo : RI.check, on: NET.myReady, act(){ setReady(!NET.myReady); }});
+    L.push({label:'Reagir', emo:'😂', sub:'react'});
+    if (TM.run) L.push({label:'Pedir mais tempo', icon:RI.clock, off: Date.now() - (NET.askT || 0) < 20000, act: askMoreTime});
+    if (roomWriting()) L.push({label:'Quem falta', icon:RI.user, act(){ const miss = roomPlayers().filter(r => !r.ready && !r.spect).map(r => r.name || 'Jogador'); toast(miss.length ? `Faltam: ${miss.join(', ')}` : 'Todos prontos!'); }});
+    L.push({label:'Placar', icon:RI.trophy, act(){ gtab = 'placar'; openSheet('game'); }});
+    L.push({label:'Jogo', icon:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', act(){ openSheet('game'); }});
+    L.push({label:'Limpar', icon:RI.trash, off: !(P0.text || P0.strokes.length), act(){ $('#clearBtn').click(); }});
+    L.push({label:'Mais', icon:UI.sliders, sub:'more'});
+    return L;
+  }
+  const list = [{label:'Mostrar', icon:RI.show, act: present}];
+  if (TM.run) list.push({label:'Pausar tempo', icon:RI.pause, act(){ pauseTimer(); }});
+  else if (TM.paused) list.push({label:'Continuar tempo', icon:RI.play, act(){ resumeTimer(); }});
+  list.push({label:'Cronômetro', icon:RI.clock, on: TM.run || TM.paused, sub:'timer'});
   if (NET.role === 'host' && !G){
     if (NET.phase === 'writing') list.push({label:'Revelar todos', icon:RI.eye, act: revealAll});
     else list.push({label:'Nova rodada', icon:RI.redo, act: newRound});
   }
+  if (NET.role) list.push({label:'Reagir', emo:'😂', sub:'react'});
   if (NET.role || G || S.profiles.length > 1) list.push({label:'Placar', icon:RI.trophy, act(){ gtab = 'placar'; openSheet('game'); }});
-  list.push(
-    {label:'Jogo', icon:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', act(){ openSheet('game'); }},
-    {label:'Tema', icon:UI.palette, act(){ openSheet('theme'); }},
-    {label:'Ajustes', icon:UI.sliders, act(){ openSheet('settings'); }},
-    {label:'Limpar', icon:RI.trash, off: !(P0.text || P0.strokes.length), act(){ $('#clearBtn').click(); }});
-  if (fsOK) list.push({label: fsEl() ? 'Sair da tela cheia' : 'Tela cheia', icon: fsEl() ? UI.fsOff : UI.fsOn, act(){ $('#fsBtn').click(); }});
+  list.push({label:'Jogo', icon:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', act(){ openSheet('game'); }});
+  list.push({label:'Limpar', icon:RI.trash, off: !(P0.text || P0.strokes.length), act(){ $('#clearBtn').click(); }});
+  list.push({label:'Mais', icon:UI.sliders, sub:'more'});
   return list;
 }
-const RING_TITLE = {text:'Atalhos', draw:'Ferramentas', colors:'Cores', shapes:'Formas', erasers:'Apagar', timer:'Cronômetro'};
+const RING_TITLE = {text:'Atalhos', draw:'Ferramentas', colors:'Cores', shapes:'Formas', erasers:'Apagar', timer:'Cronômetro', react:'Reagir', more:'Mais'};
 function ringTitle(kind){
   if (kind === 'timer'){ const ms = TM.run ? TM.end - performance.now() : TM.paused ? TM.left : S.g.timerDur*1000; return fmtT(ms) + (TM.paused ? ' · pausado' : ''); }
   return RING_TITLE[kind] || 'Ferramentas';
@@ -2469,7 +2496,7 @@ function buildRing(kind, animate){
   ringItemsEl.innerHTML = RG.items.map((it, i) => {
     const a = (-90 + i * 360 / n) * Math.PI / 180;
     const st = `--x:${(Math.cos(a)*R).toFixed(1)}px;--y:${(Math.sin(a)*R).toFixed(1)}px;--i:${i};${it.color ? `background:${it.color};` : ''}${it.off ? 'opacity:.35;' : ''}`;
-    return `<button class="ring-item${it.color ? ' color' : ''}${it.on ? ' on' : ''}" data-ri="${i}" style="${st}" aria-label="${it.label}">${it.icon ? svg(it.icon, 1.9) : it.txt ? `<b class="rtx">${it.txt}</b>` : ''}</button>`;
+    return `<button class="ring-item${it.color ? ' color' : ''}${it.on ? ' on' : ''}" data-ri="${i}" style="${st}" aria-label="${it.label}">${it.icon ? svg(it.icon, 1.9) : it.emo ? `<b class="rtx emo">${it.emo}</b>` : it.txt ? `<b class="rtx">${it.txt}</b>` : ''}</button>`;
   }).join('');
   ringCenter.textContent = ringTitle(kind);
   if (animate !== false){ ringEl.classList.remove('open'); void ringEl.offsetWidth; requestAnimationFrame(() => ringEl.classList.add('open')); }
@@ -3033,7 +3060,7 @@ function winHTML(){
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 28')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 29')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3201,6 +3228,7 @@ const tRule = k => { const R = NET.role === 'guest' ? (NET.rules || {}) : S.g; r
 const fuseEl = document.createElement('div'); fuseEl.className = 'fuse'; fuseEl.hidden = true; fuseEl.innerHTML = '<i class="rope"></i><b class="spark"></b>'; document.getElementById('app').appendChild(fuseEl);
 const edgeEl = document.createElement('div'); edgeEl.className = 'edgeglow'; document.body.appendChild(edgeEl);
 const rimEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); rimEl.classList.add('trim'); rimEl.innerHTML = '<path class="bg" pathLength="100"/><path class="fg" pathLength="100" stroke-dasharray="100 100"/>'; board.appendChild(rimEl);
+const frzEl = document.createElement('div'); frzEl.className = 'tfreeze'; document.body.appendChild(frzEl);
 const bigEl = document.createElement('div'); bigEl.className = 'tbig'; document.body.appendChild(bigEl);
 let rimKey = '';
 /* contorno: um traço que percorre a borda do quadro, a partir do topo, e vai encolhendo */
@@ -3213,6 +3241,7 @@ function rimPath(){
   rimEl.querySelectorAll('path').forEach(pa => { pa.setAttribute('d', d); pa.style.strokeWidth = sw; });
 }
 function rimShow(left, paused){
+  frzEl.classList.toggle('on', !!paused);
   const on = tRule('tRim') !== false && (TM.run || TM.paused) && TM.dur > 0;
   rimEl.classList.toggle('on', on); if (!on) return;
   rimPath();
@@ -3221,6 +3250,13 @@ function rimShow(left, paused){
   rimEl.classList.toggle('warn', sec <= Math.max(10, TM.dur/1000*.25) && sec > 5);
   rimEl.classList.toggle('hot', sec <= 5);
   rimEl.classList.toggle('paused', !!paused);
+}
+/* aviso de 1 minuto: só em contagens longas (num tempo de 1 min ele cairia logo no começo) */
+function oneMinute(){
+  toast('Falta 1 minuto');
+  const R = NET.role === 'guest' ? (NET.rules || {}) : S.g, mode = R.tick || 'som';
+  if ((mode === 'som' || mode === 'ambos') && !S.g.mute && ac()){ try{ tickSound(R.tSnd || 'bip', .35, 60); }catch(_){} }
+  if ((mode === 'vibra' || mode === 'ambos') && navigator.vibrate) try{ navigator.vibrate([60, 90, 60]); }catch(_){}
 }
 function bigTick(sec){
   if (tRule('tBig') === false || sec > 5 || sec <= 0) return;
@@ -3252,7 +3288,8 @@ function tickTimer(){
   const sec = Math.ceil(left/1000);
   timerEl.classList.toggle('hot', left > 0 && sec <= 5);
   timerEl.classList.toggle('warn', sec <= 10 && sec > 5);
-  if (sec !== TM.lastSec && sec > 0){ const first = TM.lastSec === -1; TM.lastSec = sec; timerTick(sec); if (!first || sec <= 5) bigTick(sec); }
+  if (sec !== TM.lastSec && sec > 0){ const first = TM.lastSec === -1, prev = TM.lastSec; TM.lastSec = sec;
+    if (sec === 60 && prev === 61 && TM.dur >= 90000) oneMinute(); timerTick(sec); if (!first || sec <= 5) bigTick(sec); }
   if (left <= 0) timerDone();
 }
 /* trava do fim do tempo: 'all' (escrita e desenho) ou 'text' (só a escrita) */
@@ -3272,18 +3309,20 @@ function startTimer(ms, fromNet, dur){
   TM.dur = dur || ms; TM.end = performance.now() + ms; TM.run = true; TM.lastSec = -1;
   timerEl.hidden = false; timerEl.classList.remove('done', 'hot');
   tickTimer(); TM.iv = setInterval(tickTimer, 200);
+  if (!NET.role) roomAwake(true); // a tela não apaga no meio da contagem
   render();
   if (!fromNet && NET.role === 'host') netBroadcast({k:'timer', at: Date.now() + ms, ms, dur: TM.dur});
   if (win) syncSheet();
 }
 function stopTimer(fromNet){
+  if (!NET.role) roomAwake(false);
   clearInterval(TM.iv); TM.run = false; TM.paused = false; timerEl.hidden = true; timerEl.classList.remove('hot', 'warn', 'done', 'paused'); fuseEl.hidden = true; tpop.hidden = true; rimShow(0);
   render();
   if (!fromNet && NET.role === 'host') netBroadcast({k:'timerStop'});
   if (win) syncSheet();
 }
 function timerDone(){
-  clearInterval(TM.iv); TM.run = false;
+  clearInterval(TM.iv); TM.run = false; if (!NET.role) roomAwake(false);
   timerEl.querySelector('span').textContent = '0:00';
   timerEl.classList.remove('hot', 'warn'); timerEl.classList.add('done'); rimShow(0);
   tflash.classList.remove('on'); void tflash.offsetWidth; tflash.classList.add('on');
@@ -3321,10 +3360,11 @@ function adjTimer(sec){
 }
 function pauseTimer(ms, fromNet){
   if (!TM.run && !fromNet) return;
+  const was = TM.paused;
   TM.left = ms != null ? ms : TM.end - performance.now(); clearInterval(TM.iv); TM.run = false; TM.paused = true;
   timerEl.hidden = false; timerEl.classList.add('paused'); timerEl.querySelector('span').textContent = fmtT(TM.left); rimShow(TM.left, true);
   if (!fromNet && NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur});
-  if (!fromNet) toast('Tempo pausado');
+  if (!was) toast(fromNet ? 'Tempo pausado pelo anfitrião' : 'Tempo pausado');
 }
 function resumeTimer(){
   if (!TM.paused) return; const d = TM.dur; TM.paused = false; timerEl.classList.remove('paused');
@@ -3520,7 +3560,7 @@ function balloon(pl, kind, demo){
   if (!demo && balLast[key] && now - balLast[key] < (bf === 3 ? 2400 : 7000) && !['join','leave','ready','unready'].includes(kind)) return;
   balLast[key] = now;
   const wrap = $('#bals'), style = S.g.balS || 'fala';
-  wrap.className = 'bals bs-' + style + (document.body.classList.contains('inmode') && style !== 'lateral' && style !== 'live' ? ' anchor-b' : '');
+  wrap.className = 'bals bs-' + style + (document.body.classList.contains('inmode') && style !== 'lateral' && style !== 'live' ? ' anchor-b' : '') + (!timerEl.hidden && !timerEl.classList.contains('ghost') ? ' tdown' : '');
   // mesmo tipo de aviso já na tela: junta as pessoas num balão só, em vez de empilhar
   if (style !== 'live' && PLURAL[kind]){
     const same = balRows().find(r => r._kind === kind && !r._demo === !demo);
@@ -4279,6 +4319,7 @@ function hostMsg(pe, m){
   if (m.k === 'lob'){ lobAdd(m.id, m.c, m.w, m.p || [], m.n, pe.card.id); for (const o of NET.peers.values()) if (o !== pe && o.open) o.send(Object.assign({who: pe.card.id}, m)); return; }
   if (m.k === 'react'){ floatReact(pe.card, m.e); for (const o of NET.peers.values()) if (o !== pe && o.open) o.send({k:'react', id: pe.card.id, e: m.e}); return; }
   if (m.k === 'ga'){ gameAct(pe.card.id, m.a); return; }
+  if (m.k === 'askT'){ if (TM.run){ sfx('ring'); toast(`${pe.card.name || 'Jogador'} pediu mais tempo`, '+15 s', () => adjTimer(15)); } return; }
   if (m.k === 'ready'){
     const v = !!m.v; if (v === !!pe.ready) return;
     pe.ready = v; balloon(pe.card, v ? 'ready' : 'unready');
@@ -4765,6 +4806,11 @@ function floatReact(pl, e, own){
   i.style.cssText = `--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#fff'};right:${Math.round(Math.random()*30)}px;--dur:${dur.toFixed(2)}s;--sw:${(.8 + Math.random() * .7).toFixed(2)}s;--sd:-${(Math.random()).toFixed(2)}s;--amp:${Math.round(6 + Math.random() * 12)}px;--fs:${Math.round(28 + Math.random() * 12)}px`;
   i.innerHTML = `<span><span>${e}<b>${avatarHTML(pl)}</b></span></span>`;
   box.appendChild(i); setTimeout(() => i.remove(), dur * 1000 + 100);
+}
+/* convidado pede mais tempo; o anfitrião decide com um toque */
+function askMoreTime(){
+  if (Date.now() - (NET.askT || 0) < 20000){ toast('Pedido já enviado'); return; }
+  NET.askT = Date.now(); hostSend({k:'askT'}); toast('Pedido enviado ao anfitrião');
 }
 function sendReact(e){
   floatReact(meCard(), e, true);
@@ -5287,7 +5333,7 @@ function gameClick(t){
 // libera tocando 7 vezes na versão, em Ajustes. Fica só neste aparelho.
 const BOT_NAMES = ['Ana','Beto','Caju','Duda','Enzo','Fafá','Gui','Helô','Iago','Juju','Kiko','Lara'];
 const BOT_POOL = [['Pizza','Pizza','pizza','Sorvete','Chocolate'],['Azul','azul','Vermelho','Azul','Verde'],['Cachorro','Gato','Cachorro','cachorro','Papagaio'],['Praia','Praia','Montanha','praia','Cachoeira'],['Café','Café','Chá','Suco','café']];
-const BOT_END = ['ato','elo','ina','ola','eta','ão','ico','aço','ura'];
+const BOT_WORDS = {A:'Abacaxi,Amarelo,Ana,Arara,Aracaju,Advogado,Arroz,Anel,Adidas,Avatar',B:'Banana,Bege,Bruno,Baleia,Bahia,Bombeiro,Bolo,Bola,Boné,Batman',C:'Caju,Cinza,Carla,Cachorro,Curitiba,Cozinheiro,Coxinha,Cadeira,Coca-Cola,Carros',D:'Damasco,Dourado,Daniel,Dromedário,Dinamarca,Dentista,Doce de leite,Dado,Dell,Divertida Mente',E:'Ervilha,Esmeralda,Eduardo,Elefante,Espanha,Engenheiro,Empada,Escova,Elma Chips,Encanto',F:'Figo,Fúcsia,Fernanda,Foca,Fortaleza,Fotógrafo,Feijoada,Faca,Fiat,Frozen',G:'Goiaba,Grená,Gabriel,Girafa,Goiânia,Garçom,Guaraná,Garfo,Gol,Gladiador',H:'Hortelã,Havana,Helena,Hipopótamo,Holanda,Historiador,Hambúrguer,Harpa,Havaianas,Hulk',I:'Inhame,Índigo,Igor,Iguana,Itália,Instrutor,Iogurte,Ímã,Ipiranga,Interestelar',J:'Jaca,Jade,Juliana,Jacaré,Japão,Jornalista,Jujuba,Jarra,Jeep,Jumanji',K:'Kiwi,Kaki,Karina,Koala,Kuwait,Kickboxer,Kibe,Kit,Kibon,Kung Fu Panda',L:'Limão,Lilás,Lucas,Leão,Londres,Lixeiro,Lasanha,Lápis,Lacoste,Lilo e Stitch',M:'Manga,Marrom,Maria,Macaco,Manaus,Médico,Macarrão,Mesa,Mizuno,Moana',N:'Nectarina,Neve,Natália,Naja,Natal,Nutricionista,Nhoque,Navalha,Nike,Nemo',O:'Oliva,Ocre,Otávio,Onça,Olinda,Oculista,Omelete,Óculos,Omo,Oppenheimer',P:'Pera,Prata,Pedro,Pato,Paris,Professor,Pizza,Panela,Puma,Procurando Nemo',Q:'Quiabo,Quartzo,Quitéria,Quati,Quênia,Químico,Queijo,Quadro,Qualy,Quarteto Fantástico',R:'Romã,Rosa,Rafael,Rato,Recife,Repórter,Risoto,Relógio,Reebok,Rei Leão',S:'Siriguela,Salmão,Sofia,Sapo,Salvador,Sapateiro,Sushi,Sofá,Samsung,Shrek',T:'Tomate,Turquesa,Tiago,Tatu,Teresina,Taxista,Tapioca,Tesoura,Tramontina,Titanic',U:'Uva,Uva-passa,Ursula,Urso,Uruguai,Urologista,Umbu,Unha,Uber,Up',V:'Vagem,Verde,Vitória,Vaca,Veneza,Veterinário,Vatapá,Vela,Vivo,Velozes e Furiosos',W:'Wasabi,Wengé,Wagner,Wallaby,Washington,Web designer,Waffle,Walkman,Whirlpool,Wall-E',X:'Xuxu,Xadrez,Xuxa,Xexéu,Xangai,Xerife,Xis-salada,Xícara,Xiaomi,X-Men',Y:'Yakisoba,Yellow,Yasmin,Yak,York,Youtuber,Yakult,Yoyô,Yamaha,Yesterday',Z:'Zimbro,Zinco,Zeca,Zebra,Zâmbia,Zelador,Zabaione,Zíper,Zara,Zootopia'};
 const SIM = {bots:[], iv:0, round:0};
 function devHTML(){
   const n = SIM.bots.filter(b => !b.dead).length;
@@ -5343,7 +5389,8 @@ function botSnap(b){
   const d = snapOf(P()); d.name = b.card.name; d.icon = b.card.icon; d.accent = b.card.accent; d.strokes = []; d.ref = null;
   d.text = b.text || ''; return d;
 }
-function botWord(L){ return L + pick(BOT_END); }
+// palavras de verdade; a posição da categoria ajuda a acertar o tipo (nome, animal, cidade...) e às vezes repete para dar empate
+function botWord(L, i, name){ const l = (BOT_WORDS[L] || L + 'ato').split(','); const n = normT(name || ''); const k = /nome/.test(n) ? 2 : /animal/.test(n) ? 3 : /cidade|estado|pais/.test(n) ? 4 : /profiss/.test(n) ? 5 : /comida/.test(n) ? 6 : /objeto/.test(n) ? 7 : /marca/.test(n) ? 8 : /filme|serie/.test(n) ? 9 : /fruta|verdura/.test(n) ? 0 : /^cor\b|\bcor$/.test(n) ? 1 : -1; return k >= 0 && Math.random() < .8 ? l[k] : pick(l); }
 /* mensagens do anfitrião para o jogador de mentira */
 function botRecv(b, m){
   if (b.dead) return;
@@ -5382,7 +5429,7 @@ function botThink(b){
       b.ans = {};
       botLater(b, brnd(300, 1500), () => botSend(b, {k:'st', s:'typing'}));
       g.final.forEach((_, i) => botLater(b, brnd(2000, Math.max(4000, (g.cfg.time || 60) * 700)), () => {
-        if (Math.random() < .85) b.ans[i] = botWord(g.letter);
+        if (Math.random() < .85) b.ans[i] = botWord(g.letter, i, g.final[i]);
         ga({t:'ans', a: Object.assign({}, b.ans)});
       }));
       return;
