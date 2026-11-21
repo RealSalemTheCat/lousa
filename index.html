@@ -642,7 +642,12 @@ body.settings .bals:not(.demo){opacity:0}
 .rpts:disabled{opacity:1}
 .stab{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .srow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
-.srow.me{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.srow.me,.frow.me{border-color:color-mix(in srgb,var(--accent) 75%,transparent);background:linear-gradient(115deg,color-mix(in srgb,var(--accent) 20%,var(--panel2)),var(--panel2) 55%,color-mix(in srgb,var(--accent) 12%,var(--panel2)));box-shadow:0 8px 26px -12px var(--accent)}
+.frow{position:relative;overflow:hidden}
+.srow.me::after,.frow.me::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.16) 48%,rgba(255,255,255,.05) 55%,transparent 70%);transform:translateX(-130%);animation:meshine 5s ease-in-out 1.2s infinite}
+@keyframes meshine{0%,72%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+.srow.me .sn::after{content:"você";margin-left:8px;padding:2px 7px;border-radius:999px;font:800 10px var(--uif);letter-spacing:.08em;text-transform:uppercase;vertical-align:2px;background:color-mix(in srgb,var(--accent) 28%,transparent);color:var(--tx)}
+@media (prefers-reduced-motion:reduce){.srow.me::after,.frow.me::after{animation:none}}
 .srow{position:relative;overflow:hidden;animation:tilein .45s cubic-bezier(.3,1.5,.5,1) var(--d,0ms) backwards}
 .srow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w,0%);background:color-mix(in srgb,var(--accent) 12%,transparent);transform-origin:0 50%;animation:barw .9s cubic-bezier(.3,1,.4,1) calc(var(--d,0ms) + 200ms) backwards}
 .srow > *{position:relative}
@@ -652,7 +657,7 @@ body.settings .bals:not(.demo){opacity:0}
 .srow .st.pop{animation:land .45s cubic-bezier(.2,1.8,.4,1)}
 .ftab{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .frow{display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 8px 6px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
-.frow.me{border-color:color-mix(in srgb,var(--accent) 45%,transparent)}.frow.off{opacity:.6}
+.frow.off{opacity:.6}
 .frow .pos{width:16px;color:var(--tx3);font-weight:800}.frow .sn{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .frow small,.gp small{font-weight:700;font-size:11px;color:var(--tx3)}
 .frow .add{font-style:normal;font-weight:800;font-size:13px;color:#3fb6ff}
@@ -851,8 +856,16 @@ body.inlobby .bals:not(.anchor-b):not(.bs-live){top:calc(124px + env(safe-area-i
 .tstep .sbtn{width:46px;height:46px;border-radius:14px;font-size:24px}
 .tstep .tv{min-width:4.2ch;text-align:center;font:700 34px/1 'Bricolage Grotesque',var(--uif);font-variant-numeric:tabular-nums}
 #secretBtn.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
-.cd{position:fixed;inset:0;z-index:95;display:grid;place-items:center;background:rgba(10,10,12,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:auto;touch-action:none}
-.cd span{font:800 34vmin/1 'Bricolage Grotesque',var(--uif);color:#fff;animation:cdpop .9s cubic-bezier(.2,1.4,.4,1) both;text-shadow:0 10px 40px rgba(0,0,0,.4)}
+.cd{position:fixed;inset:0;z-index:95;display:grid;place-items:center;grid-template-areas:"c";pointer-events:auto;touch-action:none;
+  background:radial-gradient(ellipse at 50% 50%,rgba(10,10,14,.55) 0%,rgba(4,4,6,.88) 62%,rgba(0,0,0,.96) 100%);-webkit-backdrop-filter:blur(10px) saturate(.6);backdrop-filter:blur(10px) saturate(.6);opacity:0;transition:opacity .25s ease}
+.cd.in{opacity:1}.cd.out{opacity:0;transition-duration:.25s}
+.cd > *{grid-area:c}
+.cd span{font:800 38vmin/1 'Bricolage Grotesque',var(--uif);color:#fff;animation:cdpop .9s cubic-bezier(.2,1.4,.4,1) both;text-shadow:0 0 30px color-mix(in srgb,var(--accent) 70%,transparent),0 0 90px color-mix(in srgb,var(--accent) 45%,transparent)}
+.cd small{align-self:end;margin-bottom:16vh;font:700 15px var(--uif);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);animation:cdtx .9s ease both}
+.cd-ring{width:52vmin;height:52vmin;border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 80%,#fff);box-shadow:0 0 40px color-mix(in srgb,var(--accent) 60%,transparent),inset 0 0 40px color-mix(in srgb,var(--accent) 35%,transparent);animation:cdring .9s cubic-bezier(.2,.8,.3,1) both}
+@keyframes cdring{0%{transform:scale(.55);opacity:0}25%{opacity:1}100%{transform:scale(1.35);opacity:0}}
+@keyframes cdtx{0%{opacity:0;transform:translateY(8px)}30%,80%{opacity:1;transform:none}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cd span,.cd-ring,.cd small{animation:none}}
 @keyframes cdpop{0%{transform:scale(2.2);opacity:0}25%{transform:scale(1);opacity:1}80%{opacity:1}100%{transform:scale(.6);opacity:0}}
 .netov{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,calc(100vw - 20px));max-height:min(90vh,820px);z-index:92;background:var(--panel);border:1px solid var(--line2);border-radius:24px;box-shadow:0 0 0 100vmax rgba(6,6,8,.55),0 30px 80px -10px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;padding:14px 16px 18px;gap:14px;overflow-y:auto;animation:floatin .38s cubic-bezier(.3,1.35,.5,1)}
 .nv-head{display:flex;align-items:center;width:100%;max-width:480px}
@@ -1271,7 +1284,7 @@ function load(){
   try{
     const j = JSON.parse(localStorage.getItem(KEY));
     if (j && Array.isArray(j.profiles) && j.profiles.length){
-      j.g = Object.assign({portraitWrite:true, rvl:'count', tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
+      j.g = Object.assign({rvlFx:'own', portraitWrite:true, rvl:'count', tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
       j.ui = Object.assign(defUI(), j.ui || {}); j.ui.sizes = Object.assign(defUI().sizes, j.ui.sizes || {});
       j.profiles.forEach(p => { const d = newProfile(p.name, p.accent); for (const k in d) if (!(k in p)) p[k] = d[k]; if (!THEMES[p.theme]) p.theme = 'lousa'; });
       return j;
@@ -2909,12 +2922,20 @@ async function present(){
   await nextFrames(2);
   if (seq !== presentSeq || !presenting) return;
   presentAt = performance.now();
+  enterFx(tr);
+  if (!coverOn) hint('Toque duas vezes para voltar');
+  if (navigator.vibrate) try{ navigator.vibrate(12); }catch(_){}
+  try{ navigator.wakeLock && navigator.wakeLock.request('screen').then(w => wakeLock = w, () => {}); }catch(_){}
+}
+/* a transição de entrada escolhida pelo jogador (também usada quando o anfitrião vira as cartas) */
+function enterFx(tr){
   if (tr === 'pow' || tr === 'heart') genShapes(board.offsetWidth, board.offsetHeight);
   board.classList.remove('prep');
   sfx('show');
   const settle = ms => { clearTimeout(enterT); enterT = setTimeout(() => { board.classList.remove('enter'); document.body.classList.add('settled'); }, ms); };
   if (tr === 'none'){ document.body.classList.add('settled'); }
   else {
+    board.classList.remove('enter'); void board.offsetWidth;
     board.classList.add('enter');
     if (isJsTrans(tr)){ runWrite(tr, false); settle(400); }
     else settle(1000);
@@ -2924,9 +2945,17 @@ async function present(){
     layer.className = 'layer'; void layer.offsetWidth; layer.classList.add(k, 'intro-delay');
     setTimeout(() => layer.classList.remove(k, 'intro-delay'), 1400);
   }
-  if (!coverOn) hint('Toque duas vezes para voltar');
-  if (navigator.vibrate) try{ navigator.vibrate(12); }catch(_){}
-  try{ navigator.wakeLock && navigator.wakeLock.request('screen').then(w => wakeLock = w, () => {}); }catch(_){}
+}
+async function replayEnter(){
+  const tr = board.dataset.tr || 'none', seq = presentSeq;
+  document.body.classList.remove('settled');
+  board.classList.add('prep');
+  if (isJsTrans(tr)){ measureWriteRows(); txt.style.clipPath = 'path("M0 0Z")'; }
+  await nextFrames(2);
+  if (seq !== presentSeq || !presenting) return;
+  enterFx(tr);
+  revealBurst();
+  setTimeout(() => { if (presenting) hint('Toque duas vezes para voltar'); }, 1200);
 }
 let leaving = false, backT = 0, enterT = 0;
 function transId(){
@@ -3150,7 +3179,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 36')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 37')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3253,6 +3282,7 @@ sheetBody.addEventListener('click', e => {
     else if (k === 'tsnd'){ S.g.tSnd = v; if (NET.role === 'host') pushRoster(); if (ac()) tickSound(v, .8, 2); }
     else if (k === 'tickfrom'){ S.g.tickFrom = +v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'rvl'){ S.g.rvl = v; if (NET.role === 'host') pushRoster(); }
+    else if (k === 'rvlfx'){ S.g.rvlFx = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'revmode'){ S.g.revMode = v; if (v === 'each') resetReady(); if (NET.role === 'host') pushRoster(); updateRoomUI(); }
     else if (k === 'tend'){ S.g.tEnd = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'lockw'){ S.g.lockW = v; if (NET.role === 'host') pushRoster(); }
@@ -3500,6 +3530,7 @@ function hideCover(anim){
   if (!coverOn){ coverEl.hidden = true; return; }
   coverOn = false;
   if (!anim){ coverEl.hidden = true; board.classList.remove('rvl'); return; }
+  if (rvlFxNow() === 'own' && NET.role){ coverEl.hidden = true; replayEnter(); return; }
   sfx('show');
   coverEl.classList.add('go');
   board.classList.remove('rvl'); void board.offsetWidth; board.classList.add('rvl');
@@ -4170,7 +4201,8 @@ function fluxoHTML(){
     <p>Quem fugiu do fluxo pega peixe do cardume. Quando o cardume acaba, vence quem tiver <b>menos peixes</b>.</p></div>
     <div class="mrow col"><span>Como cada rodada termina</span>${host ? seg('frev', [['together','Pronto'],['timer','Com tempo'],['each','Cada um']], revModeNow()) : `<b>${{together:'cada um toca em Pronto; quando todos estiverem prontos, contagem e todos mostram', timer:'tempo igual para todos; quando acaba, todos mostram', each:'cada um mostra quando quiser; o anfitrião confere'}[revModeNow()]}</b>`}</div>
     ${host && revModeNow() === 'timer' ? `<div class="mrow"><span>Tempo para pensar</span>${stepper('ftime', S.g.timerDur, fmtT(S.g.timerDur * 1000))}</div>` : ''}
-    ${revModeNow() !== 'each' ? `<div class="mrow col"><span>Na hora de revelar</span>${host ? seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], rvlNow()) : `<b>${RVL_LB[rvlNow()]}</b>`}</div><div class="f-sub" style="margin-top:-4px">${RVL_TX[rvlNow()]}</div>` : ''}
+    ${revModeNow() !== 'each' ? `<div class="mrow col"><span>Na hora de revelar</span>${host ? seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], rvlNow()) : `<b>${RVL_LB[rvlNow()]}</b>`}</div><div class="f-sub" style="margin-top:-4px">${RVL_TX[rvlNow()]}</div>
+    <div class="mrow col"><span>Efeito ao aparecer</span>${host ? seg('rvlfx', [['own','Transição de cada um'],['card','Virar carta']], rvlFxNow()) : `<b>${rvlFxNow() === 'card' ? 'virar carta' : 'transição de cada um'}</b>`}</div>` : ''}
     ${host ? `<button class="mlink press" data-m="tlook">Som e visual do tempo ›</button>` : ''}
     <div class="mrow"><span>Peixes no cardume</span>${host ? stepper('pool', G.cfg.pool) : `<b>${G.cfg.pool}</b>`}</div>
     <div class="f-sub">${fishHint(n)}${host && G.cfg.pool !== fishSuggest(n) ? ` <button class="lnk" data-m="fishsug">Usar ${fishSuggest(n)}</button>` : ''}</div>
@@ -4201,9 +4233,10 @@ function fluxoHTML(){
   if (G.phase === 'break'){
     const rows = gAll().map(id => ({id, f: G.fish[id] || 0})).sort((a, b) => a.f - b.f);
     return `${mHead('Intervalo', `${G.left} peixes no cardume`)}<div class="mb mcenter">
+      ${host ? fsub('Leia a próxima carta e toque em começar quando a mesa estiver pronta.') : fsub('Aguarde o anfitrião ler a próxima carta.')}
       <div class="rcard"><span>Próxima</span><b>Rodada ${G.round}</b><i>${svg(FISH, 1.8)} ${G.left} de ${G.cfg.pool} no cardume</i></div>
       <div class="stab" style="width:100%;max-width:420px">${rows.map((x, i) => `<div class="srow ${x.id === myId() ? 'me' : ''}" style="--d:${i * 70}ms"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}</span><b class="st">${svg(FISH, 1.8)}${x.f}</b></div>`).join('')}</div>
-      ${host ? fsub('Leia a próxima carta e toque em começar quando a mesa estiver pronta.') : fsub('Aguarde o anfitrião ler a próxima carta.')}</div>
+</div>
       <div class="mf">${host ? `<button class="nbtn press" data-m="undo">Corrigir anterior</button><button class="nbtn pri press" data-m="nextround">Começar rodada ${G.round}</button>` : '<span class="mwait">O anfitrião começa a próxima rodada</span>'}</div>`;
   }
   if (G.phase === 'end'){
@@ -4270,6 +4303,7 @@ modeEl.addEventListener('click', e => {
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
   if (d.fadj){ act({t:'fishAdj', id: d.fadj, d: +d.d}); return; }
+  const rf = t.closest('[data-seg="rvlfx"]'); if (rf && d.v){ S.g.rvlFx = d.v; save(); pushRoster(); renderMode(); return; }
   const rv = t.closest('[data-seg="rvl"]'); if (rv && d.v){ S.g.rvl = d.v; save(); pushRoster(); renderMode(); return; }
   if (d.m === 'tlook'){ gtab = 'rodada'; foldT = true; openSheet('game'); return; }
   const fr = t.closest('[data-seg="frev"]'); if (fr && d.v){ S.g.revMode = d.v; save(); resetReady(); pushRoster(); updateRoomUI(); renderMode(); return; }
@@ -4388,7 +4422,7 @@ function netBroadcast(obj){ for (const pe of NET.peers.values()) if (pe.open) pe
 const hostSend = obj => { if (NET.host && NET.host.open) NET.host.send(obj); };
 function pushRoster(){
   NET.roster = hostRoster(); saveHostSess();
-  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, tSnd: S.g.tSnd || 'bip', tEndSnd: S.g.tEndSnd || 'bipes', undoReady: S.g.undoReady !== false, tPill: S.g.tPill !== false, tFuse: !!S.g.tFuse, tEdge: !!S.g.tEdge, tRim: S.g.tRim !== false, tBig: S.g.tBig !== false, rvl: S.g.rvl || 'count', lobby: S.g.lobby !== false}});
+  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, tSnd: S.g.tSnd || 'bip', tEndSnd: S.g.tEndSnd || 'bipes', undoReady: S.g.undoReady !== false, tPill: S.g.tPill !== false, tFuse: !!S.g.tFuse, tEdge: !!S.g.tEdge, tRim: S.g.tRim !== false, tBig: S.g.tBig !== false, rvl: S.g.rvl || 'count', rvlFx: S.g.rvlFx || 'own', lobby: S.g.lobby !== false}});
   syncRoom();
   renderScoreTag();
   if (S.g.autoAll !== false) checkAutoReveal();
@@ -4791,7 +4825,7 @@ function guestMsg(m){
   if (m.k === 'roster'){
     const wasSecret = NET.secret;
     NET.roster = m.list; NET.secret = m.room.secret;
-    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, tSnd: m.room.tSnd, tEndSnd: m.room.tEndSnd, undoReady: m.room.undoReady, tPill: m.room.tPill, tFuse: m.room.tFuse, tEdge: m.room.tEdge, tRim: m.room.tRim, tBig: m.room.tBig, rvl: m.room.rvl, lobby: m.room.lobby};
+    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, tSnd: m.room.tSnd, tEndSnd: m.room.tEndSnd, undoReady: m.room.undoReady, tPill: m.room.tPill, tFuse: m.room.tFuse, tEdge: m.room.tEdge, tRim: m.room.tRim, tBig: m.room.tBig, rvl: m.room.rvl, rvlFx: m.room.rvlFx, lobby: m.room.lobby};
     const mine = m.list.find(r => r.id === myId()); if (mine) NET.myReady = !!mine.ready;
     syncRoom();
     renderScoreTag();
@@ -4863,6 +4897,7 @@ function roundClear(){
   save(); applyTheme(true);
   if (!G) toast('Nova rodada', 'Desfazer', () => { Object.assign(P(), snap); txt.textContent = P().text; save(); applyTheme(true); });
 }
+const rvlFxNow = () => (NET.role === 'guest' ? (NET.rules || {}).rvlFx : S.g.rvlFx) || 'own';
 const rvlNow = () => (NET.role === 'guest' ? (NET.rules || {}).rvl : S.g.rvl) || 'count';
 function countdownThenShow(){
   closeLobby();
@@ -4874,16 +4909,25 @@ function countdownThenShow(){
   NET.veil = how === 'host'; NET.veilAll = false;
   if (how !== 'count'){
     // sem contagem: entra direto; no modo do anfitrião, fica coberto até ele tocar
-    forceCover = true; present(); setTimeout(sendFinalSnap, 300);
-    if (how === 'now') setTimeout(() => { if (presenting && coverOn) hideCover(true); }, 700);
+    forceCover = how === 'host' || rvlFxNow() === 'card'; present(); setTimeout(sendFinalSnap, 300);
+    if (how === 'now' && forceCover) setTimeout(() => { if (presenting && coverOn) hideCover(true); }, 700);
     return;
   }
   const cd = $('#cd');
-  cd.hidden = false;
+  cd.hidden = false; cd.classList.remove('out'); void cd.offsetWidth; cd.classList.add('in');
+  if (navigator.vibrate) try{ navigator.vibrate(20); }catch(_){}
   const step = n => {
-    if (n === 0){ cd.hidden = true; cd.innerHTML = ''; forceCover = true; present(); setTimeout(sendFinalSnap, 300); setTimeout(() => { if (presenting && coverOn) hideCover(true); }, 1100); return; }
-    cd.innerHTML = `<span>${n}</span>`;
-    if (!S.g.mute && ac()) try{ tone({f: n === 1 ? 990 : 660, type:'triangle', dur:.12, vol:.08}); }catch(_){}
+    if (n === 0){
+      cd.classList.add('out');
+      setTimeout(() => { cd.hidden = true; cd.innerHTML = ''; cd.classList.remove('in', 'out'); }, 260);
+      const card = rvlFxNow() === 'card';
+      forceCover = card; present(); setTimeout(sendFinalSnap, 300);
+      if (card) setTimeout(() => { if (presenting && coverOn) hideCover(true); }, 1100);
+      return;
+    }
+    cd.innerHTML = `<div class="cd-ring"></div><span>${n}</span><small>${n === 3 ? 'Virem os celulares para a mesa' : n === 2 ? 'Prontos?' : 'Já!'}</small>`;
+    if (!S.g.mute && ac()) try{ tone({f: n === 1 ? 990 : 520, type:'triangle', dur: n === 1 ? .22 : .14, vol:.09}); tone({f: n === 1 ? 495 : 260, type:'sine', dur:.3, vol:.06}); }catch(_){}
+    if (navigator.vibrate) try{ navigator.vibrate(n === 1 ? 45 : 18); }catch(_){}
     setTimeout(() => step(n - 1), 900);
   };
   step(3);
@@ -5302,6 +5346,7 @@ function stepTimer(dir){
 }
 const fsub = t => `<div class="f-sub">${t}</div>`;
 /* controle da rodada: como revelar e nova rodada (fica no topo da janela Sala e em Jogo › Rodada) */
+const RVLFX_TX = {own:'Cada quadro aparece com a transição que o jogador escolheu no Tema.', card:'Todos os quadros viram como uma carta, do mesmo jeito.'};
 const RVL_TX = {count:'Contagem de 3 s para todos virarem o celular para a mesa; depois os quadros aparecem.', now:'Os quadros aparecem na hora, sem contagem.', host:'Os quadros aparecem cobertos. Quando todos estiverem com a tela virada, o anfitrião toca na própria tela e revela todos juntos.'};
 const TEND_LB = {warn:'Só avisar', lock:'Travar', reveal:'Revelar'};
 const MODES = [['stop','Adedonha','Letra sorteada, categorias votadas, STOP! e correção juntos.','<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M15.5 15.5l2 2"/>'],
@@ -5335,7 +5380,7 @@ function rodadaHTML(){
       : 'Cada um mostra quando quiser, como na mesa: dois toques no quadro ou Mostrar.')}</div>
     <div class="sec"><div class="sec-t">Tempo</div>${TM.run ? `<div class="bigtime">${fmtT(TM.end - performance.now())}</div>` : ''}
       ${fsub(`Quando acabar: ${TEND_LB[R.tEnd || 'reveal'].toLowerCase()}${R.tEnd === 'lock' ? (R.lockW === 'text' ? ' só a escrita' : ' escrita e desenho') : ''}. O anfitrião define e inicia o tempo.`)}</div>
-    ${tog ? `<div class="sec"><div class="sec-t">Revelação</div>${fsub(RVL_TX[rvlNow()])}</div>` : `<div class="sec"><div class="sec-t">Revelação</div>
+    ${tog ? `<div class="sec"><div class="sec-t">Revelação</div>${fsub(RVL_TX[rvlNow()] + ' ' + RVLFX_TX[rvlFxNow()])}</div>` : `<div class="sec"><div class="sec-t">Revelação</div>
       <div class="f-row"><span class="f-lb">Capa antes de revelar</span>${tg('data-gtg="cover"', S.g.cover)}</div>${fsub('O seu quadro aparece coberto e vira como uma carta.')}</div>`}
     ${fsub('Quem decide as regras da rodada é o anfitrião.')}`;
   return `${sum}
@@ -5354,7 +5399,8 @@ function rodadaHTML(){
       ${te === 'lock' ? `<div style="margin-top:8px">${seg('lockw', [['all','Escrita e desenho'],['text','Só a escrita']], lw)}</div>` : ''}
       ${fsub(teDesc)}</div>
     <div class="sec"><div class="sec-t">Revelação</div>
-      ${tog ? `<div class="f-stack"><span class="f-lb">Na hora de revelar</span>${seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], S.g.rvl || 'count')}</div>${fsub(RVL_TX[S.g.rvl || 'count'])}`
+      ${tog ? `<div class="f-stack"><span class="f-lb">Na hora de revelar</span>${seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], S.g.rvl || 'count')}</div>${fsub(RVL_TX[S.g.rvl || 'count'])}
+        <div class="f-stack" style="margin-top:10px"><span class="f-lb">Efeito ao aparecer</span>${seg('rvlfx', [['own','Transição de cada um'],['card','Virar carta']], rvlFxNow())}</div>${fsub(RVLFX_TX[rvlFxNow()])}`
         : `<div class="f-row"><span class="f-lb">Capa antes de revelar</span>${tg('data-gtg="cover"', S.g.cover)}</div>${fsub('O quadro aparece coberto e vira como uma carta.')}`}
       <div class="f-row" style="margin-top:6px"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div>
       ${inRoom ? `<div class="f-row"><span class="f-lb">Saguão de desenho para quem terminou</span>${tg('data-gtg="lobby"', S.g.lobby !== false)}</div>` : ''}</div>
