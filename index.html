@@ -19,7 +19,7 @@
 :root{
   --ui:#0e0e0f; --panel:#161618; --panel2:#1f1f22; --panel3:#2b2b2f;
   --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.16);
-  --tx:#eeebe4; --tx2:#a19d95; --tx3:#6b6862;
+  --tx:#eeebe4; --tx2:#b6b1a8; --tx3:#8d8981;
   --accent:#ffad2a; --on-accent:#141414;
   --uif:'Schibsted Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --ink:#141414; --bg:#f4f3ef; --c1:#fff; --c2:#f0f; --c3:#00f;
@@ -580,9 +580,10 @@ body.settings .bals:not(.demo){opacity:0}
 .mb{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 18px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;overflow-anchor:none}
 .mb::-webkit-scrollbar{display:none}
 /* a mesma tela sendo atualizada (votos chegando) não repete as animações de entrada */
-.mode.same .srow,.mode.same .srow::before,.mode.same .rrow,.mode.same .cat,.mode.same .frow,.mode.same .vcard,.mode.same .vans{animation:none!important}
+.mode.same .srow,.mode.same .srow::before,.mode.same .rrow,.mode.same .cat,.mode.same .frow,.mode.same .vtcard,.mode.same .vans{animation:none!important}
 .mf{flex:none;display:flex;gap:8px;align-items:center;justify-content:flex-end;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--ui)}
-.mf .nbtn{flex:1;max-width:220px}
+.mf .nbtn{flex:1 1 auto;max-width:220px;white-space:nowrap;padding-left:12px;padding-right:12px}
+.mf .nbtn.pri{flex-grow:1.6}
 .mwait{flex:1;text-align:center;color:var(--tx3);font-size:13.5px;font-weight:600}
 .mcenter{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
 .mtabs{margin-bottom:12px}
@@ -599,6 +600,7 @@ body.settings .bals:not(.demo){opacity:0}
 .ctag.entra{background:color-mix(in srgb,#57e389 18%,transparent);color:#57e389}.ctag.fixada{background:var(--accent);color:var(--on-accent)}
 .ctag.vetada{background:rgba(255,90,90,.16);color:#ff7a7a}.ctag.nafila{color:var(--accent)}
 .yn{display:flex;gap:6px}
+.yn.kept{opacity:.4}
 .yn button{display:flex;align-items:center;justify-content:center;gap:4px;height:38px;width:60px;padding:0 8px;border-radius:11px;background:var(--panel3);font-weight:800;font-size:14px;color:var(--tx2);font-variant-numeric:tabular-nums}
 .yn svg{width:15px;height:15px}
 .yn .vy.on{background:#57e389;color:#0d2a17}.yn .vn.on{background:#ff6b6b;color:#2a0d0d}
@@ -614,13 +616,26 @@ body.settings .bals:not(.demo){opacity:0}
 .mav svg{width:15px;height:15px}
 .lets{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:7px;margin-top:10px}
 .let{position:relative;height:50px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font:800 21px 'Bricolage Grotesque',var(--uif);color:var(--tx)}
-.let.out{color:var(--tx3);text-decoration:line-through;opacity:.45}
+.let.out{background:transparent;border:1.5px dashed var(--line2);color:var(--tx3);text-decoration:line-through;text-decoration-thickness:2px}
 .let.mine{box-shadow:inset 0 0 0 2px #ff7a7a}
 .let.forced::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
-.lkey{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12px;color:var(--tx3)}
-.lkey span{display:flex;align-items:center;gap:6px}.lkey b{width:14px;height:14px;border-radius:4px;background:var(--panel2);border:1px solid var(--line)}
-.lkey .k2{opacity:.45;background:var(--panel)}.lkey .k3{box-shadow:inset 0 0 0 2px #ff7a7a}
-.let i{position:absolute;right:4px;top:3px;font:700 10px var(--uif);font-style:normal;color:#ff7a7a}
+.lkey{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font-size:12.5px;color:var(--tx2)}
+.lkey span{display:flex;align-items:center;gap:7px}.lkey b{width:18px;height:18px;border-radius:5px;background:var(--panel2);border:1px solid var(--line2)}
+.lkey .k2{background:transparent;border:1.5px dashed var(--line2)}.lkey .k3{box-shadow:inset 0 0 0 2px #ff7a7a}
+.lkey .k4{position:relative}.lkey .k4::after{content:"";position:absolute;left:50%;bottom:3px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.let i{position:absolute;right:5px;top:3px;font:800 11px var(--uif);font-style:normal;color:#ff8a8a}
+.mgt{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--tx3);margin:20px 4px 8px}
+.mgt:first-child{margin-top:4px}
+.mgroup{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:0 14px;margin:0 0 4px}
+.mgroup > .mrow{border-bottom:0}
+.mgroup > * + .mrow,.mgroup > * + .mlink{border-top:1px solid var(--line)}
+.mgroup .mrow.col{padding:13px 0 12px}
+.mgroup .seg{background:var(--panel)}
+.mdesc{font-size:12.5px;line-height:1.45;color:var(--tx2);margin:-2px 0 13px}
+.mgroup .mlink{background:none;border-radius:0;margin:0;padding:15px 0;display:flex;justify-content:space-between}
+.mb .seg{display:grid;width:100%}
+.mb .seg button{padding:0 8px}
+.mfoot{font-size:12.5px;line-height:1.45;color:var(--tx3);margin:14px 4px 0}
 .mrow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;border-bottom:1px solid var(--line);font-size:15px;font-weight:600}
 .mrow.col{flex-direction:column;align-items:stretch;padding:10px 0;gap:8px}
 .mrow b{font-weight:800}
@@ -645,14 +660,14 @@ body.settings .bals:not(.demo){opacity:0}
 .rlist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .vbody{display:flex;flex-direction:column;gap:14px;padding-top:6px}
 .vprog{height:4px;border-radius:3px;background:var(--panel3);overflow:hidden;flex:none}.vprog b{display:block;height:100%;background:var(--accent);border-radius:inherit;transition:width .5s ease}
-.vcard{position:relative;flex:none;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px 18px;border-radius:22px;background:var(--panel2);border:1px solid var(--line);text-align:center;overflow:hidden;animation:tilein .45s cubic-bezier(.3,1.5,.5,1) both;transition:border-color .3s,box-shadow .3s}
+.vtcard{position:relative;flex:none;min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px 18px;border-radius:22px;background:var(--panel2);border:1px solid var(--line);text-align:center;overflow:hidden;animation:tilein .45s cubic-bezier(.3,1.5,.5,1) both;transition:border-color .3s,box-shadow .3s}
 .vwho{display:flex;align-items:center;gap:8px;font:700 15px var(--uif);color:var(--tx2)}.vwho .mav{width:30px;height:30px}
 .vans{font:800 clamp(30px,9vw,46px)/1.08 'Bricolage Grotesque',var(--uif);color:var(--tx);word-break:break-word;max-width:100%}
 .vdup{min-height:18px;font:600 13px var(--uif);color:var(--tx3)}
 .vstamp{position:absolute;right:14px;top:14px;padding:6px 12px;border-radius:10px;font:800 15px var(--uif);letter-spacing:.06em;text-transform:uppercase;opacity:0;transform:scale(1.6) rotate(-8deg);transition:opacity .25s,transform .35s cubic-bezier(.2,1.8,.4,1)}
-.vcard.ok{border-color:#57e389;box-shadow:0 0 0 1px #57e389,0 10px 30px -12px #57e389}.vcard.ok .vstamp{opacity:1;transform:rotate(-8deg);color:#57e389;border:2px solid #57e389}
-.vcard.no{border-color:#ff6b6b;box-shadow:0 0 0 1px #ff6b6b,0 10px 30px -12px #ff6b6b}.vcard.no .vstamp{opacity:1;transform:rotate(-8deg);color:#ff6b6b;border:2px solid #ff6b6b}
-.vcard.no .vans{text-decoration:line-through;text-decoration-thickness:3px;color:var(--tx3)}
+.vtcard.ok{border-color:#57e389;box-shadow:0 0 0 1px #57e389,0 10px 30px -12px #57e389}.vtcard.ok .vstamp{opacity:1;transform:rotate(-8deg);color:#57e389;border:2px solid #57e389}
+.vtcard.no{border-color:#ff6b6b;box-shadow:0 0 0 1px #ff6b6b,0 10px 30px -12px #ff6b6b}.vtcard.no .vstamp{opacity:1;transform:rotate(-8deg);color:#ff6b6b;border:2px solid #ff6b6b}
+.vtcard.no .vans{text-decoration:line-through;text-decoration-thickness:3px;color:var(--tx3)}
 .vbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none}
 .vbig{height:96px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--panel2);border:1px solid var(--line);font:800 16px var(--uif);color:var(--tx);position:relative}
 .vbig svg{width:28px;height:28px}.vbig i{position:absolute;right:12px;top:10px;font:800 13px var(--uif);font-style:normal;color:var(--tx3);font-variant-numeric:tabular-nums}
@@ -3231,7 +3246,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 41')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 42')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3772,6 +3787,8 @@ function balloon(pl, kind, demo){
   if (!demo) addFeed(pl, kind, text);
   // nas telas dos modos (respostas, votação, conferência) os avisos de "escrevendo" só atrapalham: ficam só no histórico
   if (!demo && (presenting || document.body.classList.contains('inmode')) && ['typing','drawing','erasing','idle','unready'].includes(kind)) return;
+  // nas telas de preparação, correção e placar, "terminou" não quer dizer nada: só entra e sai
+  if (!demo && document.body.classList.contains('inmode') && kind === 'ready' && !(G && ((G.mode === 'fluxo' && G.phase === 'write') || (G.mode === 'stop' && G.phase === 'play')))) return;
   const bf = S.g.balF ?? 2, key = pl.id + kind, now = performance.now();
   if (presenting || (bf === 0 && !demo)) return;
   if (bf === 1 && !demo && !['join','leave','ready','kick','dispute','show'].includes(kind)) return;
@@ -4236,35 +4253,45 @@ function stopHTML(){
       body = `
       <form class="madd" data-m="catform"><input class="txt-in" id="catIn" maxlength="40" placeholder="Sugerir categoria" autocomplete="off" enterkeyhint="send"><button class="nbtn pri press" type="submit">Sugerir</button></form>
       ${host ? `<div style="margin-top:12px">${seg('mvote', [['yn','Sim ou Não'],['rank','Mais votadas']], rank ? 'rank' : 'yn')}</div>` : ''}
-      <div class="f-sub">${rank ? `Marque as que você quer. Entram as ${G.cfg.ncat || 6} com mais votos.` : `Vote Sim ou Não. Entra quem tiver mais Sim${G.cfg.ncat ? `, até ${G.cfg.ncat} categorias` : ''}.`} Sugestões parecidas viram uma só, com os autores juntos.${host ? ' Toque no nome para fixar, vetar ou apagar.' : ' O anfitrião pode fixar ou vetar.'}</div>
+      <div class="f-sub">${rank ? `Marque as que você quer. Entram as ${G.cfg.ncat || 6} com mais votos.` : `Vote Sim ou Não. Entra quem tiver mais Sim${G.cfg.ncat ? `, até ${G.cfg.ncat} categorias` : ''}.`} Sugestões parecidas viram uma só, com os autores juntos. Fixadas e vetadas não dependem de voto; os votos delas ficam guardados caso voltem para a votação.${host ? ' Toque no nome para fixar, vetar ou apagar.' : ' O anfitrião pode fixar ou vetar.'}</div>
       <div class="ccount">${shown.length} ${shown.length === 1 ? 'categoria entra' : 'categorias entram'}</div>
       <div class="cats">${G.cats.map(c => { const stt = catState(c), inn = shown.includes(c.id), y = c.yes.includes(myId()), no = c.no.includes(myId());
         const tag = c.st === 'in' ? 'fixada' : c.st === 'out' ? 'vetada' : stt === 'in' ? (inn ? 'entra' : 'na fila') : 'fora';
         return `<div class="cat ${inn ? 'in' : ''}" data-catrow="${c.id}">
           <button class="cname press" ${host ? `data-catmenu="${c.id}"` : 'tabindex="-1"'}><span class="cn">${esc(c.name)}</span><span class="ctag ${tag.replace(' ', '')}">${tag}</span>${c.by.length ? `<span class="by">${c.by.map(id => avChip(id)).join('')}</span>` : ''}</button>
-          <span class="yn"><button class="vy press ${y ? 'on' : ''}" data-cv="${c.id}" data-v="1">${svg(yesI, 2.4)}${c.yes.length}</button>${rank ? '' : `<button class="vn press ${no ? 'on' : ''}" data-cv="${c.id}" data-v="-1">${svg(noI, 2.4)}${c.no.length}</button>`}</span>
+          <span class="yn ${c.st !== 'auto' ? 'kept' : ''}"><button class="vy press ${y ? 'on' : ''}" data-cv="${c.id}" data-v="1">${svg(yesI, 2.4)}${c.yes.length}</button>${rank ? '' : `<button class="vn press ${no ? 'on' : ''}" data-cv="${c.id}" data-v="-1">${svg(noI, 2.4)}${c.no.length}</button>`}</span>
           ${MV.catEdit === c.id ? `<span class="cact"><button class="nbtn press ${c.st === 'in' ? 'on' : ''}" data-cst="${c.id}" data-v="in">Fixar</button><button class="nbtn press ${c.st === 'auto' ? 'on' : ''}" data-cst="${c.id}" data-v="auto">Votação</button><button class="nbtn press ${c.st === 'out' ? 'on' : ''}" data-cst="${c.id}" data-v="out">Vetar</button><button class="nbtn press" data-cdel="${c.id}">Apagar</button></span>` : ''}</div>`; }).join('')}</div>`;
     }
     if (MV.tab === 'letters') body = `
       <div class="f-sub" style="margin-top:0">${host ? 'Você decide: toque para tirar ou devolver. Os números mostram quantos querem tirar a letra.' : `Toque para votar e tirar uma letra. Sai com ${Math.floor(n / 2) + 1} ${Math.floor(n / 2) + 1 === 1 ? 'voto' : 'votos'}; o anfitrião decide no fim.`}</div>
       <div class="lets">${LETTERS.map(L => { const v = (G.lv[L] || []).length, o = out.includes(L), mine = (G.lv[L] || []).includes(myId()), forced = (G.lf || {})[L] || (G.out.includes(L) ? 'out' : '');
         return `<button class="let press ${o ? 'out' : ''} ${mine ? 'mine' : ''} ${forced ? 'forced' : ''}" data-let="${L}">${L}${v ? `<i>${v}</i>` : ''}</button>`; }).join('')}</div>
-      <div class="lkey"><span><b class="k1"></b>vai para o sorteio</span><span><b class="k2"></b>fora</span><span><b class="k3"></b>seu voto para tirar</span></div>
+      <div class="lkey"><span><b class="k1"></b>no sorteio</span><span><b class="k2"></b>fora do sorteio</span><span><b class="k3"></b>seu voto para tirar</span><span><b class="k4"></b>decidida pelo anfitrião</span></div>
       <div class="f-sub">${26 - out.length} letras no sorteio.</div>`;
-    if (MV.tab === 'rules') body = `
-      <div class="mrow"><span>Limite de categorias</span>${host ? stepper('ncat', G.cfg.ncat, G.cfg.ncat || 'sem') : `<b>${G.cfg.ncat || 'sem limite'}</b>`}</div>
-      <div class="mrow"><span>Trocas de letra por partida</span>${host ? stepper('swapMax', G.cfg.swapMax, G.cfg.swapMax || '∞') : `<b>${G.cfg.swapMax || 'ilimitadas'}</b>`}</div>
-      <div class="mrow"><span>Tempo da rodada</span>${host ? stepper('time', G.cfg.time, fmtT(G.cfg.time * 1000)) : `<b>${fmtT(G.cfg.time * 1000)}</b>`}</div>
-      ${host ? `<button class="mlink press" data-m="tlook">Som e visual do tempo ›</button>` : ''}
-      <div class="mrow"><span>Resposta única</span>${host ? stepper('uniq', G.cfg.uniq, G.cfg.uniq + ' pts') : `<b>${G.cfg.uniq} pts</b>`}</div>
-      <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
-      <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
-      <div class="mrow col"><span>Correção</span>${host ? seg('mreview', [['cat','Lista por categoria'],['player','Uma resposta por vez']], G.cfg.review || 'cat') : `<b>${G.cfg.review === 'player' ? 'uma resposta por vez' : 'lista por categoria'}</b>`}</div>
-      <div class="mrow col"><span>Empate na votação</span>${host ? seg('mtiev', [['ok','Vale'],['no','Anula'],['host','Anfitrião desempata']], G.cfg.tieV || 'ok') : `<b>${{ok:'a resposta vale', no:'a resposta é anulada', host:'o voto do anfitrião decide'}[G.cfg.tieV || 'ok']}</b>`}</div>
-      <div class="f-sub" style="margin-top:-4px">${(G.cfg.review || 'cat') === 'player' ? 'Como na mesa: em cada categoria, um jogador por vez mostra o que escreveu e todos votam Vale ou Não vale. Quando todos votam, segue sozinho.' : 'Todas as respostas da categoria aparecem juntas; quem discordar contesta.'}</div>
-      ${(G.cfg.review || 'cat') === 'player' ? `<div class="mrow col"><span>Ordem dos jogadores</span>${host ? seg('morder', [['rand','Sorteio'],['alpha','A a Z'],['most','Mais pontos'],['least','Menos pontos']], G.cfg.order || 'rand') : `<b>${{rand:'sorteio', alpha:'alfabética', most:'mais pontos primeiro', least:'menos pontos primeiro'}[G.cfg.order || 'rand']}</b>`}</div>` : ''}
-      <div class="f-sub">Categorias, letras e regras ficam salvas para a próxima partida.</div>
+    if (MV.tab === 'rules'){
+      const pm = (G.cfg.review || 'cat') === 'player';
+      body = `
+      <div class="mgt">Partida</div><div class="mgroup">
+        <div class="mrow"><span>Limite de categorias</span>${host ? stepper('ncat', G.cfg.ncat, G.cfg.ncat || 'sem') : `<b>${G.cfg.ncat || 'sem limite'}</b>`}</div>
+        <div class="mrow"><span>Trocas de letra por partida</span>${host ? stepper('swapMax', G.cfg.swapMax, G.cfg.swapMax || '∞') : `<b>${G.cfg.swapMax || 'ilimitadas'}</b>`}</div>
+        <div class="mrow"><span>Tempo da rodada</span>${host ? stepper('time', G.cfg.time, fmtT(G.cfg.time * 1000)) : `<b>${fmtT(G.cfg.time * 1000)}</b>`}</div>
+        ${host ? `<button class="mlink press" data-m="tlook"><span>Som e visual do tempo</span><span>›</span></button>` : ''}
+      </div>
+      <div class="mgt">Pontos</div><div class="mgroup">
+        <div class="mrow"><span>Resposta única</span>${host ? stepper('uniq', G.cfg.uniq, G.cfg.uniq + ' pts') : `<b>${G.cfg.uniq} pts</b>`}</div>
+        <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
+        <div class="mdesc">Em branco, com a letra errada ou anulada vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
+      </div>
+      <div class="mgt">Correção</div><div class="mgroup">
+        <div class="mrow col"><span>Como corrigir</span>${host ? seg('mreview', [['cat','Lista por categoria'],['player','Uma por vez']], G.cfg.review || 'cat') : `<b>${pm ? 'uma resposta por vez' : 'lista por categoria'}</b>`}</div>
+        <div class="mdesc">${pm ? 'Como na mesa: em cada categoria, um jogador por vez mostra o que escreveu e todos votam Vale ou Não vale. Quando todos votam, segue sozinho.' : 'Todas as respostas da categoria aparecem juntas; quem discordar contesta.'}</div>
+        ${pm ? `<div class="mrow col"><span>Ordem dos jogadores</span>${host ? seg('morder', [['rand','Sorteio'],['alpha','A a Z'],['most','+ pontos'],['least','− pontos']], G.cfg.order || 'rand') : `<b>${{rand:'sorteio', alpha:'alfabética', most:'mais pontos primeiro', least:'menos pontos primeiro'}[G.cfg.order || 'rand']}</b>`}</div>` : ''}
+        <div class="mrow col"><span>Empate na votação</span>${host ? seg('mtiev', [['ok','Vale'],['no','Anula'],['host','Anfitrião']], G.cfg.tieV || 'ok') : `<b>${{ok:'a resposta vale', no:'a resposta é anulada', host:'o voto do anfitrião decide'}[G.cfg.tieV || 'ok']}</b>`}</div>
+        <div class="mdesc">${{ok:'No empate, a resposta vale.', no:'No empate, a resposta é anulada.', host:'No empate, o voto do anfitrião decide.'}[G.cfg.tieV || 'ok']}</div>
+      </div>
+      <div class="mfoot">Categorias, letras e regras ficam salvas para a próxima partida.</div>
       ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-m="reset">Voltar ao padrão</button></div>' : ''}`;
+    }
     return `${mHead('Adedonha', 'preparação')}<div class="mb">${tabs}${body}</div>
       <div class="mf">${host ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="start">Sortear letra</button>` : `<span class="mwait">Combinem tudo; o anfitrião começa</span>`}</div>`;
   }
@@ -4328,7 +4355,7 @@ function stopHTML(){
       const inCat = G.seq.filter(x => x.ci === ci && !x.recap), pos = inCat.findIndex(x => x === it) + 1;
       const okI = '<path d="M5 12.5l4.5 4.5L19 7.5"/>', noI = '<path d="M6 6l12 12M18 6 6 18"/>';
       return `${mHead(esc(cat), `letra ${G.letter} · resposta ${pos}/${inCat.length} · categoria ${ci + 1}/${N}`)}<div class="mb vbody"><div class="vprog"><b style="width:${prog}%"></b></div>
-        <div class="vcard ${done ? verdict : ''}">
+        <div class="vtcard ${done ? verdict : ''}">
           <div class="vwho">${avChip(it.id)}<span>${esc(gName(it.id))}</span></div>
           <div class="vans">${esc(r.t)}</div>
           <div class="vdup">${r.dup && r.dup.length ? `igual a ${r.dup.map(id => esc(gName(id))).join(', ')} · vale ${G.cfg.rep}` : `única · vale ${G.cfg.uniq}`}</div>
@@ -4380,17 +4407,21 @@ function fluxoHTML(){
     ${host ? '' : `<div class="mstate"><b>Preparando a partida</b><span>O anfitrião está escolhendo as regras. Quando ele tocar em Começar, escreva na lousa a resposta que você acha que a maioria vai dar.</span></div>`}
     <div class="mrules"><p>Alguém lê a pergunta da carta. Cada um escreve na lousa a resposta que acha que <b>a maioria</b> vai dar.</p>
     <p>Quem fugiu do fluxo pega peixe do cardume. Quando o cardume acaba, vence quem tiver <b>menos peixes</b>.</p></div>
+    <div class="mgt">Rodada</div><div class="mgroup">
     <div class="mrow col"><span>Como cada rodada termina</span>${host ? seg('frev', [['together','Pronto'],['timer','Com tempo'],['each','Cada um']], revModeNow()) : `<b>${{together:'cada um toca em Pronto; quando todos estiverem prontos, contagem e todos mostram', timer:'tempo igual para todos; quando acaba, todos mostram', each:'cada um mostra quando quiser; o anfitrião confere'}[revModeNow()]}</b>`}</div>
     ${host && revModeNow() === 'timer' ? `<div class="mrow"><span>Tempo para pensar</span>${stepper('ftime', S.g.timerDur, fmtT(S.g.timerDur * 1000))}</div>` : ''}
-    ${revModeNow() !== 'each' ? `<div class="mrow col"><span>Na hora de revelar</span>${host ? seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], rvlNow()) : `<b>${RVL_LB[rvlNow()]}</b>`}</div><div class="f-sub" style="margin-top:-4px">${RVL_TX[rvlNow()]}</div>
-    <div class="mrow col"><span>Efeito ao aparecer</span>${host ? seg('rvlfx', [['own','Transição de cada um'],['card','Virar carta']], rvlFxNow()) : `<b>${rvlFxNow() === 'card' ? 'virar carta' : 'transição de cada um'}</b>`}</div>` : ''}
-    ${host ? `<button class="mlink press" data-m="tlook">Som e visual do tempo ›</button>` : ''}
+    ${revModeNow() !== 'each' ? `<div class="mrow col"><span>Na hora de revelar</span>${host ? seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], rvlNow()) : `<b>${RVL_LB[rvlNow()]}</b>`}</div><div class="mdesc">${RVL_TX[rvlNow()]}</div>
+    <div class="mrow col"><span>Efeito ao aparecer</span>${host ? seg('rvlfx', [['own','Transição de cada um'],['card','Virar carta']], rvlFxNow()) : `<b>${rvlFxNow() === 'card' ? 'virar carta' : 'transição de cada um'}</b>`}</div><div class="mdesc">${RVLFX_TX[rvlFxNow()]}</div>` : ''}
+    </div><div class="mgt">Peixes</div><div class="mgroup">
     <div class="mrow"><span>Peixes no cardume</span>${host ? stepper('pool', G.cfg.pool) : `<b>${G.cfg.pool}</b>`}</div>
-    <div class="f-sub">${fishHint(n)}${host && G.cfg.pool !== fishSuggest(n) ? ` <button class="lnk" data-m="fishsug">Usar ${fishSuggest(n)}</button>` : ''}</div>
+    <div class="mdesc">${fishHint(n)}${host && G.cfg.pool !== fishSuggest(n) ? ` <button class="lnk" data-m="fishsug">Usar ${fishSuggest(n)}</button>` : ''}</div>
     <div class="mrow"><span>Resposta única leva 2 peixes (opcional)</span>${host ? tg('data-mtg="uniq2"', G.cfg.uniq2) : `<b>${G.cfg.uniq2 ? 'sim' : 'não'}</b>`}</div>
+    </div><div class="mgt">Partida</div><div class="mgroup">
     <div class="mrow"><span>Intervalo entre rodadas</span>${host ? tg('data-mtg="inter"', G.cfg.inter !== false) : `<b>${G.cfg.inter !== false ? 'sim' : 'não'}</b>`}</div>
-    <div class="f-sub" style="margin-top:-4px">Mostra o placar e só libera a lousa quando o anfitrião começar a próxima rodada.</div>
-    <div class="mrow col"><span>Empate na resposta mais comum</span>${host ? seg('mtie', [['none','Ninguém leva'],['all','Todos levam']], G.cfg.tie) : `<b>${G.cfg.tie === 'all' ? 'todos levam peixe' : 'ninguém leva peixe'}</b>`}</div></div>
+    <div class="mdesc">Mostra o placar e só libera a lousa quando o anfitrião começar a próxima rodada.</div>
+    <div class="mrow col"><span>Empate na resposta mais comum</span>${host ? seg('mtie', [['none','Ninguém leva'],['all','Todos levam']], G.cfg.tie) : `<b>${G.cfg.tie === 'all' ? 'todos levam peixe' : 'ninguém leva peixe'}</b>`}</div>
+    </div>
+    ${host ? `<div class="mgroup" style="margin-top:14px"><button class="mlink press" data-m="tlook"><span>Som e visual do tempo</span><span>›</span></button></div>` : ''}</div>
     <div class="mf">${host ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="start">Começar</button>` : '<span class="mwait">O anfitrião começa</span>'}</div>`;
   if (G.phase === 'judge'){
     const flow = fluxoFlow(), f = fluxoFish();
