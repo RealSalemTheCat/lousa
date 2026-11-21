@@ -1241,7 +1241,7 @@ function load(){
   try{
     const j = JSON.parse(localStorage.getItem(KEY));
     if (j && Array.isArray(j.profiles) && j.profiles.length){
-      j.g = Object.assign({tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
+      j.g = Object.assign({rvl:'count', tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
       j.ui = Object.assign(defUI(), j.ui || {}); j.ui.sizes = Object.assign(defUI().sizes, j.ui.sizes || {});
       j.profiles.forEach(p => { const d = newProfile(p.name, p.accent); for (const k in d) if (!(k in p)) p[k] = d[k]; if (!THEMES[p.theme]) p.theme = 'lousa'; });
       return j;
@@ -1688,25 +1688,24 @@ function fitCanvas(ctx, text, f, W, H){
   return {size, lines: test(size).lines};
 }
 function matrixPlan(fr, p, m){
-  // na fonte matricial, cada pixel da letra vira sempre o mesmo número de pontos (Baixa 1, Média 2, Alta 3);
-  // é o espaçamento dos pontos que se ajusta ao quadro, então o traço não muda ao abrir menus ou girar
-  const kq = {low:1, med:2, high:3}[p.ledDensity] || 2;
+  // os pontos têm sempre o mesmo tamanho (pela densidade escolhida); palavra curta fica com letras maiores,
+  // feitas de mais pontos, como num letreiro de verdade. Só encolhe os pontos se o texto não couber.
+  const N = {low:30, med:46, high:66}[p.ledDensity] || 46, base = Math.max(4, m / N);
   const raw = shownText(), text = E('upper') ? raw.toUpperCase() : raw;
   if (!text.trim()) return null;
-  if (E('anim') === 'roll'){
-    const rb = rollBox(fr), line = rollLine(raw, isSample()).replace(/   ·   /g, '  ·  '), mr = mxRowsFor(line);
-    return {pitch: Math.max(3, Math.min(m/8, rb.h * (p.rollSize/100) / ((mr.end - mr.start) * kq)))};
-  }
+  if (E('anim') === 'roll' && !editing) return {pitch: base};
   const {start, end} = mxRowsFor(text), lh = end - start;
   const full = Math.max(...text.split('\n').map(mxWidth)), minW = Math.max(1, ...text.split(/\s+/).filter(Boolean).map(mxWidth));
   let best = null;
   for (let mw = full; mw >= minW; mw--){
     const lines = mxLayout(text, mw), cw = Math.max(...lines.map(mxWidth)), chh = lines.length*(lh + 1) - 1;
-    const pt = Math.min(fr.w / (cw*kq), fr.h / (chh*kq));
+    const pt = Math.min(fr.w / cw, fr.h / chh);
     if (!best || pt > best.pt + .01) best = {pt, lines};
     if (cw < mw) mw = cw;
   }
-  return {pitch: Math.max(3, Math.min(m/8, best.pt)), fit: {k: kq, lines: best.lines, start, end}};
+  const k = Math.floor(best.pt / base);
+  if (k >= 1) return {pitch: base, fit: {k, lines: best.lines, start, end}};
+  return {pitch: Math.max(3, best.pt), fit: {k: 1, lines: best.lines, start, end}};
 }
 function renderLED(fr){
   const p = P(), m = Math.min(bw, bh);
@@ -2901,6 +2900,7 @@ function fitComp(){
   compEl.style.transform = `translate(${(pf.x + (pf.w - w*k)/2 - x0*k).toFixed(1)}px, ${(pf.y + (pf.h - h*k)/2 - y0*k).toFixed(1)}px) scale(${k.toFixed(4)})`;
 }
 async function finishExit(){
+  if (NET.role === 'host' && NET.veil) unveilAll();
   hideCover(false); setTimeout(renderMode, 50); if (typeof refitVV === 'function') refitVV();
   if (NET.role === 'host' && !revTogether() && !G) setTimeout(() => toast('Todos já mostraram?', 'Nova rodada', newRound), 700);
   if (comp){ comp = null; applyComp(); }
@@ -2927,6 +2927,12 @@ board.addEventListener('pointerup', e => {
   clearSelection();
   if (now - presentAt < 450) return;
   ripple(e.clientX, e.clientY);
+  if (coverOn && NET.veil){
+    // revelação pelo anfitrião: só ele vira as cartas; o convidado ainda pode sair com dois toques
+    if (NET.role === 'host'){ if (now - presentAt > 800){ unveilAll(); lastTap = 0; } return; }
+    if (now - lastTap < 380 && Math.hypot(e.clientX - lastTapXY[0], e.clientY - lastTapXY[1]) < 90){ lastTap = 0; exitPresent(); return; }
+    lastTap = now; lastTapXY = [e.clientX, e.clientY]; hint('Quem revela é o anfitrião'); return;
+  }
   if (coverOn){ hideCover(true); lastTap = 0; presentAt = now; return; }
   if (now - lastTap < 380 && Math.hypot(e.clientX - lastTapXY[0], e.clientY - lastTapXY[1]) < 90){ lastTap = 0; exitPresent(); return; }
   lastTap = now; lastTapXY = [e.clientX, e.clientY];
@@ -3060,7 +3066,7 @@ function winHTML(){
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 29')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 30')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3162,6 +3168,7 @@ sheetBody.addEventListener('click', e => {
     else if (k === 'tendsnd'){ S.g.tEndSnd = v; if (NET.role === 'host') pushRoster(); if (ac()) endSound(v); }
     else if (k === 'tsnd'){ S.g.tSnd = v; if (NET.role === 'host') pushRoster(); if (ac()) tickSound(v, .8, 2); }
     else if (k === 'tickfrom'){ S.g.tickFrom = +v; if (NET.role === 'host') pushRoster(); }
+    else if (k === 'rvl'){ S.g.rvl = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'revmode'){ S.g.revMode = v; if (v === 'each') resetReady(); if (NET.role === 'host') pushRoster(); updateRoomUI(); }
     else if (k === 'tend'){ S.g.tEnd = v; if (NET.role === 'host') pushRoster(); }
     else if (k === 'lockw'){ S.g.lockW = v; if (NET.role === 'host') pushRoster(); }
@@ -3378,8 +3385,25 @@ function showCover(){
   coverOn = true;
   coverEl.querySelector('.cn').textContent = p.name || 'Jogador';
   coverEl.querySelector('.ci').innerHTML = iconHTML(p);
+  veilInfo();
   coverEl.style.fontSize = Math.min(board.clientWidth, board.clientHeight) * .045 + 'px';
   coverEl.classList.remove('go'); coverEl.hidden = false;
+}
+/* texto da capa: normal, esperando o anfitrião, ou (no anfitrião) quantos já estão com a tela virada */
+function veilInfo(){
+  const ch = coverEl.querySelector('.ch'); if (!ch) return;
+  if (!NET.veil){ ch.textContent = 'Toque para revelar'; return; }
+  if (NET.role !== 'host'){ ch.textContent = 'O anfitrião vai revelar'; return; }
+  const total = 1 + [...NET.peers.values()].filter(pe => pe.open && pe.card && !pe.spect).length;
+  const n = NET.collect ? Object.keys(NET.collect).length : NET.gallery ? NET.gallery.length : total;
+  ch.textContent = `Toque para revelar todos · ${Math.min(n, total)} de ${total} prontos`;
+  if (n >= total && !NET.veilAll){ NET.veilAll = true; sfx('ui'); if (navigator.vibrate) try{ navigator.vibrate(40); }catch(_){} }
+}
+function unveilAll(){
+  if (NET.role !== 'host' || !NET.veil) return;
+  NET.veil = false; const d = 300;
+  netBroadcast({k:'unveil', at: Date.now() + d});
+  setTimeout(() => { if (presenting && coverOn) hideCover(true); }, d);
 }
 function hideCover(anim){
   if (!coverOn){ coverEl.hidden = true; return; }
@@ -3892,6 +3916,8 @@ function roundFlash(n){
   document.body.appendChild(el); setTimeout(() => el.remove(), 1700); sfx('show');
 }
 function renderMode(){
+  // fase nova do jogo sempre abre a tela do jogo, mesmo que ela tenha sido minimizada antes
+  const ph = G ? G.mode + G.phase + G.round : ''; if (ph !== MV.ph){ MV.ph = ph; modeMin = false; }
   if (G && G.mode === 'fluxo' && G.phase === 'write' && MV.flashed !== G.round){ const first = MV.flashed == null && G.round > 1 && false; MV.flashed = G.round; if (!presenting) roundFlash(G.round); }
   updateRoomUI();
   const show = modeOpen();
@@ -3901,7 +3927,7 @@ function renderMode(){
   pill.hidden = !G || show || presenting || !!win || (NET.role && NET.myReady);
   if (G && !show && !presenting){
     pill.innerHTML = G.mode === 'fluxo' && G.phase === 'write'
-      ? `${svg(FISH, 1.8)}<span>${fluxoStep()}</span><b>placar</b>`
+      ? (NET.phase === 'revealed' && NET.role === 'host' ? `${svg(FISH, 1.8)}<span>Recolhendo respostas…</span>` : `${svg(FISH, 1.8)}<span>${fluxoStep()}</span><b>placar</b>`)
       : `<span>${G.mode === 'stop' ? 'Adedonha' : 'Segue o Fluxo'}</span><b>voltar</b>`;
   }
   if (!show) return;
@@ -4263,7 +4289,7 @@ function netBroadcast(obj){ for (const pe of NET.peers.values()) if (pe.open) pe
 const hostSend = obj => { if (NET.host && NET.host.open) NET.host.send(obj); };
 function pushRoster(){
   NET.roster = hostRoster(); saveHostSess();
-  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, tSnd: S.g.tSnd || 'bip', tEndSnd: S.g.tEndSnd || 'bipes', undoReady: S.g.undoReady !== false, tPill: S.g.tPill !== false, tFuse: !!S.g.tFuse, tEdge: !!S.g.tEdge, tRim: S.g.tRim !== false, tBig: S.g.tBig !== false, lobby: S.g.lobby !== false}});
+  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, tSnd: S.g.tSnd || 'bip', tEndSnd: S.g.tEndSnd || 'bipes', undoReady: S.g.undoReady !== false, tPill: S.g.tPill !== false, tFuse: !!S.g.tFuse, tEdge: !!S.g.tEdge, tRim: S.g.tRim !== false, tBig: S.g.tBig !== false, rvl: S.g.rvl || 'count', lobby: S.g.lobby !== false}});
   syncRoom();
   renderScoreTag();
   if (S.g.autoAll !== false) checkAutoReveal();
@@ -4350,6 +4376,7 @@ function hostSnap(id, d, final){
   if (!NET.secret){ NET.live[id] = d; netBroadcast({k:'live', id, d}); syncRoomSoon(); }
 }
 function maybeGallery(force){
+  if (NET.veil) setTimeout(veilInfo, 0);
   const need = [myId(), ...[...NET.peers.values()].filter(p => p.open && p.card).map(p => p.card.id)];
   if (!force && !need.every(id => NET.collect[id])) return;
   clearTimeout(NET.collectT);
@@ -4379,6 +4406,7 @@ function revealAll(){
 }
 function newRound(){
   if (NET.role !== 'host') return;
+  NET.veil = false;
   NET.phase = 'writing'; NET.gallery = null; NET.live = {}; resetReady(); setLock(null);
   netBroadcast({k:'round'});
 
@@ -4664,7 +4692,7 @@ function guestMsg(m){
   if (m.k === 'roster'){
     const wasSecret = NET.secret;
     NET.roster = m.list; NET.secret = m.room.secret;
-    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, tSnd: m.room.tSnd, tEndSnd: m.room.tEndSnd, undoReady: m.room.undoReady, tPill: m.room.tPill, tFuse: m.room.tFuse, tEdge: m.room.tEdge, tRim: m.room.tRim, tBig: m.room.tBig, lobby: m.room.lobby};
+    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, tSnd: m.room.tSnd, tEndSnd: m.room.tEndSnd, undoReady: m.room.undoReady, tPill: m.room.tPill, tFuse: m.room.tFuse, tEdge: m.room.tEdge, tRim: m.room.tRim, tBig: m.room.tBig, rvl: m.room.rvl, lobby: m.room.lobby};
     const mine = m.list.find(r => r.id === myId()); if (mine) NET.myReady = !!mine.ready;
     syncRoom();
     renderScoreTag();
@@ -4680,8 +4708,9 @@ function guestMsg(m){
   if (m.k === 'fishmsg'){ setTimeout(() => fishToast(m.f), 300); return; }
   if (m.k === 'timer'){ const ms = m.at && NET.offOk ? m.at - NET.off - Date.now() : m.ms; const wasP = TM.paused; startTimer(Math.max(0, ms), true, m.dur); if (wasP) toast('Valendo de novo!'); return; }
   if (m.k === 'pong'){ clockSample(m); return; }
-  if (m.k === 'tpause'){ TM.dur = m.dur || TM.dur; pauseTimer(m.ms, true); toast('O anfitrião pausou o tempo'); return; }
+  if (m.k === 'tpause'){ TM.dur = m.dur || TM.dur; pauseTimer(m.ms, true); return; }
   if (m.k === 'timerStop'){ stopTimer(true); return; }
+  if (m.k === 'unveil'){ NET.veil = false; const d = m.at && NET.offOk ? m.at - NET.off - Date.now() : 0; setTimeout(() => { if (presenting && coverOn) hideCover(true); }, Math.max(0, Math.min(1000, d))); return; }
   if (m.k === 'reveal'){ NET.phase = 'revealed'; NET.myReady = false; setLock(null); updateRoomUI(); countdownThenShow(); return; }
   if (m.k === 'gallery'){ NET.gallery = m.list; syncRoom(); return; }
   if (m.k === 'live'){ NET.live[m.id] = m.d; syncRoomSoon(); return; }
@@ -4735,11 +4764,20 @@ function roundClear(){
   save(); applyTheme(true);
   if (!G) toast('Nova rodada', 'Desfazer', () => { Object.assign(P(), snap); txt.textContent = P().text; save(); applyTheme(true); });
 }
+const rvlNow = () => (NET.role === 'guest' ? (NET.rules || {}).rvl : S.g.rvl) || 'count';
 function countdownThenShow(){
   closeLobby();
   if (editing) txt.blur();
   closeSheet(); closeRing();
   if (presenting) finishExit();
+  const how = rvlNow();
+  NET.veil = how === 'host'; NET.veilAll = false;
+  if (how !== 'count'){
+    // sem contagem: entra direto; no modo do anfitrião, fica coberto até ele tocar
+    forceCover = true; present(); setTimeout(sendFinalSnap, 300);
+    if (how === 'now') setTimeout(() => { if (presenting && coverOn) hideCover(true); }, 700);
+    return;
+  }
   const cd = $('#cd');
   cd.hidden = false;
   const step = n => {
@@ -5163,18 +5201,21 @@ function stepTimer(dir){
 }
 const fsub = t => `<div class="f-sub">${t}</div>`;
 /* controle da rodada: como revelar e nova rodada (fica no topo da janela Sala e em Jogo › Rodada) */
+const RVL_TX = {count:'Contagem de 3 s para todos virarem o celular para a mesa; depois os quadros aparecem.', now:'Os quadros aparecem na hora, sem contagem.', host:'Os quadros aparecem cobertos. Quando todos estiverem com a tela virada, o anfitrião toca na própria tela e revela todos juntos.'};
 function roundCtlHTML(){
   const host = NET.role === 'host', tog = revTogether();
   if (!host) return `<div class="sec"><div class="sec-t">Rodada</div>${fsub(tog
       ? (revModeNow() === 'timer' ? 'Tempo igual para todos: quando o tempo acabar, os quadros aparecem juntos. Terminou antes? Toque em Pronto.' : 'Revelação juntos: quando terminar, toque em Pronto (ou dois toques no quadro). Todos mostram ao mesmo tempo.')
-      : 'Cada um mostra quando quiser, como na mesa: dois toques no quadro ou Mostrar.')}</div>`;
+      : 'Cada um mostra quando quiser, como na mesa: dois toques no quadro ou Mostrar.')}${tog ? fsub(RVL_TX[rvlNow()]) : ''}</div>`;
   const rm = revModeNow();
   return `<div class="sec"><div class="sec-t">Rodada</div>
     ${seg('revmode', [['together','Pronto'],['timer','Tempo igual'],['each','Cada um']], rm)}
     ${fsub(rm === 'each' ? 'Sem Pronto e sem contagem: cada um vira a tela no seu tempo, quando a mesa combinar.' : rm === 'timer' ? 'Todos têm o mesmo tempo, pelo mesmo relógio. Quando acaba, os quadros travam e aparecem juntos. Quem terminar antes pode marcar Pronto.' : 'Cada um toca em Pronto quando terminar; a contagem começa para todos ao mesmo tempo.')}
     ${rm === 'timer' ? `<div class="tstep" style="margin-top:10px"><button class="sbtn press" data-g="tminus" aria-label="Menos">−</button><span class="tv" id="tVal">${TM.run ? fmtT(TM.end - performance.now()) : fmtT(S.g.timerDur * 1000)}</span><button class="sbtn press" data-g="tplus" aria-label="Mais">+</button></div>` : ''}
     ${rm !== 'each' ? `<div class="f-row" style="margin-top:6px"><span class="f-lb">${rm === 'timer' ? 'Revelar antes se todos ficarem prontos' : 'Começar sozinho quando todos estiverem prontos'}</span>${tg('data-gtg="autoAll"', S.g.autoAll !== false)}</div>
-    <div class="f-row"><span class="f-lb">Permitir mudar de ideia depois do Pronto</span>${tg('data-gtg="undoReady"', S.g.undoReady !== false)}</div>` : ''}
+    <div class="f-row"><span class="f-lb">Permitir mudar de ideia depois do Pronto</span>${tg('data-gtg="undoReady"', S.g.undoReady !== false)}</div>
+    <div class="f-stack" style="margin-top:10px"><span class="f-lb">Na hora de revelar</span>${seg('rvl', [['count','Contagem'],['now','Direto'],['host','Anfitrião vira']], S.g.rvl || 'count')}</div>
+    ${fsub(RVL_TX[S.g.rvl || 'count'])}` : ''}
     <div class="room-act">${rm === 'together' ? '<button class="nbtn press" data-g="reveal">Revelar agora</button>' : ''}${rm === 'each' && G && G.mode === 'fluxo' ? '<button class="nbtn press" data-g="collect">Conferir respostas</button>' : ''}<button class="nbtn pri press" data-g="round">${rm === 'timer' ? (TM.run ? 'Recomeçar rodada' : 'Começar rodada') : 'Nova rodada'}</button></div>
     <div class="f-row"><span class="f-lb">Limpar quadros na nova rodada</span>${tg('data-gtg="roundClear"', S.g.roundClear)}</div>
     <div class="f-row"><span class="f-lb">Saguão de desenho para quem terminou</span>${tg('data-gtg="lobby"', S.g.lobby !== false)}</div></div>`;
