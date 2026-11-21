@@ -733,6 +733,23 @@ body.inmode .dock{visibility:hidden}
 .confetti i{position:absolute;top:-20px;border-radius:2px;animation:confall linear forwards}
 @keyframes confall{to{transform:translate(var(--x),110vh) rotate(var(--r))}}
 .timer.paused{animation:tpaus 1.2s ease-in-out infinite}
+.timer{transition:transform .35s var(--spring),color .3s,background-color .3s}
+.timer.warn{transform:scale(1.14);transform-origin:right center;color:#ff9a1f;background:color-mix(in srgb,#ff9a1f 16%,transparent)}
+.timer.hot{transform:scale(1.22);transform-origin:right center;background:color-mix(in srgb,#ff4d4d 16%,transparent)}
+.trim{position:absolute;inset:0;width:100%;height:100%;z-index:7;pointer-events:none;overflow:visible;opacity:0;transition:opacity .4s}
+.trim.on{opacity:1}
+.trim path{fill:none;stroke-linecap:round;transition:stroke .5s}
+.trim .bg{stroke:color-mix(in srgb,var(--ink) 10%,transparent)}
+.trim .fg{stroke:var(--accent);filter:drop-shadow(0 0 4px var(--accent));transition:stroke-dasharray .25s linear,stroke .5s}
+.trim.warn .fg{stroke:#ff9a1f;filter:drop-shadow(0 0 6px #ff9a1f)}
+.trim.hot .fg{stroke:#ff4d4d;filter:drop-shadow(0 0 9px #ff4d4d)}
+.trim.paused .fg{animation:tpaus 1.2s ease-in-out infinite}
+.tbig{position:fixed;left:50%;top:50%;z-index:64;pointer-events:none;font:800 min(46vw,46vh)/1 var(--uif);color:#ff4d4d;opacity:0;transform:translate(-50%,-50%);font-variant-numeric:tabular-nums;text-shadow:0 0 40px rgba(255,60,60,.5)}
+.tbig.go{animation:tbig .95s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes tbig{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}18%{opacity:.34;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.82)}}
+.mbar{display:block;height:4px;border-radius:3px;margin-top:6px;background:color-mix(in srgb,var(--tx) 10%,transparent);overflow:hidden}
+.mbar b{display:block;height:100%;width:100%;background:var(--accent);border-radius:inherit;transform-origin:left;transition:transform .25s linear,background-color .4s}
+.mbar.warn b{background:#ff9a1f}.mbar.hot b{background:#ff4d4d}
 @keyframes tpaus{50%{opacity:.45}}
 .tpop{position:fixed;z-index:80;display:flex;gap:4px;padding:5px;border-radius:14px;background:rgba(24,24,27,.97);border:1px solid var(--line2);box-shadow:0 14px 34px rgba(0,0,0,.5);animation:morein .25s cubic-bezier(.3,1.45,.5,1);transform-origin:90% 0}
 .tpop button{height:38px;padding:0 12px;border-radius:10px;font-weight:700;font-size:13.5px;background:var(--panel2)}.tpop button.pri{background:var(--accent);color:var(--on-accent)}
@@ -874,6 +891,7 @@ body.inlobby .bals:not(.anchor-b):not(.bs-live){top:calc(124px + env(safe-area-i
 .ring.open .ring-disc{transform:scale(1) rotate(0);opacity:1}
 .ring-item{position:absolute;left:0;top:0;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:var(--panel3);color:var(--tx);display:grid;place-items:center;transform:translate(0,0) scale(.3);opacity:0;transition:transform .38s var(--spring),opacity .2s,background-color .15s,box-shadow .15s;transition-delay:calc(var(--i) * 22ms)}
 .ring-item svg{width:22px;height:22px}
+.ring-item .rtx{font-size:13px;font-weight:750;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .ring.open .ring-item{transform:translate(var(--x),var(--y)) scale(1);opacity:1}
 .ring.open .ring-item.hot{transform:translate(var(--x),var(--y)) scale(1.16);background:var(--accent);color:var(--on-accent);transition-delay:0s}
 .ring-item.on{box-shadow:0 0 0 2px var(--accent)}
@@ -882,7 +900,7 @@ body.inlobby .bals:not(.anchor-b):not(.bs-live){top:calc(124px + env(safe-area-i
 .ring-center{position:absolute;left:0;top:0;transform:translate(-50%,-50%);width:74px;text-align:center;font:600 11.5px/1.25 var(--uif);color:var(--tx2);opacity:0;transition:opacity .2s .1s}
 .ring.open .ring-center{opacity:1}
 .ring.closing .ring-item{transition-delay:0s}
-.txt-box.sample{opacity:.55}
+.txt-box.sample{opacity:1}
 .empty.below{align-items:flex-end;padding-bottom:7%}
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:#2b2b2f;color:var(--tx);border:1px solid var(--line2);border-radius:13px;padding:6px 6px 6px 15px;display:flex;gap:10px;align-items:center;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s var(--spring);z-index:60;white-space:nowrap;box-shadow:0 12px 30px rgba(0,0,0,.45)}
@@ -1208,7 +1226,7 @@ function load(){
   try{
     const j = JSON.parse(localStorage.getItem(KEY));
     if (j && Array.isArray(j.profiles) && j.profiles.length){
-      j.g = Object.assign({rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
+      j.g = Object.assign({tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
       j.ui = Object.assign(defUI(), j.ui || {}); j.ui.sizes = Object.assign(defUI().sizes, j.ui.sizes || {});
       j.profiles.forEach(p => { const d = newProfile(p.name, p.accent); for (const k in d) if (!(k in p)) p[k] = d[k]; if (!THEMES[p.theme]) p.theme = 'lousa'; });
       return j;
@@ -1427,9 +1445,9 @@ function render(){
   ledWrap.hidden = !isLed() || editing;
   ledBase.style.display = p.texture ? '' : 'none';
   tickBox.hidden = !(roll && !ledMode);
-  tickBox.style.opacity = sample ? '.55' : '1';
+  tickBox.style.opacity = '1';
   // a caixa de texto continua no lugar (para tocar e editar), mas invisível quando outro modo desenha
-  txtBox.style.opacity = (ledMode || roll) ? '0' : (sample ? '.55' : '1');
+  txtBox.style.opacity = (ledMode || roll) ? '0' : '1';
   renderDom(fr);
   if (roll && !ledMode) renderTicker(fr);
   if (ledMode) renderLED(fr);
@@ -1687,8 +1705,9 @@ function renderLED(fr){
   lb.fillStyle = lum(bg) > .4 ? rgba('#000000', .07) : mix(bg, ink, .09);
   dotPath(lb, cb => { for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) cb(x, y); }, .36);
   lb.fill();
-  ledGlow.style.filter = `blur(${Math.max(2, pitch*.55)}px) saturate(1.35)`;
-  ledGlow.style.opacity = (E('glow')/100).toFixed(2);
+  ledGlow.style.filter = `blur(${Math.max(2, pitch*.6)}px) saturate(1.6) brightness(1.35)`;
+  ledGlow.style.opacity = Math.min(1, E('glow')/100*1.5).toFixed(2);
+  ledGlow.style.mixBlendMode = lum(bg) > .4 ? 'normal' : 'screen';
   ldx.setTransform(1,0,0,1,0,0); ldx.clearRect(0,0,cols,rows);
   if (p.strokes.length){
     const mp = mapping(), k = mp.s / pitch;
@@ -1702,7 +1721,7 @@ function renderLED(fr){
   const f = FONTS[E('font')], useMx = E('font') === 'matrix';
   const bx = (fr.x - ox)/pitch, by = (fr.y - oy)/pitch, bW = fr.w/pitch, bH = fr.h/pitch;
   const gs = gradSpec();
-  ledWrap.style.opacity = sample ? '.55' : '1';
+  ledWrap.style.opacity = '1';
   if (!text.trim()){ ledFrame(null); return; }
   const gphase = now => gs && gs.anim ? (now/1000/(gs.speed||3)) % 1 : 0;
   if (E('anim') === 'roll'){
@@ -1897,14 +1916,21 @@ function ledFrame(t){
   ll.setTransform(dpr,0,0,dpr,0,0); ll.clearRect(0,0,bw,bh);
   for (const g of groups.values()){
     ll.fillStyle = g.c;
-    dotPath(ll, cb => { for (let k = 0; k < g.pts.length; k += 2) cb(g.pts[k], g.pts[k+1]); }, .4);
+    dotPath(ll, cb => { for (let k = 0; k < g.pts.length; k += 2) cb(g.pts[k], g.pts[k+1]); }, .43);
     ll.fill();
   }
-  ll.fillStyle = 'rgba(255,255,255,.32)';
-  dotPath(ll, cb => { for (let k = 0; k < all.length; k += 2) cb(all[k], all[k+1]); }, .17);
+  // núcleo quente: o centro do LED aceso quase branco, como luz de verdade
+  ll.fillStyle = 'rgba(255,255,255,.5)';
+  dotPath(ll, cb => { for (let k = 0; k < all.length; k += 2) cb(all[k], all[k+1]); }, .2);
+  ll.fill();
+  ll.fillStyle = 'rgba(255,255,255,.35)';
+  dotPath(ll, cb => { for (let k = 0; k < all.length; k += 2) cb(all[k], all[k+1]); }, .1);
   ll.fill();
   lg.setTransform(1,0,0,1,0,0); lg.clearRect(0,0,ledGlow.width,ledGlow.height);
+  lg.globalCompositeOperation = 'lighter';
   lg.drawImage(ledLit, 0, 0, ledGlow.width, ledGlow.height);
+  lg.drawImage(ledLit, 0, 0, ledGlow.width, ledGlow.height);
+  lg.globalCompositeOperation = 'source-over';
 }
 
 /* ================= entrada de desenho ================= */
@@ -2373,6 +2399,12 @@ const RI = {
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
   text:'<path d="M5 6V5h14v1M12 5v14M9 19h6"/>',
   back:'<path d="M15 18l-6-6 6-6"/>',
+  play:'<path d="M8 5.5v13l10.5-6.5z"/>',
+  pause:'<path d="M8.5 5v14M15.5 5v14"/>',
+  stop:'<rect x="6.5" y="6.5" width="11" height="11" rx="2"/>',
+  clock:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 1.8M9.5 2.5h5M12 2.5V6"/>',
+  eye:'<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/>',
 };
 function ringDefs(kind){
   const u = S.ui, h = H();
@@ -2390,32 +2422,56 @@ function ringDefs(kind){
       {label:'Apagar', icon: inErase ? TOOLS[u.tool].i : TOOLS.erase.i, on: inErase, sub:'erasers'},
       {label:'Cores', color: penColor(u.color), sub:'colors'},
       {label:'Desfazer', icon:RI.undo, off: !h.u.length, act: undo},
-      {label:'Refazer', icon:RI.redo, off: !h.r.length, act: redoAct}];
+      {label:'Refazer', icon:RI.redo, off: !h.r.length, act: redoAct}].concat(NET.role !== 'guest' ? [{label:'Cronômetro', icon:RI.clock, on: TM.run || TM.paused, sub:'timer'}] : []);
   }
-  const P0 = P();
-  const list = [
-    {label:'Mostrar', icon:RI.show, act: present},
-    {label:'Escrever', icon:RI.text, act(){ startEditing(); }},
-    {label:'Desenho', icon:TOOLS.pen.i, act(){ setMode('draw'); }},
+  if (kind === 'timer'){
+    const back = RG.base || 'text', canStart = !G || G.mode === 'fluxo';
+    const L = [];
+    if (TM.run) L.push({label:'Pausar', icon:RI.pause, act(){ pauseTimer(); }});
+    else if (TM.paused) L.push({label:'Continuar', icon:RI.play, act(){ resumeTimer(); }});
+    else L.push({label:'Iniciar ' + fmtT(S.g.timerDur*1000), icon:RI.play, off: !canStart, act(){ startTimer(S.g.timerDur * 1000); }});
+    L.push({label:'+15 s', txt:'+15', stay:true, act(){ adjTimer(15); }});
+    L.push({label:'−15 s', txt:'−15', stay:true, act(){ adjTimer(-15); }});
+    if (!TM.run && !TM.paused) for (const sec of [30, 60, 90, 120, 180].filter(x => x !== S.g.timerDur)) L.push({label:'Iniciar ' + fmtT(sec*1000), txt: sec < 60 ? sec + 's' : fmtT(sec*1000).replace(':00',"'"), on: S.g.timerDur === sec, off: !canStart, act(){ S.g.timerDur = sec; save(); startTimer(sec * 1000); }});
+    else L.push({label:'Parar', icon:RI.stop, act(){ stopTimer(); }});
+    L.push({label:'Voltar', icon:RI.back, sub: back});
+    return L;
+  }
+  const P0 = P(), boss = NET.role !== 'guest';
+  const list = [{label:'Mostrar', icon:RI.show, act: present}];
+  if (boss){
+    if (TM.run) list.push({label:'Pausar tempo', icon:RI.pause, act(){ pauseTimer(); }});
+    else if (TM.paused) list.push({label:'Continuar tempo', icon:RI.play, act(){ resumeTimer(); }});
+    list.push({label:'Cronômetro', icon:RI.clock, on: TM.run || TM.paused, sub:'timer'});
+  }
+  if (NET.role === 'host' && !G){
+    if (NET.phase === 'writing') list.push({label:'Revelar todos', icon:RI.eye, act: revealAll});
+    else list.push({label:'Nova rodada', icon:RI.redo, act: newRound});
+  }
+  if (NET.role || G || S.profiles.length > 1) list.push({label:'Placar', icon:RI.trophy, act(){ gtab = 'placar'; openSheet('game'); }});
+  list.push(
     {label:'Jogo', icon:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>', act(){ openSheet('game'); }},
     {label:'Tema', icon:UI.palette, act(){ openSheet('theme'); }},
-    {label:'Jogador', icon:RI.user, act(){ openSheet('player'); }},
     {label:'Ajustes', icon:UI.sliders, act(){ openSheet('settings'); }},
-    {label:'Limpar', icon:RI.trash, off: !(P0.text || P0.strokes.length), act(){ $('#clearBtn').click(); }},
-  ];
+    {label:'Limpar', icon:RI.trash, off: !(P0.text || P0.strokes.length), act(){ $('#clearBtn').click(); }});
   if (fsOK) list.push({label: fsEl() ? 'Sair da tela cheia' : 'Tela cheia', icon: fsEl() ? UI.fsOff : UI.fsOn, act(){ $('#fsBtn').click(); }});
   return list;
 }
-const RING_TITLE = {text:'Atalhos', draw:'Ferramentas', colors:'Cores', shapes:'Formas', erasers:'Apagar'};
+const RING_TITLE = {text:'Atalhos', draw:'Ferramentas', colors:'Cores', shapes:'Formas', erasers:'Apagar', timer:'Cronômetro'};
+function ringTitle(kind){
+  if (kind === 'timer'){ const ms = TM.run ? TM.end - performance.now() : TM.paused ? TM.left : S.g.timerDur*1000; return fmtT(ms) + (TM.paused ? ' · pausado' : ''); }
+  return RING_TITLE[kind] || 'Ferramentas';
+}
 function buildRing(kind, animate){
+  if (kind === 'text' || kind === 'draw') RG.base = kind;
   RG.kind = kind; RG.items = ringDefs(kind); RG.hot = -1;
   const n = RG.items.length, R = n > 9 ? 90 : 84;
   ringItemsEl.innerHTML = RG.items.map((it, i) => {
     const a = (-90 + i * 360 / n) * Math.PI / 180;
     const st = `--x:${(Math.cos(a)*R).toFixed(1)}px;--y:${(Math.sin(a)*R).toFixed(1)}px;--i:${i};${it.color ? `background:${it.color};` : ''}${it.off ? 'opacity:.35;' : ''}`;
-    return `<button class="ring-item${it.color ? ' color' : ''}${it.on ? ' on' : ''}" data-ri="${i}" style="${st}" aria-label="${it.label}">${it.icon ? svg(it.icon, 1.9) : ''}</button>`;
+    return `<button class="ring-item${it.color ? ' color' : ''}${it.on ? ' on' : ''}" data-ri="${i}" style="${st}" aria-label="${it.label}">${it.icon ? svg(it.icon, 1.9) : it.txt ? `<b class="rtx">${it.txt}</b>` : ''}</button>`;
   }).join('');
-  ringCenter.textContent = RING_TITLE[kind] || 'Ferramentas';
+  ringCenter.textContent = ringTitle(kind);
   if (animate !== false){ ringEl.classList.remove('open'); void ringEl.offsetWidth; requestAnimationFrame(() => ringEl.classList.add('open')); }
 }
 function openRing(x, y, kind, holdId){
@@ -2440,6 +2496,7 @@ function ringActivate(i){
   const it = RG.items[i]; if (!it || it.off) return;
   if (navigator.vibrate) try{ navigator.vibrate(6); }catch(_){}
   if (it.sub){ RG.hold = null; buildRing(it.sub); return; }
+  if (it.stay){ RG.hold = null; it.act(); buildRing(RG.kind, false); return; }
   closeRing();
   setTimeout(() => it.act(), 10);
 }
@@ -2453,7 +2510,7 @@ function ringHot(x, y){
   if (hot !== RG.hot){
     RG.hot = hot;
     ringItemsEl.querySelectorAll('.ring-item').forEach((b, i) => b.classList.toggle('hot', i === hot));
-    ringCenter.textContent = hot >= 0 ? RG.items[hot].label : (RING_TITLE[RG.kind] || 'Ferramentas');
+    ringCenter.textContent = hot >= 0 ? RG.items[hot].label : ringTitle(RG.kind);
   }
 }
 document.addEventListener('pointermove', e => { if (RG.open && RG.hold === e.pointerId) ringHot(e.clientX, e.clientY); }, true);
@@ -2975,7 +3032,8 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
-    <div class="sec">${fsub('Lousa · versão 27')}</div>`;
+    ${S.g.dev ? devHTML() : ''}
+    <div class="sec" id="verSec">${fsub('Lousa · versão 28')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3142,7 +3200,34 @@ function placeTimer(pf){
 const tRule = k => { const R = NET.role === 'guest' ? (NET.rules || {}) : S.g; return R[k]; };
 const fuseEl = document.createElement('div'); fuseEl.className = 'fuse'; fuseEl.hidden = true; fuseEl.innerHTML = '<i class="rope"></i><b class="spark"></b>'; document.getElementById('app').appendChild(fuseEl);
 const edgeEl = document.createElement('div'); edgeEl.className = 'edgeglow'; document.body.appendChild(edgeEl);
+const rimEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); rimEl.classList.add('trim'); rimEl.innerHTML = '<path class="bg" pathLength="100"/><path class="fg" pathLength="100" stroke-dasharray="100 100"/>'; board.appendChild(rimEl);
+const bigEl = document.createElement('div'); bigEl.className = 'tbig'; document.body.appendChild(bigEl);
+let rimKey = '';
+/* contorno: um traço que percorre a borda do quadro, a partir do topo, e vai encolhendo */
+function rimPath(){
+  const W = board.clientWidth, Hh = board.clientHeight, sw = Math.max(3, Math.min(W, Hh) * .012), r0 = parseFloat(getComputedStyle(board).borderTopLeftRadius) || 0;
+  const key = W + 'x' + Hh + ':' + r0; if (key === rimKey) return; rimKey = key;
+  const i = sw/2 + 1, r = Math.max(0, r0 - i), x0 = i, y0 = i, x1 = W - i, y1 = Hh - i, cx = W/2;
+  const d = `M${cx} ${y0}H${x1-r}A${r} ${r} 0 0 1 ${x1} ${y0+r}V${y1-r}A${r} ${r} 0 0 1 ${x1-r} ${y1}H${x0+r}A${r} ${r} 0 0 1 ${x0} ${y1-r}V${y0+r}A${r} ${r} 0 0 1 ${x0+r} ${y0}Z`;
+  rimEl.setAttribute('viewBox', `0 0 ${W} ${Hh}`);
+  rimEl.querySelectorAll('path').forEach(pa => { pa.setAttribute('d', d); pa.style.strokeWidth = sw; });
+}
+function rimShow(left, paused){
+  const on = tRule('tRim') !== false && (TM.run || TM.paused) && TM.dur > 0;
+  rimEl.classList.toggle('on', on); if (!on) return;
+  rimPath();
+  const p = Math.max(0, Math.min(1, left / TM.dur)), sec = Math.ceil(left/1000);
+  rimEl.querySelector('.fg').style.strokeDasharray = `${(p*100).toFixed(2)} 100`;
+  rimEl.classList.toggle('warn', sec <= Math.max(10, TM.dur/1000*.25) && sec > 5);
+  rimEl.classList.toggle('hot', sec <= 5);
+  rimEl.classList.toggle('paused', !!paused);
+}
+function bigTick(sec){
+  if (tRule('tBig') === false || sec > 5 || sec <= 0) return;
+  bigEl.textContent = sec; bigEl.classList.remove('go'); void bigEl.offsetWidth; bigEl.classList.add('go');
+}
 function timerLooks(left){
+  rimShow(left, false);
   const pill = tRule('tPill') !== false, fuse = !!tRule('tFuse'), edge = !!tRule('tEdge');
   timerEl.classList.toggle('ghost', !pill);
   fuseEl.hidden = !fuse || !TM.run || presenting;
@@ -3161,11 +3246,13 @@ function tickTimer(){
   timerEl.querySelector('span').textContent = fmtT(left);
   if (win === 'game' || win === 'room'){ const tv = sheetBody.querySelector('#tVal, .bigtime'); if (tv) tv.textContent = fmtT(Math.max(0, left)); }
   const mtm = document.getElementById('mTime'); if (mtm) mtm.textContent = fmtT(Math.max(0, left));
+  const mb = document.getElementById('mBar'); if (mb){ const s2 = Math.ceil(left/1000); mb.firstChild.style.transform = `scaleX(${Math.max(0, Math.min(1, left / TM.dur)).toFixed(4)})`; mb.classList.toggle('warn', s2 <= 10 && s2 > 5); mb.classList.toggle('hot', s2 <= 5); }
   const fg = timerEl.querySelector('.tr-fg');
   if (fg) fg.style.strokeDashoffset = (62.83 * (1 - Math.max(0, left) / TM.dur)).toFixed(2);
   const sec = Math.ceil(left/1000);
   timerEl.classList.toggle('hot', left > 0 && sec <= 5);
-  if (sec !== TM.lastSec && sec > 0){ TM.lastSec = sec; timerTick(sec); }
+  timerEl.classList.toggle('warn', sec <= 10 && sec > 5);
+  if (sec !== TM.lastSec && sec > 0){ const first = TM.lastSec === -1; TM.lastSec = sec; timerTick(sec); if (!first || sec <= 5) bigTick(sec); }
   if (left <= 0) timerDone();
 }
 /* trava do fim do tempo: 'all' (escrita e desenho) ou 'text' (só a escrita) */
@@ -3190,7 +3277,7 @@ function startTimer(ms, fromNet, dur){
   if (win) syncSheet();
 }
 function stopTimer(fromNet){
-  clearInterval(TM.iv); TM.run = false; TM.paused = false; timerEl.hidden = true; timerEl.classList.remove('hot', 'done', 'paused'); fuseEl.hidden = true; tpop.hidden = true;
+  clearInterval(TM.iv); TM.run = false; TM.paused = false; timerEl.hidden = true; timerEl.classList.remove('hot', 'warn', 'done', 'paused'); fuseEl.hidden = true; tpop.hidden = true; rimShow(0);
   render();
   if (!fromNet && NET.role === 'host') netBroadcast({k:'timerStop'});
   if (win) syncSheet();
@@ -3198,7 +3285,7 @@ function stopTimer(fromNet){
 function timerDone(){
   clearInterval(TM.iv); TM.run = false;
   timerEl.querySelector('span').textContent = '0:00';
-  timerEl.classList.remove('hot'); timerEl.classList.add('done');
+  timerEl.classList.remove('hot', 'warn'); timerEl.classList.add('done'); rimShow(0);
   tflash.classList.remove('on'); void tflash.offsetWidth; tflash.classList.add('on');
   if (!S.g.mute && ac()){ try{ endSound((NET.role === 'guest' ? (NET.rules || {}) : S.g).tEndSnd || 'bipes'); }catch(_){} }
   if (navigator.vibrate) try{ navigator.vibrate([140, 80, 140]); }catch(_){}
@@ -3223,14 +3310,19 @@ tpop.addEventListener('click', e => {
   const b = e.target.closest('[data-tp]'); if (!b) return; const a = b.dataset.tp;
   if (a === 'more'){ tpop.hidden = true; openSheet('game'); return; }
   if (a === 'pause'){ TM.paused ? resumeTimer() : pauseTimer(); posTpop(); return; }
-  if (TM.paused){ TM.left = Math.max(1000, TM.left + (+a) * 1000); timerEl.querySelector('span').textContent = fmtT(TM.left); if (NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur}); return; }
-  if (TM.run){ const left = TM.end - performance.now(), nl = Math.max(1000, left + (+a) * 1000); TM.end = performance.now() + nl; TM.dur = Math.max(TM.dur, nl); TM.lastSec = -1; if (NET.role === 'host') netBroadcast({k:'timer', at: Date.now() + nl, ms: nl, dur: TM.dur}); tickTimer(); }
+  adjTimer(+a);
 });
 document.addEventListener('pointerdown', e => { if (!tpop.hidden && !e.target.closest('.tpop,#timer')) tpop.hidden = true; }, true);
+/* soma/subtrai segundos: no tempo correndo, no pausado ou na duração da próxima contagem */
+function adjTimer(sec){
+  if (TM.paused){ TM.left = Math.max(1000, TM.left + sec * 1000); TM.dur = Math.max(TM.dur, TM.left); timerEl.querySelector('span').textContent = fmtT(TM.left); if (NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur}); return; }
+  if (TM.run){ const left = TM.end - performance.now(), nl = Math.max(1000, left + sec * 1000); TM.end = performance.now() + nl; TM.dur = Math.max(TM.dur, nl); TM.lastSec = -1; if (NET.role === 'host') netBroadcast({k:'timer', at: Date.now() + nl, ms: nl, dur: TM.dur}); tickTimer(); return; }
+  S.g.timerDur = Math.max(10, Math.min(900, S.g.timerDur + sec)); save(); if (win) syncSheet();
+}
 function pauseTimer(ms, fromNet){
   if (!TM.run && !fromNet) return;
   TM.left = ms != null ? ms : TM.end - performance.now(); clearInterval(TM.iv); TM.run = false; TM.paused = true;
-  timerEl.hidden = false; timerEl.classList.add('paused'); timerEl.querySelector('span').textContent = fmtT(TM.left);
+  timerEl.hidden = false; timerEl.classList.add('paused'); timerEl.querySelector('span').textContent = fmtT(TM.left); rimShow(TM.left, true);
   if (!fromNet && NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur});
   if (!fromNet) toast('Tempo pausado');
 }
@@ -3841,7 +3933,7 @@ function stopHTML(){
   if (G.phase === 'play' || G.phase === 'stopping' || G.phase === 'collect'){
     const lock = G.phase !== 'play' && G.phase !== 'stopping';
     if (MV.ansKey !== G.round + G.letter){ MV.ans = Object.assign({}, (G.ans && G.ans[myId()]) || {}); MV.ansKey = G.round + G.letter; }
-    return `${mHead(`Letra <span class="hl">${G.letter}</span>`, `rodada ${G.round} · <i id="mTime">${TM.run ? fmtT(TM.end - performance.now()) : ''}</i>`)}<div class="mb">
+    return `${mHead(`Letra <span class="hl">${G.letter}</span>`, `rodada ${G.round} · <i id="mTime">${TM.run ? fmtT(TM.end - performance.now()) : ''}</i>${TM.run || TM.paused ? `<i class="mbar" id="mBar"><b style="transform:scaleX(${(Math.max(0, (TM.run ? TM.end - performance.now() : TM.left)) / (TM.dur || 1)).toFixed(4)})"></b></i>` : ''}`)}<div class="mb">
       ${G.final.map((c, i) => `<label class="ans"><span>${esc(c)}</span><input class="txt-in" data-ans="${i}" maxlength="40" value="${esc(MV.ans[i] || '')}" placeholder="${G.letter}…" autocomplete="off" autocapitalize="sentences" spellcheck="false" enterkeyhint="next" ${lock ? 'disabled' : ''}></label>`).join('')}</div>
       <div class="mf"><span class="mfill" id="mFill"></span><button class="stopbtn press" data-m="stop" id="stopBtn" disabled>STOP!</button></div>
       <div class="stopov" id="stopOv" hidden></div>`;
@@ -4131,7 +4223,7 @@ function netBroadcast(obj){ for (const pe of NET.peers.values()) if (pe.open) pe
 const hostSend = obj => { if (NET.host && NET.host.open) NET.host.send(obj); };
 function pushRoster(){
   NET.roster = hostRoster(); saveHostSess();
-  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, tSnd: S.g.tSnd || 'bip', tEndSnd: S.g.tEndSnd || 'bipes', undoReady: S.g.undoReady !== false, tPill: S.g.tPill !== false, tFuse: !!S.g.tFuse, tEdge: !!S.g.tEdge, lobby: S.g.lobby !== false}});
+  netBroadcast({k:'roster', list: NET.roster, room:{name: NET.hostName, secret: NET.secret, phase: NET.phase, tEnd: S.g.tEnd || 'reveal', lockW: S.g.lockW || 'all', rev: S.g.revMode || 'together', tick: S.g.tick || 'som', tickFrom: S.g.tickFrom || 5, tSnd: S.g.tSnd || 'bip', tEndSnd: S.g.tEndSnd || 'bipes', undoReady: S.g.undoReady !== false, tPill: S.g.tPill !== false, tFuse: !!S.g.tFuse, tEdge: !!S.g.tEdge, tRim: S.g.tRim !== false, tBig: S.g.tBig !== false, lobby: S.g.lobby !== false}});
   syncRoom();
   renderScoreTag();
   if (S.g.autoAll !== false) checkAutoReveal();
@@ -4531,7 +4623,7 @@ function guestMsg(m){
   if (m.k === 'roster'){
     const wasSecret = NET.secret;
     NET.roster = m.list; NET.secret = m.room.secret;
-    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, tSnd: m.room.tSnd, tEndSnd: m.room.tEndSnd, undoReady: m.room.undoReady, tPill: m.room.tPill, tFuse: m.room.tFuse, tEdge: m.room.tEdge, lobby: m.room.lobby};
+    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, tSnd: m.room.tSnd, tEndSnd: m.room.tEndSnd, undoReady: m.room.undoReady, tPill: m.room.tPill, tFuse: m.room.tFuse, tEdge: m.room.tEdge, tRim: m.room.tRim, tBig: m.room.tBig, lobby: m.room.lobby};
     const mine = m.list.find(r => r.id === myId()); if (mine) NET.myReady = !!mine.ready;
     syncRoom();
     renderScoreTag();
@@ -5070,6 +5162,8 @@ function gameHTML(){
       <div class="f-stack"><span class="f-lb">Começa a avisar em</span>${seg('tickfrom', [['3','3 s'],['5','5 s'],['10','10 s'],['15','15 s']], String(S.g.tickFrom || 5))}</div>
       <div class="f-stack"><span class="f-lb">Som do aviso</span>${seg('tsnd', [['bip','Bipe'],['relogio','Relógio'],['tambor','Tambor'],['sino','Sino']], S.g.tSnd || 'bip')}</div>
       <div class="f-stack"><span class="f-lb">Som quando o tempo acaba</span>${seg('tendsnd', [['bipes','Bipes'],['buzina','Buzina'],['gongo','Gongo'],['apito','Apito'],['fanfarra','Fanfarra'],['nada','Nenhum']], S.g.tEndSnd || 'bipes')}</div>
+      <div class="f-row"><span class="f-lb">Contorno do quadro</span>${tg('data-gtg="tRim"', S.g.tRim !== false)}</div>
+      <div class="f-row"><span class="f-lb">Números grandes no fim</span>${tg('data-gtg="tBig"', S.g.tBig !== false)}</div>
       <div class="f-row"><span class="f-lb">Pílula com o tempo</span>${tg('data-gtg="tPill"', S.g.tPill !== false)}</div>
       <div class="f-row"><span class="f-lb">Pavio de bomba no topo</span>${tg('data-gtg="tFuse"', !!S.g.tFuse)}</div>
       <div class="f-row"><span class="f-lb">Bordas pulsando no fim</span>${tg('data-gtg="tEdge"', !!S.g.tEdge)}</div>
@@ -5188,6 +5282,120 @@ function gameClick(t){
   return true;
 }
 
+
+/* ================= laboratório (escondido): sala simulada com jogadores de mentira ================= */
+// libera tocando 7 vezes na versão, em Ajustes. Fica só neste aparelho.
+const BOT_NAMES = ['Ana','Beto','Caju','Duda','Enzo','Fafá','Gui','Helô','Iago','Juju','Kiko','Lara'];
+const BOT_POOL = [['Pizza','Pizza','pizza','Sorvete','Chocolate'],['Azul','azul','Vermelho','Azul','Verde'],['Cachorro','Gato','Cachorro','cachorro','Papagaio'],['Praia','Praia','Montanha','praia','Cachoeira'],['Café','Café','Chá','Suco','café']];
+const BOT_END = ['ato','elo','ina','ola','eta','ão','ico','aço','ura'];
+const SIM = {bots:[], iv:0, round:0};
+function devHTML(){
+  const n = SIM.bots.filter(b => !b.dead).length;
+  return `<div class="sec"><div class="sec-t">Laboratório</div>
+    ${n ? `${fsub(`Sala simulada com ${n} jogador${n > 1 ? 'es' : ''} de mentira.`)}<div class="nv-row"><button class="nbtn press" data-dev="add">+1 jogador</button><button class="nbtn pri press" data-dev="end">Encerrar simulação</button></div>`
+      : `${fsub('Abre uma sala de teste com jogadores automáticos. Eles digitam, marcam Pronto, respondem nos modos e reagem.')}<div class="nv-row"><button class="nbtn press" data-dev="3">3</button><button class="nbtn press" data-dev="5">5</button><button class="nbtn pri press" data-dev="8">8 jogadores</button></div>`}
+    <div class="nv-row" style="margin-top:8px"><button class="nbtn press" data-dev="off">Esconder laboratório</button></div></div>`;
+}
+let verTaps = 0, verT = 0;
+sheetBody.addEventListener('click', e => {
+  if (e.target.closest('#verSec')){
+    clearTimeout(verT); verT = setTimeout(() => verTaps = 0, 2500);
+    if (++verTaps >= 7){ verTaps = 0; S.g.dev = !S.g.dev; save(); toast(S.g.dev ? 'Laboratório liberado' : 'Laboratório escondido'); syncSheet(); }
+    return;
+  }
+  const b = e.target.closest('[data-dev]'); if (!b) return;
+  const v = b.dataset.dev;
+  if (v === 'off'){ S.g.dev = false; save(); syncSheet(); return; }
+  if (v === 'end'){ simEnd(); syncSheet(); return; }
+  if (v === 'add'){ simAddBot(); syncSheet(); return; }
+  simStart(+v); syncSheet();
+});
+function simStart(n){
+  if (NET.role){ toast('Saia da sala atual antes de simular'); return; }
+  NET.role = 'host'; NET.mode = 'sim'; NET.code = 'SIM'; NET.feed = []; NET.hostName = P().name || 'Anfitrião'; NET.scores = {}; NET.phase = 'writing'; NET.gallery = null; NET.live = {};
+  roomAwake(true); SIM.bots = []; SIM.round = 0;
+  pushRoster();
+  for (let i = 0; i < n; i++) setTimeout(simAddBot, 250 + i * 380);
+  clearInterval(SIM.iv); SIM.iv = setInterval(simPulse, 1500);
+  toast(`Simulação com ${n} jogadores`);
+}
+function simEnd(){
+  clearInterval(SIM.iv); SIM.iv = 0;
+  SIM.bots.forEach(b => botKill(b)); SIM.bots = [];
+  if (NET.mode === 'sim' && NET.role === 'host') endRoom();
+}
+function simAddBot(){
+  if (NET.mode !== 'sim') return;
+  const used = new Set(SIM.bots.map(b => b.card.name)), name = BOT_NAMES.find(x => !used.has(x)) || ('Bot ' + (SIM.bots.length + 1));
+  const ik = Object.keys(ICONS);
+  const bot = {t:[], dead:false, key:'', ans:{}, voted:{}};
+  bot.card = {id:'bot-' + uid().slice(0, 6), name, icon: ik[(SIM.bots.length * 7 + 3) % ik.length], accent: ACCENTS[(SIM.bots.length * 5 + 2) % ACCENTS.length], theme: P().theme};
+  bot.pe = {open:true, st:'idle', card:null, send: m => botRecv(bot, m), close: () => botKill(bot)};
+  NET.peers.set(bot.card.id, bot.pe); SIM.bots.push(bot);
+  hostMsg(bot.pe, {k:'hello', p: bot.card});
+  botThink(bot);
+}
+function botKill(b){ b.dead = true; b.t.forEach(clearTimeout); b.t = []; if (b.pe) b.pe.open = false; }
+const botLater = (b, ms, f) => { b.t.push(setTimeout(() => { if (!b.dead && NET.mode === 'sim') f(); }, ms)); };
+const botSend = (b, m) => { if (!b.dead && b.pe.open) hostMsg(b.pe, m); };
+const brnd = (a, z) => a + Math.random() * (z - a);
+function botSnap(b){
+  const d = snapOf(P()); d.name = b.card.name; d.icon = b.card.icon; d.accent = b.card.accent; d.strokes = []; d.ref = null;
+  d.text = b.text || ''; return d;
+}
+function botWord(L){ return L + pick(BOT_END); }
+/* mensagens do anfitrião para o jogador de mentira */
+function botRecv(b, m){
+  if (b.dead) return;
+  if (m.k === 'kick' || m.k === 'bye'){ botKill(b); return; }
+  if ((m.k === 'reveal' || m.k === 'collect') && b === SIM.bots.find(x => !x.dead)) SIM.round++;
+  if (m.k === 'reveal' || m.k === 'collect'){ botLater(b, brnd(250, 1200), () => botSend(b, {k:'snap', d: botSnap(b), final:true})); return; }
+  if (m.k === 'gallery'){ if (Math.random() < .45) botLater(b, brnd(1500, 6000), () => botSend(b, {k:'react', e: pick(REACTS)})); return; }
+  if (m.k === 'round' || m.k === 'roster' || m.k === 'gs' || m.k === 'timer' || m.k === 'spect') botThink(b);
+}
+/* cada jogador de mentira olha o estado do jogo e decide o que fazer, uma vez por situação */
+function botThink(b){
+  if (b.dead) return;
+  const g = G, phase = g ? g.mode + ':' + g.phase + ':' + (g.round || 0) + ':' + (g.letter || '') : 'free:' + NET.phase;
+  if (phase === b.key) return;
+  b.key = phase;
+  if (!g || (g.mode === 'fluxo' && (g.phase === 'write'))){
+    if (NET.phase !== 'writing' || b.pe.spect) return;
+    const pool = BOT_POOL[SIM.round % BOT_POOL.length];
+    b.text = pick(pool);
+    botLater(b, brnd(600, 3500), () => botSend(b, {k:'st', s:'typing'}));
+    if (Math.random() < .25) botLater(b, brnd(3500, 6000), () => botSend(b, {k:'st', s:'erasing'}));
+    if (!NET.secret) botLater(b, brnd(4000, 7000), () => botSend(b, {k:'snap', d: botSnap(b)}));
+    botLater(b, brnd(6000, 9000), () => botSend(b, {k:'st', s:'idle'}));
+    if (revTogether()) botLater(b, brnd(5000, 16000), () => { if (NET.phase === 'writing') botSend(b, {k:'ready', v:true}); });
+    return;
+  }
+  if (g.mode === 'stop'){
+    const ga = a => botSend(b, {k:'ga', a});
+    if (g.phase === 'setup'){
+      g.cats.forEach((c, i) => { if (b.voted[c.id]) return; b.voted[c.id] = 1; botLater(b, brnd(400, 4000) + i * 120, () => ga({t:'catVote', id: c.id, v: Math.random() < .75 ? 1 : -1})); });
+      if (!b.added && Math.random() < .3){ b.added = 1; botLater(b, brnd(1500, 5000), () => ga({t:'catAdd', name: pick(['Time de futebol','Instrumento','Bebida','Esporte','Doce'])})); }
+      b.key = ''; // continua votando nas categorias novas
+      return;
+    }
+    if (g.phase === 'play'){
+      b.ans = {};
+      botLater(b, brnd(300, 1500), () => botSend(b, {k:'st', s:'typing'}));
+      g.final.forEach((_, i) => botLater(b, brnd(2000, Math.max(4000, (g.cfg.time || 60) * 700)), () => {
+        if (Math.random() < .85) b.ans[i] = botWord(g.letter);
+        ga({t:'ans', a: Object.assign({}, b.ans)});
+      }));
+      return;
+    }
+    if (g.phase === 'stopping' || g.phase === 'collect'){ ga({t:'ans', a: Object.assign({}, b.ans)}); return; }
+    if (g.phase === 'review' && g.marks){ if (Math.random() < .15){ const others = Object.keys(g.ans || {}).filter(id => id !== b.card.id); if (others.length) botLater(b, brnd(1000, 4000), () => ga({t:'bad', k: pick(others) + '|' + Math.floor(Math.random() * g.final.length)})); } b.key = phase + ':' + (g.ci || 0) + ':' + (g.pi || 0); return; }
+  }
+}
+/* pulso: mantém os de mentira "vivos" e percebe rodada nova */
+function simPulse(){
+  if (NET.mode !== 'sim' || NET.role !== 'host'){ clearInterval(SIM.iv); return; }
+  for (const b of SIM.bots) if (!b.dead){ b.pe.seen = Date.now(); botThink(b); }
+}
 /* ================= viewport / início ================= */
 const vv = window.visualViewport;
 function fitVV(){ if (!vv || presenting) return; app.style.height = vv.height + 'px'; app.style.top = vv.offsetTop + 'px'; }
@@ -5227,6 +5435,8 @@ if ((P().text.trim() || P().strokes.length) && !localStorage.getItem('lousa.sess
   try{ history.replaceState(null, '', location.pathname + location.search); }catch(_){}
   if (onlineOK()) setTimeout(() => openJoinOnline(m[1].toUpperCase()), 400);
 })();
+// gancho só para testes automatizados no arquivo local
+if (location.protocol === 'file:') window.__ev = src => eval(src);
 // no site (https), guarda o app para abrir sem internet
 if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname)) navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(r => r.update()).catch(() => {});
 })();
