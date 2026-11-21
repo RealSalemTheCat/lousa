@@ -520,16 +520,30 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 body.settings .bals:not(.demo){opacity:0}
 .bals.tdown{top:calc(112px + env(safe-area-inset-top))}
 .bals.anchor-b{top:auto;bottom:calc(86px + env(safe-area-inset-bottom))}
-.brow{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;padding:0 12px;transition:transform .45s cubic-bezier(.3,1.2,.45,1)}
+.bals.anchor-b.lift{bottom:calc(128px + env(safe-area-inset-bottom))}
+.brow{position:absolute;left:0;right:0;top:0;display:flex;justify-content:center;padding:0 12px;transition:transform .55s cubic-bezier(.25,1.25,.4,1)}
 .anchor-b .brow{top:auto;bottom:0}
 .bal .avg{display:flex;flex:none}.bal .avg .av + .av{margin-left:-11px}
 .bal .avg .av{box-shadow:0 0 0 2px var(--ring,var(--c))}
 .bs-pensamento{--ring:#fbfbfd}.bs-quadrinho{--ring:#fff}.bs-postit{--ring:#fff3a0}.bs-lateral{--ring:#16161a}
 .bal.bump .bal-in{animation:balbump .4s cubic-bezier(.3,1.6,.5,1)}
 @keyframes balbump{40%{transform:scale(1.07)}}
-.bal{--dx:0px;--rz:0deg;position:relative;transform:translate(var(--dx)) rotate(var(--rz));animation:balin .62s cubic-bezier(.2,1.6,.35,1) both}
+.bal{--dx:0px;--rz:0deg;--to:30px 100%;position:relative;transform:translate(var(--dx)) rotate(var(--rz));transform-origin:var(--to);animation:balin .7s linear both}
+/* encostados nas margens: um à esquerda, outro à direita, cada lado com a sua pilha */
+.brow.sl{justify-content:flex-start;padding:0 0 0 14px}
+.brow.sr{justify-content:flex-end;padding:0 14px 0 0}
+.brow.sr .bal{--to:calc(100% - 30px) 100%}
+.brow.sl .bal-in,.brow.sr .bal-in{max-width:min(80vw,340px)}
+.brow.sr .bal-in{flex-direction:row-reverse;padding:6px 6px 6px 15px}
+.brow.sr .bal-in::after{left:auto;right:30px;clip-path:polygon(0 0,100% 0,85% 100%)}
+.brow.sr .bal.out .bal-in{transform-origin:calc(100% - 21px) 50%}
+.brow.sr .bal .avg{flex-direction:row-reverse}.brow.sr .bal .avg .av + .av{margin-left:0;margin-right:-11px}
+.bs-pensamento .brow.sr .bal-in::after{left:auto;right:22px;box-shadow:9px 9px 0 -2px #fbfbfd}
+.bs-quadrinho .brow.sr .bal-in{border-radius:20px 20px 6px 20px;box-shadow:-5px 6px 0 #111}
+.bs-quadrinho .brow.sr .bal-in::after{left:auto;right:18px}
+.bs-postit .brow.sr .bal-in{border-radius:3px 3px 3px 16px}
 .bal-in{display:flex;align-items:center;gap:9px;padding:6px 15px 6px 6px;border-radius:22px;background:var(--c);color:var(--oc);font:500 14px/1.25 var(--uif);max-width:min(84vw,360px);
-  box-shadow:0 10px 26px -6px color-mix(in srgb,var(--c) 55%,transparent),0 2px 0 rgba(0,0,0,.12) inset,0 -3px 0 rgba(0,0,0,.14) inset;animation:balbob 2.4s ease-in-out .6s infinite}
+  box-shadow:0 10px 26px -6px color-mix(in srgb,var(--c) 55%,transparent),0 2px 0 rgba(0,0,0,.12) inset,0 -3px 0 rgba(0,0,0,.14) inset;animation:balbob 3.6s ease-in-out .7s infinite}
 .bal-in::after{content:"";position:absolute;left:30px;bottom:-7px;width:16px;height:12px;background:var(--c);clip-path:polygon(0 0,100% 0,15% 100%);border-radius:2px}
 .bal b{font-weight:800}
 .bal .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--oc);color:var(--c);font:800 14px var(--uif);box-shadow:0 0 0 2px color-mix(in srgb,var(--oc) 30%,transparent)}
@@ -540,8 +554,13 @@ body.settings .bals:not(.demo){opacity:0}
 .bal.out .av{animation:avout .42s ease-in forwards}
 @keyframes retract{0%{transform:scale(1)}25%{transform:scale(1.03,1.04)}100%{transform:scale(.06,.5);opacity:0}}
 @keyframes avout{60%{transform:scale(1.1)}100%{transform:scale(0);opacity:0}}
-@keyframes balin{0%{transform:translate(var(--dx),-26px) rotate(calc(var(--rz) * -3)) scale(.2);opacity:0}60%{opacity:1}}
-@keyframes balbob{50%{transform:translateY(-4px) rotate(.6deg)}}
+/* nasce da ponta, como uma mola: passa um pouco do tamanho, volta e assenta */
+@keyframes balin{0%{transform:translate(var(--dx),8px) rotate(var(--rz)) scale(.25);opacity:0}
+  30%{transform:translate(var(--dx),-2px) rotate(var(--rz)) scale(1.06);opacity:1}
+  52%{transform:translate(var(--dx),1px) rotate(var(--rz)) scale(.97)}
+  72%{transform:translate(var(--dx),0) rotate(var(--rz)) scale(1.015)}
+  100%{transform:translate(var(--dx),0) rotate(var(--rz)) scale(1)}}
+@keyframes balbob{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-3px) rotate(.4deg)}65%{transform:translateY(-1px) rotate(-.3deg)}}
 @keyframes balpop{35%{transform:translate(var(--dx)) rotate(var(--rz)) scale(1.12)}100%{transform:translate(var(--dx),-6px) rotate(var(--rz)) scale(.1);opacity:0}}
 @keyframes balring{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
 .szpv{position:fixed;z-index:90;pointer-events:none;transform:translate(-50%,-50%) scale(.6);opacity:0;transition:opacity .15s,transform .2s cubic-bezier(.3,1.5,.5,1)}
@@ -2460,6 +2479,7 @@ const RI = {
   clock:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 1.8M9.5 2.5h5M12 2.5V6"/>',
   eye:'<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  lockOpen:'<rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 6.8-1.2"/>',
   trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7"/>',
 };
 function ringDefs(kind){
@@ -2516,6 +2536,7 @@ function ringDefs(kind){
     return L;
   }
   const list = [{label:'Mostrar', icon:RI.show, act: present}];
+  if (lockMode) list.push({label:'Destravar quadro', icon:RI.lockOpen, act: unlockAll});
   if (TM.run) list.push({label:'Pausar tempo', icon:RI.pause, act(){ pauseTimer(); }});
   else if (TM.paused) list.push({label:'Continuar tempo', icon:RI.play, act(){ resumeTimer(); }});
   list.push({label:'Cronômetro', icon:RI.clock, on: TM.run || TM.paused, sub:'timer'});
@@ -3180,7 +3201,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 38')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 39')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3418,9 +3439,10 @@ function setLock(m){
   if (m && editing) txt.blur();
   if (m === 'all' && cur) cur = null;
   board.classList.toggle('locked', !!m);
-  if (m) toast(m === 'all' ? 'Tempo esgotado: quadro travado' : 'Tempo esgotado: escrita travada', NET.role === 'guest' ? undefined : 'Destravar', NET.role === 'guest' ? undefined : () => { setLock(null); if (NET.role === 'host') netBroadcast({k:'lock', w:null}); });
+  if (m) toast(m === 'all' ? 'Tempo esgotado: quadro travado' : 'Tempo esgotado: escrita travada', NET.role === 'guest' ? undefined : 'Destravar', NET.role === 'guest' ? undefined : unlockAll);
 }
-function lockedMsg(){ hint(lockMode === 'all' ? 'Quadro travado: o tempo acabou' : 'Escrita travada: o tempo acabou'); }
+function unlockAll(){ setLock(null); if (NET.role === 'host') netBroadcast({k:'lock', w:null}); }
+function lockedMsg(){ hint((lockMode === 'all' ? 'Quadro travado: o tempo acabou' : 'Escrita travada: o tempo acabou') + (NET.role === 'guest' ? '' : ' · toque longo para destravar')); }
 function startTimer(ms, fromNet, dur){
   clearInterval(TM.iv); setTimeout(() => { if (G) renderMode(); updateRoomUI(); }, 0);
   if (lockMode) setLock(null);
@@ -3678,7 +3700,7 @@ function balRows(){ return [...$('#bals').children].filter(r => !r.dataset.gone)
 function balLayout(){
   const wrap = $('#bals'); if (wrap.classList.contains('bs-live')) return;
   const rows = balRows().reverse(), up = wrap.classList.contains('anchor-b') ? -1 : 1;
-  let y = 0;
+  let y = 0; // uma pilha só, em zigue-zague: cada balão encostado numa margem, sem sobrepor o vizinho
   for (const r of rows){ r.style.transform = `translateY(${up * y}px)`; r._y = up * y; y += r.offsetHeight + BAL.gap; }
 }
 function balPaint(row){
@@ -3697,6 +3719,17 @@ function balRetire(row, fast){
   setTimeout(() => row.remove(), fast ? 300 : 520);
 }
 function balArm(row, ms){ clearTimeout(row._t); row._t = setTimeout(() => balRetire(row), ms); }
+/* os balões ficam onde não há conteúdo: se o texto ou o desenho ocupa o alto do quadro, eles vão para baixo */
+function balZoneBottom(){
+  if (win || !board) return false;
+  const br = board.getBoundingClientRect(), zone = 150, p = P();
+  let top = Infinity, bot = -Infinity;
+  if (!isSample() && p.text.trim()){ const r = txt.getBoundingClientRect(); if (r.height){ top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); } }
+  for (const st of p.strokes){ if (st.t === 'erase') continue; for (const q of st.p){ const y = br.top + q[1] * (br.height / (bh || br.height)); if (y < top) top = y; if (y > bot) bot = y; } }
+  if (top === Infinity) return false;
+  const hitTop = top < br.top + zone, hitBot = bot > br.bottom - zone;
+  return hitTop && !hitBot;
+}
 function balloon(pl, kind, demo){
   if (!pl) return;
   const text = demo ? demoText(kind) : phraseFor(pl.id, kind); if (!text) return;
@@ -3709,7 +3742,8 @@ function balloon(pl, kind, demo){
   if (!demo && balLast[key] && now - balLast[key] < (bf === 3 ? 2400 : 7000) && !['join','leave','ready','unready'].includes(kind)) return;
   balLast[key] = now;
   const wrap = $('#bals'), style = S.g.balS || 'fala';
-  wrap.className = 'bals bs-' + style + ((document.body.classList.contains('inmode') || presenting) && style !== 'lateral' && style !== 'live' ? ' anchor-b' : '') + (!timerEl.hidden && !timerEl.classList.contains('ghost') ? ' tdown' : '') + (pl && pl.id === 'demo' ? ' demo' : '');
+  const inM = document.body.classList.contains('inmode') || presenting, zB = !inM && balZoneBottom();
+  wrap.className = 'bals bs-' + style + ((inM || zB) && style !== 'lateral' && style !== 'live' ? ' anchor-b' + (zB ? ' lift' : '') : '') + (!timerEl.hidden && !timerEl.classList.contains('ghost') ? ' tdown' : '') + (pl && pl.id === 'demo' ? ' demo' : '');
   // mesmo tipo de aviso já na tela: junta as pessoas num balão só, em vez de empilhar
   if (style !== 'live' && PLURAL[kind]){
     const same = balRows().find(r => r._kind === kind && !r._demo === !demo);
@@ -3733,7 +3767,13 @@ function balloon(pl, kind, demo){
     const row = document.createElement('div'); row.className = 'brow';
     row._kind = kind; row._pls = [pl]; row._text = text; row._demo = !!demo;
     const b = document.createElement('div'); b.className = 'bal';
-    b.style.cssText = `--dx:${Math.round((Math.random() - .5) * Math.min(70, innerWidth * .12))}px;--rz:${((Math.random() - .5) * 4).toFixed(1)}deg`;
+    if (style !== 'live' && style !== 'lateral'){
+      // alterna os lados: o novo fica na margem oposta à do último
+      const last = balRows().slice(-1)[0];
+      BAL.side = last && last._side ? (last._side === 'sl' ? 'sr' : 'sl') : (BAL.side === 'sl' ? 'sr' : 'sl');
+      row._side = BAL.side; row.classList.add(BAL.side);
+    }
+    b.style.cssText = `--dx:${Math.round(Math.random() * 10) * (row._side === 'sr' ? -1 : 1)}px;--rz:${((Math.random() - .5) * 3).toFixed(1)}deg`;
     if (style === 'live') row.style.cssText = `--dur:${(3.2 + Math.random() * .9).toFixed(2)}s;--sw:${(.9 + Math.random() * .6).toFixed(2)}s;--sd:-${Math.random().toFixed(2)}s;--amp:${Math.round(6 + Math.random() * 10)}px;right:${Math.round(Math.random() * 18)}px`;
     b.innerHTML = '<div class="bal-in"></div>';
     row.appendChild(b); balPaint(row);
@@ -4524,6 +4564,7 @@ function maybeGallery(force){
 function collectAll(){
   if (NET.role !== 'host') return;
   NET.phase = 'revealed'; NET.collect = {}; NET.gallery = null;
+  if (TM.run || TM.paused) stopTimer();
   netBroadcast({k:'collect'}); sendFinalSnap();
   clearTimeout(NET.collectT); NET.collectT = setTimeout(() => maybeGallery(true), 6000);
   pushRoster();
@@ -4533,6 +4574,7 @@ function revealAll(){
   if (NET.phase === 'revealed' && NET.collect) return;
   clearTimeout(NET.autoT);
   NET.phase = 'revealed'; NET.collect = {}; NET.gallery = null; resetReady(); setLock(null);
+  if (TM.run || TM.paused) stopTimer(); // rodada revelada: o tempo da rodada acabou para todos
   netBroadcast({k:'reveal', ms:3000});
   pushRoster();
   countdownThenShow();
