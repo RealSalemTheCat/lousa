@@ -661,6 +661,8 @@ body.settings .bals:not(.demo){opacity:0}
 .vbig.no.on{background:#ff6b6b;border-color:#ff6b6b;color:#2a0d0d}.vbig.no.on svg,.vbig.no.on i{color:#2a0d0d}
 .vwait{height:96px;display:grid;place-items:center;border-radius:20px;border:1px dashed var(--line2);color:var(--tx2);font:600 15px var(--uif);flex:none}
 .vstat{display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 13px var(--uif);color:var(--tx3);min-height:30px}
+.vstat em{font-style:normal;color:#e6b64e}
+.vavs > span.away{opacity:.3;filter:grayscale(1)}
 .vavs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}.vavs > span{opacity:.3;transition:opacity .25s}.vavs > span.on{opacity:1}.vavs .mav{width:24px;height:24px;font-size:10px}
 .srow .sbtn{width:30px;height:30px;flex:none}
 .srow .sr small{color:var(--tx3);font-weight:700}
@@ -3229,7 +3231,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 40')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 41')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3778,6 +3780,13 @@ function balloon(pl, kind, demo){
   const wrap = $('#bals'), style = S.g.balS || 'fala';
   const inM = document.body.classList.contains('inmode') || presenting, zB = !inM && balZoneBottom();
   wrap.className = 'bals bs-' + style + ((inM || zB) && style !== 'lateral' && style !== 'live' ? ' anchor-b' + (zB ? ' lift' : '') : '') + (!timerEl.hidden && !timerEl.classList.contains('ghost') ? ' tdown' : '') + (pl && pl.id === 'demo' ? ' demo' : '');
+  // no alto, os balões começam abaixo do nome, dos pontos e do tempo do quadro
+  if (!wrap.classList.contains('anchor-b') && style !== 'live'){
+    let y = board.getBoundingClientRect().top + 8;
+    if (!nameTag.hidden && nameTag.offsetHeight) y = Math.max(y, nameTag.getBoundingClientRect().bottom + 8);
+    if (!timerEl.hidden && !timerEl.classList.contains('ghost')) y = Math.max(y, timerEl.getBoundingClientRect().bottom + 8);
+    wrap.style.top = Math.round(y) + 'px';
+  } else wrap.style.top = '';
   // mesmo tipo de aviso já na tela: junta as pessoas num balão só, em vez de empilhar
   if (style !== 'live' && PLURAL[kind]){
     const same = balRows().find(r => r._kind === kind && !r._demo === !demo);
@@ -4041,8 +4050,26 @@ function voteSeq(){
   });
   return items;
 }
-function voteVoters(author){ return gPlayers().filter(p => p.id !== author && !p.spect).map(p => p.id); }
+/* quem vota: todos que jogaram a rodada (mais quem está na sala), menos o autor. Quem caiu continua contando
+   por 45 s: a votação espera a pessoa voltar (o voto dela fica guardado); depois disso segue sem ela.
+   O anfitrião pode sempre tocar em Próximo. */
+const offSeen = {};
+const VOTE_GRACE = 45000;
+function voteVoters(author, all){
+  const ids = [...new Set([...(G.porder || []), ...gPlayers().filter(p => !p.spect).map(p => p.id)])].filter(id => id !== author);
+  const now = Date.now();
+  return ids.filter(id => {
+    if (gOnline(id)){ delete offSeen[id]; return true; }
+    offSeen[id] ||= now;
+    return all || now - offSeen[id] < VOTE_GRACE;
+  });
+}
 function voteDone(k, author){ const m = (G.marks || {})[k] || {}; return voteVoters(author).every(id => (m.ok || []).includes(id) || (m.bad || []).includes(id)); }
+let voteIv = 0;
+function voteWatch(){
+  if (voteIv) return;
+  voteIv = setInterval(() => { if (!G || G.mode !== 'stop' || G.phase !== 'review' || !G.seq || NET.role !== 'host'){ clearInterval(voteIv); voteIv = 0; return; } voteMaybeAdvance(); renderMode(); }, 5000);
+}
 let voteAdvT = 0, voteAdvSi = -1;
 function voteMaybeAdvance(){
   const it = G.seq && G.seq[G.si]; if (!it || it.recap) return;
@@ -4071,6 +4098,17 @@ function linkState(k){
   return yes > n / 2 ? true : no > n / 2 ? false : null;
 }
 function sameAns(ci, r, o){ const m = linkState(pairKey(ci, r.id, o.id)); return m != null ? m : similar(r.t, o.t); }
+/* anulada: mais "Não vale" que "Vale". No empate, vale a regra escolhida: vale, anula ou o anfitrião desempata */
+const hostId = () => NET.role === 'host' ? myId() : ((NET.roster.find(r => r.host) || {}).id);
+function annulled(m, n){
+  const no = m.bad.length; if (!no) return false;
+  const yes = G.seq ? (m.ok || []).length : Math.max(1, n - 1) - no;
+  if (G.seq ? no > yes : no > Math.max(1, n - 1) / 2) return true;
+  const tie = G.seq ? no === yes : no === Math.max(1, n - 1) / 2;
+  if (!tie) return false;
+  const tv = G.cfg.tieV || 'ok', h = hostId();
+  return tv === 'no' || (tv === 'host' && m.bad.includes(h));
+}
 function stopScores(){
   const ids = Object.keys(G.ans || {}).filter(id => gPlayers().some(p => p.id === id) || G.ans[id]);
   const res = [], tot = {}; ids.forEach(id => tot[id] = 0);
@@ -4081,7 +4119,7 @@ function stopScores(){
       let st = 'ok', why = '';
       if (!t){ st = 'x'; why = 'em branco'; }
       else if (normT(t)[0] !== L){ st = 'x'; why = `não começa com ${G.letter}`; }
-      else if (G.seq ? m.bad.length > (m.ok || []).length : (m.bad.length && m.bad.length > Math.max(1, ids.length - 1) / 2)){ st = 'x'; why = 'anulada'; }
+      else if (annulled(m, ids.length)){ st = 'x'; why = 'anulada'; }
       return {id, t, st, why, bad: m.bad, ov: m.ov};
     });
     rows.forEach(r => { if (r.st !== 'ok') return; r.dup = rows.filter(o => o !== r && o.st === 'ok' && sameAns(ci, r, o)).map(o => o.id); });
@@ -4154,7 +4192,7 @@ function renderMode(){
   if (G && G.mode === 'fluxo' && G.phase === 'write' && MV.flashed !== G.round){ const first = MV.flashed == null && G.round > 1 && false; MV.flashed = G.round; if (!presenting) roundFlash(G.round); }
   updateRoomUI();
   // alguém saiu no meio da votação: se os que ficaram já votaram, segue
-  if (NET.role === 'host' && G && G.mode === 'stop' && G.phase === 'review' && G.seq) voteMaybeAdvance();
+  if (NET.role === 'host' && G && G.mode === 'stop' && G.phase === 'review' && G.seq){ voteMaybeAdvance(); voteWatch(); }
   const show = modeOpen();
   if (modeEl.hidden !== !show && typeof refitVV === 'function') refitVV();
   modeEl.hidden = !show;
@@ -4222,6 +4260,7 @@ function stopHTML(){
       <div class="mrow"><span>Resposta repetida</span>${host ? stepper('rep', G.cfg.rep, G.cfg.rep + ' pts') : `<b>${G.cfg.rep} pts</b>`}</div>
       <div class="f-sub">Em branco, com a letra errada ou anulada pela maioria vale 0. Quem preencher tudo pode gritar STOP, e o tempo acaba para todos.</div>
       <div class="mrow col"><span>Correção</span>${host ? seg('mreview', [['cat','Lista por categoria'],['player','Uma resposta por vez']], G.cfg.review || 'cat') : `<b>${G.cfg.review === 'player' ? 'uma resposta por vez' : 'lista por categoria'}</b>`}</div>
+      <div class="mrow col"><span>Empate na votação</span>${host ? seg('mtiev', [['ok','Vale'],['no','Anula'],['host','Anfitrião desempata']], G.cfg.tieV || 'ok') : `<b>${{ok:'a resposta vale', no:'a resposta é anulada', host:'o voto do anfitrião decide'}[G.cfg.tieV || 'ok']}</b>`}</div>
       <div class="f-sub" style="margin-top:-4px">${(G.cfg.review || 'cat') === 'player' ? 'Como na mesa: em cada categoria, um jogador por vez mostra o que escreveu e todos votam Vale ou Não vale. Quando todos votam, segue sozinho.' : 'Todas as respostas da categoria aparecem juntas; quem discordar contesta.'}</div>
       ${(G.cfg.review || 'cat') === 'player' ? `<div class="mrow col"><span>Ordem dos jogadores</span>${host ? seg('morder', [['rand','Sorteio'],['alpha','A a Z'],['most','Mais pontos'],['least','Menos pontos']], G.cfg.order || 'rand') : `<b>${{rand:'sorteio', alpha:'alfabética', most:'mais pontos primeiro', least:'menos pontos primeiro'}[G.cfg.order || 'rand']}</b>`}</div>` : ''}
       <div class="f-sub">Categorias, letras e regras ficam salvas para a próxima partida.</div>
@@ -4284,6 +4323,7 @@ function stopHTML(){
       const r = (res[ci] || []).find(x => x.id === it.id) || {t:'', dup:[], st:'ok'}, k = it.id + '|' + ci, m = (G.marks || {})[k] || {ok:[], bad:[]};
       const mine = it.id === myId(), myV = (m.ok || []).includes(myId()) ? 1 : (m.bad || []).includes(myId()) ? -1 : 0;
       const voters = voteVoters(it.id), nv = voters.filter(id => (m.ok || []).includes(id) || (m.bad || []).includes(id)).length;
+      const away = voters.filter(id => !gOnline(id) && !(m.ok || []).includes(id) && !(m.bad || []).includes(id));
       const done = voteDone(k, it.id), verdict = r.why === 'anulada' ? 'no' : 'ok';
       const inCat = G.seq.filter(x => x.ci === ci && !x.recap), pos = inCat.findIndex(x => x === it) + 1;
       const okI = '<path d="M5 12.5l4.5 4.5L19 7.5"/>', noI = '<path d="M6 6l12 12M18 6 6 18"/>';
@@ -4292,11 +4332,11 @@ function stopHTML(){
           <div class="vwho">${avChip(it.id)}<span>${esc(gName(it.id))}</span></div>
           <div class="vans">${esc(r.t)}</div>
           <div class="vdup">${r.dup && r.dup.length ? `igual a ${r.dup.map(id => esc(gName(id))).join(', ')} · vale ${G.cfg.rep}` : `única · vale ${G.cfg.uniq}`}</div>
-          <div class="vstamp">${verdict === 'ok' ? 'Vale!' : 'Anulada'}</div>
+          <div class="vstamp">${(m.bad || []).length && (m.bad || []).length === (m.ok || []).length ? 'Empate: ' + (verdict === 'ok' ? 'vale' : 'anulada') : verdict === 'ok' ? 'Vale!' : 'Anulada'}</div>
         </div>
         ${mine ? `<div class="vwait">É a sua resposta: a mesa está votando</div>`
           : `<div class="vbtns"><button class="vbig ok press ${myV === 1 ? 'on' : ''}" data-vote="${k}" data-v="1">${svg(okI, 2.6)}<span>Vale</span><i>${(m.ok || []).length}</i></button><button class="vbig no press ${myV === -1 ? 'on' : ''}" data-vote="${k}" data-v="-1">${svg(noI, 2.6)}<span>Não vale</span><i>${(m.bad || []).length}</i></button></div>`}
-        <div class="vstat"><span>${nv} de ${voters.length} votaram</span><span class="vavs">${voters.map(id => `<span class="${(m.ok || []).includes(id) || (m.bad || []).includes(id) ? 'on' : ''}">${avChip(id)}</span>`).join('')}</span></div></div>
+        <div class="vstat"><span>${nv} de ${voters.length} votaram${away.length ? `<br><em>esperando ${away.map(id => esc(gName(id))).join(', ')} voltar${host ? ' · Próximo segue sem' : ''}</em>` : ''}</span><span class="vavs">${voters.map(id => `<span class="${(m.ok || []).includes(id) || (m.bad || []).includes(id) ? 'on' : ''} ${gOnline(id) ? '' : 'away'}">${avChip(id)}</span>`).join('')}</span></div></div>
         <div class="mf">${host ? navHost('Próximo') : `<span class="mwait">Quando todos votarem, segue sozinho</span>`}</div>`;
     }
     const rows = res[G.ci] || [], ci = G.ci, cat = G.final[ci];
@@ -4436,6 +4476,7 @@ modeEl.addEventListener('click', e => {
   if (d.mtg){ act({t:'cfg', k: d.mtg, v: d.mtg === 'inter' ? G.cfg.inter === false : !G.cfg[d.mtg]}); return; }
   const sg = t.closest('[data-seg="mtie"]'); if (sg && d.v){ act({t:'cfg', k:'tie', v: d.v}); return; }
   const sv = t.closest('[data-seg="mvote"]'); if (sv && d.v){ act({t:'cfg', k:'vote', v: d.v}); return; }
+  const stv = t.closest('[data-seg="mtiev"]'); if (stv && d.v){ act({t:'cfg', k:'tieV', v: d.v}); return; }
   const sr = t.closest('[data-seg="mreview"]'); if (sr && d.v){ act({t:'cfg', k:'review', v: d.v}); return; }
   const so = t.closest('[data-seg="morder"]'); if (so && d.v){ act({t:'cfg', k:'order', v: d.v}); return; }
   if (d.pick){ MV.pick = MV.pick === d.pick ? null : d.pick; renderMode(); return; }
