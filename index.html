@@ -175,7 +175,7 @@ canvas{left:0;top:0;width:100%;height:100%;pointer-events:none}
 .led-wrap canvas{position:absolute}
 #drawCv{z-index:4}
 .board.drawing #drawCv{pointer-events:auto;cursor:crosshair}
-.empty{inset:0;display:flex;align-items:center;justify-content:center;z-index:6;font:500 14.5px var(--uif);color:color-mix(in srgb,var(--ink) 62%,transparent);letter-spacing:.02em;pointer-events:none}
+.empty{inset:0;display:flex;align-items:center;justify-content:center;z-index:6;font:500 min(14.5px,3.5vw) var(--uif);white-space:nowrap;color:color-mix(in srgb,var(--ink) 62%,transparent);letter-spacing:.02em;pointer-events:none}
 .empty span{padding:.4em .9em;border-radius:999px;background:color-mix(in srgb,var(--bg) 82%,transparent);text-transform:none;font-family:var(--uif)}
 
 /* animações de efeito */
@@ -349,6 +349,11 @@ body.back .board{animation:boardin .45s cubic-bezier(.2,.9,.3,1.1)}
 .seg button[aria-pressed=true]{background:var(--panel3);color:var(--tx);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 3px rgba(0,0,0,.45)}
 .show-btn{height:44px;padding:0 18px 0 15px;border-radius:13px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex:none}
 .show-btn svg{width:20px;height:20px}
+.show-btn .lb{white-space:nowrap}
+.dock.tight{gap:6px;padding-left:8px;padding-right:8px}
+.dock.tight .show-btn{padding:0 12px}
+.dock.tight .show-btn > svg{display:none}
+.dock.tight #modeSeg button{padding-left:10px;padding-right:10px}
 .show-btn:active{filter:brightness(.9)}
 
 /* ---------- janelas ---------- */
@@ -937,6 +942,7 @@ body.inlobby .bals:not(.anchor-b):not(.bs-live){top:calc(124px + env(safe-area-i
 .ring.open .ring-center{opacity:1}
 .ring.closing .ring-item{transition-delay:0s}
 .txt-box.sample{opacity:1}
+body.haspill .empty{display:none}
 .empty.below{align-items:flex-end;padding-bottom:7%}
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:#2b2b2f;color:var(--tx);border:1px solid var(--line2);border-radius:13px;padding:6px 6px 6px 15px;display:flex;gap:10px;align-items:center;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s var(--spring);z-index:60;white-space:nowrap;box-shadow:0 12px 30px rgba(0,0,0,.45)}
@@ -2998,7 +3004,18 @@ board.addEventListener('pointerup', e => {
   lastTap = now; lastTapXY = [e.clientX, e.clientY];
   hint('Toque duas vezes para voltar');
 });
+['pointerdown', 'mousedown'].forEach(ev => $('#dock').addEventListener(ev, e => { if (editing && e.target.closest('button')) e.preventDefault(); }));
+/* o dock nunca pode passar da tela: se não couber, fica compacto (sem cortar texto) */
+function fitDock(){
+  const d = $('#dock'); if (!d) return;
+  d.classList.remove('tight');
+  if (d.scrollWidth > d.clientWidth + 1) d.classList.add('tight');
+}
+addEventListener('resize', () => setTimeout(fitDock, 50));
+const hostTimerGate = () => NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && (!G || (G.mode === 'fluxo' && G.phase === 'write'));
 $('#showBtn').addEventListener('click', e => {
+  // começar (ou continuar) o tempo vale para o botão inteiro, inclusive o contador
+  if (hostTimerGate()){ if (TM.paused) resumeTimer(); else startTimer(S.g.timerDur * 1000); return; }
   if (e.target.closest('.cnt') && roomWriting()){
     const miss = roomPlayers().filter(r => !r.ready && !r.spect).map(r => r.name || 'Jogador');
     toast(miss.length ? `Faltam: ${miss.join(', ')}` : 'Todos prontos!'); return;
@@ -3008,7 +3025,6 @@ $('#showBtn').addEventListener('click', e => {
     if (NET.confirmT && Date.now() - NET.confirmT < 4000){ NET.confirmT = 0; collectAll(); return; }
     NET.confirmT = Date.now(); toast(busy ? `${busy} ainda ${busy === 1 ? 'está escrevendo' : 'estão escrevendo'}. Toque de novo para conferir` : 'Toque de novo para conferir as respostas'); return;
   }
-  if (NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && (!G || (G.mode === 'fluxo' && G.phase === 'write'))){ startTimer(S.g.timerDur * 1000); return; }
   wantShow();
 });
 window.addEventListener('resize', () => { if (presenting){ placePresent(); if (comp){ render(); fitComp(); } } });
@@ -3128,7 +3144,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 33')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 34')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3310,6 +3326,8 @@ function rimPath(){
   rimEl.setAttribute('viewBox', `0 0 ${W} ${Hh}`);
   rimEl.querySelectorAll('path').forEach(pa => { pa.setAttribute('d', d); pa.style.strokeWidth = sw; });
 }
+// o quadro muda de tamanho (teclado, girar, janelas): o contorno é refeito no tamanho novo
+if (window.ResizeObserver) new ResizeObserver(() => { rimKey = ''; if (TM.run) rimShow(TM.end - performance.now(), false); else if (TM.paused) rimShow(TM.left, true); }).observe(board);
 function rimShow(left, paused){
   frzEl.classList.toggle('on', !!paused);
   const on = tRule('tRim') !== false && (TM.run || TM.paused) && TM.dur > 0;
@@ -3435,6 +3453,7 @@ function pauseTimer(ms, fromNet){
   timerEl.hidden = false; timerEl.classList.add('paused'); timerEl.querySelector('span').textContent = fmtT(TM.left); rimShow(TM.left, true);
   if (!fromNet && NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur});
   if (!was) toast(fromNet ? 'Tempo pausado pelo anfitrião' : 'Tempo pausado');
+  updateRoomUI();
 }
 function resumeTimer(){
   if (!TM.paused) return; const d = TM.dur; TM.paused = false; timerEl.classList.remove('paused');
@@ -3641,6 +3660,8 @@ function balloon(pl, kind, demo){
   if (!pl) return;
   const text = demo ? demoText(kind) : phraseFor(pl.id, kind); if (!text) return;
   if (!demo) addFeed(pl, kind, text);
+  // nas telas dos modos (respostas, votação, conferência) os avisos de "escrevendo" só atrapalham: ficam só no histórico
+  if (!demo && document.body.classList.contains('inmode') && ['typing','drawing','erasing','idle','unready'].includes(kind)) return;
   const bf = S.g.balF ?? 2, key = pl.id + kind, now = performance.now();
   if (presenting || (bf === 0 && !demo)) return;
   if (bf === 1 && !demo && !['join','leave','ready','kick','dispute','show'].includes(kind)) return;
@@ -3988,6 +4009,7 @@ function renderMode(){
   modeEl.hidden = !show;
   document.body.classList.toggle('inmode', show);
   pill.hidden = !G || show || presenting || !!win || (NET.role && NET.myReady);
+  document.body.classList.toggle('haspill', !pill.hidden);
   if (G && !show && !presenting){
     pill.innerHTML = G.mode === 'fluxo' && G.phase === 'write'
       ? (NET.phase === 'revealed' && NET.role === 'host' ? `${svg(FISH, 1.8)}<span>Recolhendo respostas…</span>` : `${svg(FISH, 1.8)}<span>${fluxoStep()}</span><b>placar</b>`)
@@ -5047,7 +5069,8 @@ function updateRoomUI(){
     if (!cnt){ cnt = document.createElement('span'); cnt.className = 'cnt'; sb.appendChild(cnt); }
     cnt.textContent = `${r}/${n}`;
   } else { lb.textContent = hostNewRoundBtn() ? 'Nova rodada' : (NET.role === 'host' && !revTogether() && G && G.mode === 'fluxo' && G.phase === 'write' && NET.phase === 'writing') ? 'Conferir' : 'Mostrar'; sb.classList.remove('ready'); if (cnt) cnt.remove(); }
-  if (NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && (!G || (G.mode === 'fluxo' && G.phase === 'write'))) lb.textContent = 'Começar tempo';
+  if (hostTimerGate()){ lb.textContent = TM.paused ? 'Continuar' : 'Iniciar tempo'; if (cnt) cnt.remove(); }
+  fitDock();
   const rb = $('#roomBtn');
   document.body.classList.toggle('inroom', !!NET.role);
   if (NET.role){
@@ -5536,6 +5559,7 @@ function botThink(b){
   b.key = phase;
   if (!g || (g.mode === 'fluxo' && (g.phase === 'write'))){
     if (NET.phase !== 'writing' || b.pe.spect) return;
+    if (revModeNow() === 'timer' && !TM.run){ b.key = ''; return; } // no tempo igual, só começam quando o tempo corre
     const pool = BOT_POOL[SIM.round % BOT_POOL.length];
     b.text = pick(pool);
     botLater(b, brnd(600, 3500), () => botSend(b, {k:'st', s:'typing'}));
