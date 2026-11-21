@@ -482,8 +482,10 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 
 /* ---------- jogo ---------- */
 @media (max-width:379px){ .chip-player .nm{display:none} .chip-player{padding:0 10px} }
-.timer{right:3.5%;top:10px;z-index:8;display:flex;align-items:center;gap:.4em;font:700 15px/1 var(--uif);color:var(--ink);padding:.38em .7em .38em .42em;border-radius:999px;background:color-mix(in srgb,var(--ink) 9%,transparent);border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);font-variant-numeric:tabular-nums;pointer-events:auto}
-.timer svg{width:1.25em;height:1.25em;transform:rotate(-90deg)}
+.timer{left:0;right:0;margin:0 auto;width:max-content;top:10px;z-index:8;display:flex;align-items:center;gap:.45em;font:700 15px/1 var(--uif);letter-spacing:.12em;color:var(--accent);padding:.25em .5em;border-radius:8px;font-variant-numeric:tabular-nums;pointer-events:auto;background:none}
+.timer svg{width:1.05em;height:1.05em;flex:none;animation:hglass 6s ease-in-out infinite}
+@keyframes hglass{0%,80%{transform:rotate(0)}92%,100%{transform:rotate(180deg)}}
+.timer.paused svg,.timer.done svg{animation:none}
 .timer .tr-bg{stroke:color-mix(in srgb,var(--ink) 20%,transparent)}
 .timer .tr-fg{stroke:var(--accent);transition:stroke-dashoffset .2s linear}
 .timer.hot{color:#ff4d4d;animation:tpulse .5s ease-in-out infinite alternate}
@@ -760,10 +762,10 @@ body.inmode .dock{visibility:hidden}
 .confetti{position:fixed;inset:0;z-index:97;pointer-events:none;overflow:hidden}
 .confetti i{position:absolute;top:-20px;border-radius:2px;animation:confall linear forwards}
 @keyframes confall{to{transform:translate(var(--x),110vh) rotate(var(--r))}}
-.timer.paused{color:#e6b64e;background:color-mix(in srgb,#f2c25a 14%,transparent);box-shadow:0 0 14px rgba(255,200,90,.25)}
+.timer.paused{color:#d9a63c;text-shadow:0 0 12px rgba(255,200,90,.45)}
 .timer{transition:transform .35s var(--spring),color .3s,background-color .3s}
-.timer.warn{transform:scale(1.14);transform-origin:right center;color:#ff9a1f;background:color-mix(in srgb,#ff9a1f 16%,transparent)}
-.timer.hot{transform:scale(1.22);transform-origin:right center;background:color-mix(in srgb,#ff4d4d 16%,transparent)}
+.timer.warn{transform:scale(1.12);color:#ff8a1f}
+.timer.hot{transform:scale(1.22);color:#ff4d4d}
 .trim{position:absolute;inset:0;width:100%;height:100%;z-index:7;pointer-events:none;overflow:visible;opacity:0;transition:opacity .4s}
 .trim.on{opacity:1}
 .trim path{fill:none;stroke-linecap:round;transition:stroke .5s}
@@ -1007,7 +1009,7 @@ body.haspill .empty{display:none}
       <canvas id="fxCv"></canvas>
       <div class="tflash" id="tflash"></div>
       <div class="cover" id="cover" hidden><div class="ci"></div><div class="q">?</div><div class="cn"></div><div class="ch">Toque para revelar</div></div>
-      <button class="timer" id="timer" hidden aria-label="Cronômetro"><svg viewBox="0 0 24 24"><circle class="tr-bg" cx="12" cy="12" r="10" fill="none" stroke-width="3"/><circle class="tr-fg" cx="12" cy="12" r="10" fill="none" stroke-width="3" stroke-dasharray="62.83" stroke-linecap="round"/></svg><span>0:00</span></button>
+      <button class="timer" id="timer" hidden aria-label="Cronômetro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h11M6.5 21h11M8 3v2.6a4 4 0 0 0 1.7 3.3L12 10.5l2.3-1.6A4 4 0 0 0 16 5.6V3M8 21v-2.6a4 4 0 0 1 1.7-3.3L12 13.5l2.3 1.6a4 4 0 0 1 1.7 3.3V21"/></svg><span>0:00</span></button>
       <div class="name-tag" id="nameTag"><span class="ni" id="nameIcon"></span><span id="nameText"></span><span id="nameScore" hidden></span></div>
       <div class="dpanel" id="dpanel" hidden>
         <div class="dp-row">
@@ -1451,13 +1453,14 @@ function sizeCanvases(){
   for (const c of [drawCv, ledBase, ledLit]){ c.width = Math.max(1, Math.round(w*d)); c.height = Math.max(1, Math.round(h*d)); }
   ledGlow.width = Math.max(1, Math.round(w*d/2)); ledGlow.height = Math.max(1, Math.round(h*d/2));
 }
+let timerLine = false; // a linha do tempo abaixo do nome ocupa espaço no quadro enquanto aparece
 function frame(phys){
   const W = phys ? board.clientWidth : bw, Hh = phys ? board.clientHeight : bh;
   const pres = presenting && (phys || !comp);
   const m = Math.min(W, Hh), p = P();
   const side = m * (pres ? .085 : .07);
   const ns = Math.max(11, Math.min(pres ? 26 : 19, m * (pres ? .042 : .035)));
-  const nameSpace = p.showName ? ns * 2.4 : 0;
+  const nameSpace = (p.showName ? ns * 2.4 : 0) + (timerLine ? ns * (p.showName ? 1.5 : 2.4) : 0);
   // temas com moldura, margem ou faixa reservam esse espaço (nome, texto e cronômetro ficam por dentro)
   const tp = (THEMES[p.theme] || {}).pad || {};
   const L0 = W*(tp.l || 0), R0 = W*(tp.r || 0), T0 = Hh*(tp.t || 0), B0 = Hh*(tp.b || 0);
@@ -2471,7 +2474,7 @@ function ringDefs(kind){
     L.push({label:'+15 s', txt:'+15', stay:true, act(){ adjTimer(15); }});
     L.push({label:'−15 s', txt:'−15', stay:true, act(){ adjTimer(-15); }});
     if (!TM.run && !TM.paused) for (const sec of [30, 60, 90, 120, 180].filter(x => x !== S.g.timerDur)) L.push({label:'Iniciar ' + fmtT(sec*1000), txt: sec < 60 ? sec + 's' : fmtT(sec*1000).replace(':00',"'"), on: S.g.timerDur === sec, off: !canStart, act(){ S.g.timerDur = sec; save(); startTimer(sec * 1000); }});
-    else L.push({label:'Parar', icon:RI.stop, act(){ stopTimer(); }});
+    else L.push({label:'Cancelar tempo', icon:RI.stop, act: cancelTimer});
     L.push({label:'Voltar', icon:RI.back, sub: back});
     return L;
   }
@@ -2648,7 +2651,9 @@ board.addEventListener('click', e => {
   if (IOS) startEditing(x, y); else editT = setTimeout(() => startEditing(x, y), 300);
 });
 board.addEventListener('pointerdown', e => {
-  if (presenting || mode !== 'text' || editing || e.button > 0 || e.target.closest('.dpanel,.dfab')) return;
+  // escrevendo, o toque longo em cima das letras continua sendo do sistema (selecionar); no resto do quadro abre o anel
+  if (presenting || mode !== 'text' || e.button > 0 || e.target.closest('.dpanel,.dfab')) return;
+  if (editing && txt.contains(e.target) && kbOpen) return;
   if (document.body.classList.contains('settings')) return;
   lpXY = [e.clientX, e.clientY];
   clearTimeout(lpT);
@@ -2712,7 +2717,7 @@ document.addEventListener('fullscreenchange', onFsChange);
 document.addEventListener('webkitfullscreenchange', onFsChange);
 
 /* ================= apresentação ================= */
-let wakeLock = null, lastTap = 0, lastTapXY = [0,0], hintT = 0;
+let kbOpen = false, wakeLock = null, lastTap = 0, lastTapXY = [0,0], hintT = 0;
 function hint(msg){ const h = $('#hint'); h.textContent = msg; h.classList.add('on'); clearTimeout(hintT); hintT = setTimeout(() => h.classList.remove('on'), 1600); }
 /* desenho feito em pé (sem texto) não precisa girar: ocupa a tela em pé mesmo */
 function uprightDrawing(){
@@ -3144,7 +3149,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 34')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 35')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -3296,18 +3301,11 @@ $('#doneBtn').addEventListener('click', closeSheet);
 const timerEl = $('#timer'), tflash = $('#tflash'), coverEl = $('#cover');
 const TM = {end:0, dur:0, run:false, iv:0, lastSec:-1};
 function fmtT(ms){ const s = Math.max(0, Math.ceil(ms/1000)); return Math.floor(s/60) + ':' + String(s % 60).padStart(2, '0'); }
+/* o tempo fica numa linha logo abaixo do nome, no mesmo estilo, com uma ampulheta */
 function placeTimer(pf){
   if (!timerEl) return;
-  timerEl.style.fontSize = pf.ns + 'px';
-  timerEl.style.top = Math.max(6, pf.nameTop - pf.ns*.35) + 'px';
-  timerEl.style.right = Math.max(10, (pf.right || 0) + 10) + 'px';
-  // se o cronômetro encostar no nome, o nome vai para a esquerda (nada fica por cima de nada)
-  nameTag.style.justifyContent = ''; nameTag.style.paddingLeft = '';
-  if (!timerEl.hidden && !nameTag.hidden){
-    const W = board.clientWidth, cw = [...nameTag.children].filter(c => !c.hidden).reduce((t, c) => t + c.offsetWidth, 0) + pf.ns*1.1;
-    const tl = W - (parseFloat(timerEl.style.right) || 10) - timerEl.offsetWidth;
-    if ((W + cw)/2 > tl - 8){ nameTag.style.justifyContent = 'flex-start'; nameTag.style.paddingLeft = Math.max(10, pf.x) + 'px'; }
-  }
+  timerEl.style.fontSize = (pf.ns * .95) + 'px';
+  timerEl.style.top = (pf.nameTop + (P().showName ? pf.ns * 1.55 : 0) - pf.ns * .25) + 'px';
 }
 /* visual do cronômetro (cumulativos): pílula, pavio de bomba e brilho nas bordas */
 const tRule = k => { const R = NET.role === 'guest' ? (NET.rules || {}) : S.g; return R[k]; };
@@ -3352,6 +3350,7 @@ function bigTick(sec){
 }
 function timerLooks(left){
   rimShow(left, false);
+  const tl = tRule('tPill') !== false; if (tl !== timerLine){ timerLine = tl; render(); }
   const pill = tRule('tPill') !== false, fuse = !!tRule('tFuse'), edge = !!tRule('tEdge');
   timerEl.classList.toggle('ghost', !pill);
   fuseEl.hidden = !fuse || !TM.run || presenting;
@@ -3404,7 +3403,7 @@ function startTimer(ms, fromNet, dur){
 }
 function stopTimer(fromNet){
   if (!NET.role) roomAwake(false);
-  clearInterval(TM.iv); TM.run = false; TM.paused = false; timerEl.hidden = true; timerEl.classList.remove('hot', 'warn', 'done', 'paused'); fuseEl.hidden = true; tpop.hidden = true; rimShow(0);
+  clearInterval(TM.iv); TM.run = false; TM.paused = false; timerEl.hidden = true; timerLine = false; timerEl.classList.remove('hot', 'warn', 'done', 'paused'); fuseEl.hidden = true; tpop.hidden = true; rimShow(0);
   render();
   if (!fromNet && NET.role === 'host') netBroadcast({k:'timerStop'});
   if (win) syncSheet();
@@ -3417,7 +3416,7 @@ function timerDone(){
   if (!S.g.mute && ac()){ try{ endSound((NET.role === 'guest' ? (NET.rules || {}) : S.g).tEndSnd || 'bipes'); }catch(_){} }
   if (navigator.vibrate) try{ navigator.vibrate([140, 80, 140]); }catch(_){}
   fuseEl.hidden = true; if (tRule('tEdge')) edgePulse(1.4);
-  setTimeout(() => { if (!TM.run){ timerEl.hidden = true; render(); } }, 2600);
+  setTimeout(() => { if (!TM.run && !TM.paused){ timerEl.hidden = true; timerLine = false; render(); } }, 2600);
   if (G && G.mode === 'stop'){ if (NET.role === 'host' && G.phase === 'play') stopNow(null); if (win) syncSheet(); return; }
   const te = NET.role && revModeNow() === 'timer' ? 'reveal' : (S.g.tEnd || 'reveal'), lw = S.g.lockW || 'all';
   if (!NET.role){ if (te === 'reveal' && !presenting) present(); else if (te === 'lock') setLock(lw); }
@@ -3430,16 +3429,24 @@ function timerDone(){
 timerEl.addEventListener('click', e => { e.stopPropagation(); if (presenting) return; if (NET.role === 'guest'){ openSheet('game'); return; } tpop.hidden = !tpop.hidden; posTpop(); });
 /* controles rápidos do cronômetro: −15, pausar/continuar, +15 (quem manda no tempo) */
 const tpop = document.createElement('div'); tpop.className = 'tpop'; tpop.hidden = true;
-tpop.innerHTML = '<button class="press" data-tp="-15">−15 s</button><button class="press pri" data-tp="pause">Pausar</button><button class="press" data-tp="15">+15 s</button><button class="press" data-tp="more">⋯</button>';
+tpop.innerHTML = '<button class="press" data-tp="-15">−15 s</button><button class="press pri" data-tp="pause">Pausar</button><button class="press" data-tp="15">+15 s</button><button class="press" data-tp="stop">Cancelar</button><button class="press" data-tp="more">⋯</button>';
 document.body.appendChild(tpop);
-function posTpop(){ const r = timerEl.getBoundingClientRect(); tpop.style.top = (r.bottom + 8) + 'px'; tpop.style.right = Math.max(8, innerWidth - r.right) + 'px'; tpop.querySelector('[data-tp=pause]').textContent = TM.paused ? 'Continuar' : 'Pausar'; }
+function posTpop(){ const r = timerEl.getBoundingClientRect(); tpop.style.top = (r.bottom + 8) + 'px'; tpop.style.right = 'auto'; tpop.style.left = Math.max(8, Math.min(innerWidth - tpop.offsetWidth - 8, r.left + r.width/2 - tpop.offsetWidth/2)) + 'px'; tpop.querySelector('[data-tp=pause]').textContent = TM.paused ? 'Continuar' : 'Pausar'; }
 tpop.addEventListener('click', e => {
   const b = e.target.closest('[data-tp]'); if (!b) return; const a = b.dataset.tp;
-  if (a === 'more'){ tpop.hidden = true; openSheet('game'); return; }
+  if (a === 'more'){ tpop.hidden = true; gtab = 'rodada'; openSheet('game'); return; }
+  if (a === 'stop'){ tpop.hidden = true; cancelTimer(); return; }
   if (a === 'pause'){ TM.paused ? resumeTimer() : pauseTimer(); posTpop(); return; }
   adjTimer(+a);
 });
 document.addEventListener('pointerdown', e => { if (!tpop.hidden && !e.target.closest('.tpop,#timer')) tpop.hidden = true; }, true);
+/* cancelar: o tempo some para todos e dá para começar de novo (nada é revelado nem travado) */
+function cancelTimer(){
+  if (!TM.run && !TM.paused) return;
+  stopTimer(); if (lockMode) setLock(null);
+  toast(NET.role === 'host' && revModeNow() === 'timer' ? 'Tempo cancelado. Toque em Iniciar tempo para recomeçar' : 'Tempo cancelado');
+  updateRoomUI();
+}
 /* soma/subtrai segundos: no tempo correndo, no pausado ou na duração da próxima contagem */
 function adjTimer(sec){
   if (TM.paused){ TM.left = Math.max(1000, TM.left + sec * 1000); TM.dur = Math.max(TM.dur, TM.left); timerEl.querySelector('span').textContent = fmtT(TM.left); if (NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur}); return; }
@@ -3451,6 +3458,7 @@ function pauseTimer(ms, fromNet){
   const was = TM.paused;
   TM.left = ms != null ? ms : TM.end - performance.now(); clearInterval(TM.iv); TM.run = false; TM.paused = true;
   timerEl.hidden = false; timerEl.classList.add('paused'); timerEl.querySelector('span').textContent = fmtT(TM.left); rimShow(TM.left, true);
+  if (!timerLine && tRule('tPill') !== false){ timerLine = true; render(); }
   if (!fromNet && NET.role === 'host') netBroadcast({k:'tpause', ms: TM.left, dur: TM.dur});
   if (!was) toast(fromNet ? 'Tempo pausado pelo anfitrião' : 'Tempo pausado');
   updateRoomUI();
@@ -3661,14 +3669,14 @@ function balloon(pl, kind, demo){
   const text = demo ? demoText(kind) : phraseFor(pl.id, kind); if (!text) return;
   if (!demo) addFeed(pl, kind, text);
   // nas telas dos modos (respostas, votação, conferência) os avisos de "escrevendo" só atrapalham: ficam só no histórico
-  if (!demo && document.body.classList.contains('inmode') && ['typing','drawing','erasing','idle','unready'].includes(kind)) return;
+  if (!demo && (presenting || document.body.classList.contains('inmode')) && ['typing','drawing','erasing','idle','unready'].includes(kind)) return;
   const bf = S.g.balF ?? 2, key = pl.id + kind, now = performance.now();
   if (presenting || (bf === 0 && !demo)) return;
   if (bf === 1 && !demo && !['join','leave','ready','kick','dispute','show'].includes(kind)) return;
   if (!demo && balLast[key] && now - balLast[key] < (bf === 3 ? 2400 : 7000) && !['join','leave','ready','unready'].includes(kind)) return;
   balLast[key] = now;
   const wrap = $('#bals'), style = S.g.balS || 'fala';
-  wrap.className = 'bals bs-' + style + (document.body.classList.contains('inmode') && style !== 'lateral' && style !== 'live' ? ' anchor-b' : '') + (!timerEl.hidden && !timerEl.classList.contains('ghost') ? ' tdown' : '') + (pl && pl.id === 'demo' ? ' demo' : '');
+  wrap.className = 'bals bs-' + style + ((document.body.classList.contains('inmode') || presenting) && style !== 'lateral' && style !== 'live' ? ' anchor-b' : '') + (!timerEl.hidden && !timerEl.classList.contains('ghost') ? ' tdown' : '') + (pl && pl.id === 'demo' ? ' demo' : '');
   // mesmo tipo de aviso já na tela: junta as pessoas num balão só, em vez de empilhar
   if (style !== 'live' && PLURAL[kind]){
     const same = balRows().find(r => r._kind === kind && !r._demo === !demo);
@@ -4158,7 +4166,7 @@ function fluxoHTML(){
     ${host ? '' : `<div class="mstate"><b>Preparando a partida</b><span>O anfitrião está escolhendo as regras. Quando ele tocar em Começar, escreva na lousa a resposta que você acha que a maioria vai dar.</span></div>`}
     <div class="mrules"><p>Alguém lê a pergunta da carta. Cada um escreve na lousa a resposta que acha que <b>a maioria</b> vai dar.</p>
     <p>Quem fugiu do fluxo pega peixe do cardume. Quando o cardume acaba, vence quem tiver <b>menos peixes</b>.</p></div>
-    <div class="mrow col"><span>Como cada rodada termina</span>${host ? seg('frev', [['together','Pronto'],['timer','Tempo igual'],['each','Cada um']], revModeNow()) : `<b>${{together:'cada um toca em Pronto; quando todos estiverem prontos, contagem e todos mostram', timer:'tempo igual para todos; quando acaba, todos mostram', each:'cada um mostra quando quiser; o anfitrião confere'}[revModeNow()]}</b>`}</div>
+    <div class="mrow col"><span>Como cada rodada termina</span>${host ? seg('frev', [['together','Pronto'],['timer','Com tempo'],['each','Cada um']], revModeNow()) : `<b>${{together:'cada um toca em Pronto; quando todos estiverem prontos, contagem e todos mostram', timer:'tempo igual para todos; quando acaba, todos mostram', each:'cada um mostra quando quiser; o anfitrião confere'}[revModeNow()]}</b>`}</div>
     ${host && revModeNow() === 'timer' ? `<div class="mrow"><span>Tempo para pensar</span>${stepper('ftime', S.g.timerDur, fmtT(S.g.timerDur * 1000))}</div>` : ''}
     <div class="mrow"><span>Peixes no cardume</span>${host ? stepper('pool', G.cfg.pool) : `<b>${G.cfg.pool}</b>`}</div>
     <div class="f-sub">${fishHint(n)}${host && G.cfg.pool !== fishSuggest(n) ? ` <button class="lnk" data-m="fishsug">Usar ${fishSuggest(n)}</button>` : ''}</div>
@@ -5294,7 +5302,7 @@ const MODES = [['stop','Adedonha','Letra sorteada, categorias votadas, STOP! e c
   ['fluxo','Segue o Fluxo','Responda o que a maioria vai responder. Use as cartas do jogo; o resto fica no celular.', FISH]];
 /* ---------- Jogo › Rodada: tudo da rodada num lugar só, na ordem em que ela acontece ---------- */
 let foldT = false;
-const REV_LB = {together:'Pronto', timer:'Tempo igual', each:'Cada um'}, RVL_LB = {count:'Contagem', now:'Direto', host:'Anfitrião vira'};
+const REV_LB = {together:'Pronto', timer:'Com tempo', each:'Cada um'}, RVL_LB = {count:'Contagem', now:'Direto', host:'Anfitrião vira'};
 function rodadaSummary(){
   const inRoom = !!NET.role, guest = NET.role === 'guest', R = guest ? (NET.rules || {}) : S.g;
   const rm = inRoom ? revModeNow() : null, parts = [];
@@ -5313,7 +5321,7 @@ function rodadaHTML(){
   const sum = `<div class="rsum">${esc(rodadaSummary())}</div>`;
   if (guest) return `${sum}
     <div class="sec"><div class="sec-t">Como a rodada termina</div>${fsub(tog
-      ? (rm === 'timer' ? 'Tempo igual para todos: quando o tempo acabar, os quadros aparecem juntos. Terminou antes? Toque em Pronto.' : 'Quando terminar, toque em Pronto (ou dois toques no quadro). Todos mostram ao mesmo tempo.')
+      ? (rm === 'timer' ? 'Com tempo: o anfitrião inicia o tempo para todos; quando acabar, os quadros aparecem juntos. Terminou antes? Toque em Pronto.' : 'Quando terminar, toque em Pronto (ou dois toques no quadro). Todos mostram ao mesmo tempo.')
       : 'Cada um mostra quando quiser, como na mesa: dois toques no quadro ou Mostrar.')}</div>
     <div class="sec"><div class="sec-t">Tempo</div>${TM.run ? `<div class="bigtime">${fmtT(TM.end - performance.now())}</div>` : ''}
       ${fsub(`Quando acabar: ${TEND_LB[R.tEnd || 'reveal'].toLowerCase()}${R.tEnd === 'lock' ? (R.lockW === 'text' ? ' só a escrita' : ' escrita e desenho') : ''}. O anfitrião define e inicia o tempo.`)}</div>
@@ -5322,8 +5330,8 @@ function rodadaHTML(){
     ${fsub('Quem decide as regras da rodada é o anfitrião.')}`;
   return `${sum}
     ${inRoom ? `<div class="sec"><div class="sec-t">Como a rodada termina</div>
-      ${seg('revmode', [['together','Pronto'],['timer','Tempo igual'],['each','Cada um']], rm)}
-      ${fsub(rm === 'each' ? 'Sem Pronto e sem contagem: cada um vira a tela no seu tempo, quando a mesa combinar.' : rm === 'timer' ? 'Todos têm o mesmo tempo, pelo mesmo relógio. Quando acaba, os quadros aparecem juntos. Quem terminar antes pode tocar em Pronto.' : 'Cada um toca em Pronto quando terminar; os quadros aparecem juntos.')}
+      ${seg('revmode', [['together','Pronto'],['timer','Com tempo'],['each','Cada um']], rm)}
+      ${fsub(rm === 'each' ? 'Sem Pronto e sem contagem: cada um vira a tela no seu tempo, quando a mesa combinar.' : rm === 'timer' ? 'O seu botão principal vira Iniciar tempo: o tempo começa para todos ao mesmo tempo e, quando acaba, os quadros aparecem juntos. Quem terminar antes toca em Pronto. Tocar no tempo do quadro pausa, ajusta ou cancela.' : 'Cada um toca em Pronto quando terminar; os quadros aparecem juntos.')}
       ${tog ? `<div class="f-row" style="margin-top:6px"><span class="f-lb">${rm === 'timer' ? 'Revelar antes se todos ficarem prontos' : 'Revelar sozinho quando todos estiverem prontos'}</span>${tg('data-gtg="autoAll"', S.g.autoAll !== false)}</div>
       <div class="f-row"><span class="f-lb">Permitir mudar de ideia depois do Pronto</span>${tg('data-gtg="undoReady"', S.g.undoReady !== false)}</div>` : ''}
       ${roundActs()}</div>` : ''}
@@ -5347,7 +5355,7 @@ function rodadaHTML(){
       <div class="f-stack"><span class="f-lb">Som quando o tempo acaba</span>${seg('tendsnd', [['bipes','Bipes'],['buzina','Buzina'],['gongo','Gongo'],['apito','Apito'],['fanfarra','Fanfarra'],['nada','Nenhum']], S.g.tEndSnd || 'bipes')}</div>
       <div class="f-row"><span class="f-lb">Contorno do quadro</span>${tg('data-gtg="tRim"', S.g.tRim !== false)}</div>
       <div class="f-row"><span class="f-lb">Números grandes no fim</span>${tg('data-gtg="tBig"', S.g.tBig !== false)}</div>
-      <div class="f-row"><span class="f-lb">Pílula com o tempo</span>${tg('data-gtg="tPill"', S.g.tPill !== false)}</div>
+      <div class="f-row"><span class="f-lb">Tempo embaixo do nome</span>${tg('data-gtg="tPill"', S.g.tPill !== false)}</div>
       <div class="f-row"><span class="f-lb">Pavio de bomba no topo</span>${tg('data-gtg="tFuse"', !!S.g.tFuse)}</div>
       <div class="f-row"><span class="f-lb">Bordas pulsando no fim</span>${tg('data-gtg="tEdge"', !!S.g.tEdge)}</div>
       ${fsub(host ? 'Som e visual valem para todos os celulares da sala.' : 'Valem para este celular.')}</details>`;
@@ -5597,7 +5605,16 @@ function simPulse(){
 }
 /* ================= viewport / início ================= */
 const vv = window.visualViewport;
-function fitVV(){ if (!vv || presenting) return; app.style.height = vv.height + 'px'; app.style.top = vv.offsetTop + 'px'; }
+/* o "voltar" do Android fecha o teclado mas deixa o cursor piscando: quando o teclado some, a edição termina */
+let vvMax = vv ? vv.height : innerHeight;
+function kbWatch(){
+  if (!vv) return;
+  if (!editing){ vvMax = vv.height; kbOpen = false; return; }
+  if (vv.height > vvMax) vvMax = vv.height;
+  if (vv.height < vvMax * .78) kbOpen = true;
+  else if (kbOpen && vv.height > vvMax * .9){ kbOpen = false; txt.blur(); }
+}
+function fitVV(){ kbWatch(); if (!vv || presenting) return; app.style.height = vv.height + 'px'; app.style.top = vv.offsetTop + 'px'; }
 // o teclado pode fechar enquanto a apresentação ou um modo está na frente: reajusta a altura quando voltar
 const refitVV = () => { [60, 350, 800].forEach(ms => setTimeout(fitVV, ms)); };
 document.addEventListener('focusout', refitVV);
