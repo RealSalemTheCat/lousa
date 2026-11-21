@@ -289,6 +289,12 @@ body.back .board{animation:boardin .45s cubic-bezier(.2,.9,.3,1.1)}
 .idrow{display:flex;align-items:center;gap:10px;font:600 16px var(--uif)}
 .idrow .pi{width:24px;height:24px;display:grid;place-items:center}.idrow .pi svg{width:22px;height:22px}.idrow .pi .dot{width:11px;height:11px;border-radius:50%;background:currentColor}
 .idrow b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.turn{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:rgba(10,10,12,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;text-align:center;padding:20px}
+.turn[hidden]{display:none}
+.turn-in{display:flex;flex-direction:column;align-items:center;gap:14px;font:600 16px/1.3 var(--uif)}
+.turn-ph{width:34px;height:58px;border:3px solid #fff;border-radius:8px;position:relative;animation:turnph 2.2s ease-in-out infinite}
+.turn-ph i{position:absolute;left:50%;bottom:4px;width:8px;height:3px;margin-left:-4px;border-radius:2px;background:#fff}
+@keyframes turnph{0%,25%{transform:rotate(-90deg)}55%,100%{transform:rotate(0)}}
 .rotlayer{position:fixed;left:50%;top:50%;z-index:70;pointer-events:none}
 .rotlayer[hidden]{display:none}
 .rotlayer > .rbar{pointer-events:auto}
@@ -1256,7 +1262,7 @@ function load(){
   try{
     const j = JSON.parse(localStorage.getItem(KEY));
     if (j && Array.isArray(j.profiles) && j.profiles.length){
-      j.g = Object.assign({rvl:'count', tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
+      j.g = Object.assign({portraitWrite:true, rvl:'count', tRim:true, tBig:true, rotate:true, rotDir:'left', intro:true, editMsg:true, mute:false, vol:.7, autoShow:false, cover:false, showScore:false, roundClear:true, timerDur:60, autoAll:true, revMode:'together', lobby:true, undoReady:true, tPill:true, rotAuto:true, tEnd:'reveal', lockW:'all', balF:2}, j.g || {});
       j.ui = Object.assign(defUI(), j.ui || {}); j.ui.sizes = Object.assign(defUI().sizes, j.ui.sizes || {});
       j.profiles.forEach(p => { const d = newProfile(p.name, p.accent); for (const k in d) if (!(k in p)) p[k] = d[k]; if (!THEMES[p.theme]) p.theme = 'lousa'; });
       return j;
@@ -1461,6 +1467,7 @@ const isSample = () => !P().text.trim() && !!shownText();
 
 /* ================= render geral ================= */
 function render(){
+  if (typeof checkTurn === 'function') checkTurn();
   sizeCanvases();
   if (!bw || !bh) return;
   const p = P(), fr = frame(), pf = comp ? frame(true) : fr;
@@ -2672,6 +2679,28 @@ function setOrientation(kind){
   if (S.g.rotate && isPhone()) o.lock('portrait').catch(() => {});
   else try{ o.unlock(); }catch(_){}
 }
+/* escrever é sempre em pé: com o celular deitado fora da apresentação, o quadro fica espremido pelo teclado.
+   O iPhone não deixa travar a tela, então aparece um aviso para virar (desenhar e mostrar continuam livres). */
+const turnEl = document.createElement('div'); turnEl.className = 'turn'; turnEl.hidden = true;
+turnEl.innerHTML = `<div class="turn-in"><div class="turn-ph"><i></i></div><b>Vire o celular em pé para escrever</b>
+  <div class="nv-row"><button class="nbtn press" data-turn="draw">Desenhar deitado</button><button class="nbtn pri press" data-turn="show">Mostrar</button></div></div>`;
+document.body.appendChild(turnEl);
+turnEl.addEventListener('click', e => { const b = e.target.closest('[data-turn]'); if (!b) return; if (b.dataset.turn === 'draw') setMode('draw'); else present(); checkTurn(); });
+function devLandscape(){
+  const o = screen.orientation;
+  if (o && o.type) return o.type.startsWith('landscape');
+  if (typeof window.orientation === 'number') return Math.abs(window.orientation) === 90;
+  return innerWidth > innerHeight;
+}
+function checkTurn(){
+  const on = S.g.portraitWrite !== false && isPhone() && devLandscape() && !presenting && mode !== 'draw' && !(typeof LOB !== 'undefined' && LOB.open);
+  if (on === !turnEl.hidden) return;
+  turnEl.hidden = !on;
+  if (on && editing) txt.blur();
+}
+addEventListener('orientationchange', () => setTimeout(checkTurn, 120));
+if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', checkTurn);
+addEventListener('resize', () => setTimeout(checkTurn, 60));
 function onFsChange(){ updateFsBtn(); if (win) syncSheet(); if (fsEl()) setOrientation('portrait'); }
 document.addEventListener('fullscreenchange', onFsChange);
 document.addEventListener('webkitfullscreenchange', onFsChange);
@@ -3089,7 +3118,8 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Desenhos em pé não giram</span>${tg('data-gtg="rotAuto"', S.g.rotAuto !== false)}</div>
       <div class="f-stack"><span class="f-lb">Sentido do giro</span>${seg('rot', [['left','Esquerda'],['right','Direita']], S.g.rotDir)}</div>
       <div class="f-row" style="margin-top:8px"><span class="f-lb">Animações de transição</span>${tg('data-gtg="intro"', S.g.intro)}</div>
-      <div class="f-row"><span class="f-lb">Aviso ao voltar</span>${tg('data-gtg="editMsg"', S.g.editMsg)}</div></div>
+      <div class="f-row"><span class="f-lb">Aviso ao voltar</span>${tg('data-gtg="editMsg"', S.g.editMsg)}</div>
+      <div class="f-row"><span class="f-lb">Escrever só com o celular em pé</span>${tg('data-gtg="portraitWrite"', S.g.portraitWrite !== false)}</div></div>
     <div class="sec"><div class="sec-t">Som</div>
       <div class="opt-grid" data-seg="sound">${SOUNDS.map(([v,l]) => `<button class="press" data-v="${v}" ${pressed(v === (p.sound || 'auto'))}>${v === 'auto' ? `Do tema · ${(SOUNDS.find(x => x[0] === (THEME_SND[p.theme] || 'suave')) || ['','Suave'])[1]}` : l}</button>`).join('')}</div>
       <div class="f-row" style="margin-top:10px"><span class="f-lb">Mudo</span>${tg('data-gtg="mute"', S.g.mute)}</div>
@@ -3098,7 +3128,7 @@ function winHTML(){
     ${balloonsHTML()}
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
     ${S.g.dev ? devHTML() : ''}
-    <div class="sec" id="verSec">${fsub('Lousa · versão 32')}</div>`;
+    <div class="sec" id="verSec">${fsub('Lousa · versão 33')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -4912,9 +4942,9 @@ function lobSize(){
 function openLobby(){
   if (!NET.role || !lobAllowed()) return;
   LOB.open = true; lobEl.hidden = false; document.body.classList.add('inlobby'); lobEl.style.top = Math.max(0, $('.top').getBoundingClientRect().bottom) + 'px';
-  lobSize(); lobLoop(); updateReactBar(); sfx('ui');
+  lobSize(); lobLoop(); updateReactBar(); sfx('ui'); checkTurn();
 }
-function closeLobby(){ if (!LOB.open) return; LOB.open = false; lobEl.hidden = true; document.body.classList.remove('inlobby'); cancelAnimationFrame(LOB.raf); LOB.raf = 0; updateReactBar(); }
+function closeLobby(){ if (!LOB.open) return; LOB.open = false; lobEl.hidden = true; setTimeout(checkTurn, 0); document.body.classList.remove('inlobby'); cancelAnimationFrame(LOB.raf); LOB.raf = 0; updateReactBar(); }
 lobEl.querySelector('#lobClose').addEventListener('click', closeLobby);
 lobEl.querySelector('.lsz').addEventListener('click', e => { const b = e.target.closest('[data-lw]'); if (!b) return; LOB.w = +b.dataset.lw; lobEl.querySelectorAll('[data-lw]').forEach(x => x.classList.toggle('on', x === b)); });
 addEventListener('resize', () => { if (LOB.open) lobSize(); });
