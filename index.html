@@ -625,6 +625,9 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 .frow .add{font-style:normal;font-weight:800;font-size:13px;color:#3fb6ff}
 .frow .fn{display:flex;align-items:center;gap:4px;min-width:46px;justify-content:center;font:800 18px var(--uif)}.frow .fn svg{width:18px;height:18px;color:#3fb6ff}
 .grp.miss{border-style:dashed}
+.mstate{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--accent) 10%,var(--panel2));border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);margin-bottom:14px}
+.mstate b{font-size:16px}.mstate span{color:var(--tx2);font-size:14px;line-height:1.45}
+.lnk{color:var(--accent);font-weight:700;text-decoration:underline;padding:0}
 .fishbar{display:flex;flex-wrap:wrap;gap:8px}
 .fishbar span{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:99px;background:var(--panel2);border:1px solid var(--line)}
 .fishbar b{font-weight:800}.fishbar i{font-style:normal;font-weight:800;font-size:12px;color:#3fb6ff}
@@ -2771,7 +2774,7 @@ function fitComp(){
   compEl.style.transform = `translate(${(pf.x + (pf.w - w*k)/2 - x0*k).toFixed(1)}px, ${(pf.y + (pf.h - h*k)/2 - y0*k).toFixed(1)}px) scale(${k.toFixed(4)})`;
 }
 async function finishExit(){
-  hideCover(false); setTimeout(renderMode, 50);
+  hideCover(false); setTimeout(renderMode, 50); if (typeof refitVV === 'function') refitVV();
   if (NET.role === 'host' && !revTogether() && !G) setTimeout(() => toast('Todos já mostraram?', 'Nova rodada', newRound), 700);
   if (comp){ comp = null; applyComp(); }
   presentSeq++;
@@ -2803,8 +2806,12 @@ board.addEventListener('pointerup', e => {
   hint('Toque duas vezes para voltar');
 });
 $('#showBtn').addEventListener('click', () => {
-  if (NET.role === 'host' && !revTogether() && G && G.mode === 'fluxo' && G.phase === 'write' && NET.phase === 'writing'){ collectAll(); return; }
-  if (NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && !G){ startTimer(S.g.timerDur * 1000); return; }
+  if (NET.role === 'host' && !revTogether() && G && G.mode === 'fluxo' && G.phase === 'write' && NET.phase === 'writing'){
+    const busy = roomPlayers().filter(r => r.id !== myId() && ['typing','drawing','erasing'].includes(r.st)).length;
+    if (NET.confirmT && Date.now() - NET.confirmT < 4000){ NET.confirmT = 0; collectAll(); return; }
+    NET.confirmT = Date.now(); toast(busy ? `${busy} ainda ${busy === 1 ? 'está escrevendo' : 'estão escrevendo'}. Toque de novo para conferir` : 'Toque de novo para conferir as respostas'); return;
+  }
+  if (NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && (!G || (G.mode === 'fluxo' && G.phase === 'write'))){ startTimer(S.g.timerDur * 1000); return; }
   wantShow();
 });
 window.addEventListener('resize', () => { if (presenting){ placePresent(); if (comp){ render(); fitComp(); } } });
@@ -2921,7 +2928,7 @@ function winHTML(){
       <div class="f-row"><span class="f-lb">Volume</span><span class="f-val" id="volVal">${Math.round(S.g.vol*100)}</span></div>
       <div class="f-row" style="min-height:34px"><input type="range" id="volIn" min="5" max="100" step="1" value="${Math.round(S.g.vol*100)}" style="--p:${(Math.round(S.g.vol*100)-5)/95*100}%"></div></div>
     ${fsOK ? `<div class="sec"><div class="f-row"><span class="f-lb">Tela cheia</span>${tg('data-fs="1"', !!fsEl())}</div></div>` : ''}
-    <div class="sec">${fsub('Lousa · versão 24')}</div>`;
+    <div class="sec">${fsub('Lousa · versão 25')}</div>`;
 }
 let bumpSel = null;
 function syncSheet(fade){
@@ -2951,7 +2958,7 @@ function openSheet(w){
   win = w; document.body.classList.add('settings'); document.body.classList.toggle('float', w === 'room' || w === 'game'); syncSheet(true);
   if (w !== 'room' && w !== 'game') modeMin = modeMin || !!G; renderMode();
 }
-function closeSheet(){ document.body.classList.remove('settings', 'float'); win = null; setTimeout(renderMode, 0); const n = $('#nameIn'); n && n.blur(); }
+function closeSheet(){ document.body.classList.remove('settings', 'float'); win = null; setTimeout(renderMode, 0); if (typeof refitVV === 'function') refitVV(); const n = $('#nameIn'); n && n.blur(); }
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; if (win === 'game') gtab = b.dataset.tab; else tab = b.dataset.tab; syncSheet(true); });
 function changed(anim){ save(); applyTheme(anim); syncSheet(); myContentChanged(); announceMe(); }
 function switchProfile(id){ if (editing) txt.blur(); S.active = id; txt.textContent = P().text; changed(true); renderScoreTag();
@@ -3105,7 +3112,7 @@ function setLock(m){
 }
 function lockedMsg(){ hint(lockMode === 'all' ? 'Quadro travado: o tempo acabou' : 'Escrita travada: o tempo acabou'); }
 function startTimer(ms, fromNet){
-  clearInterval(TM.iv);
+  clearInterval(TM.iv); setTimeout(() => { if (G) renderMode(); updateRoomUI(); }, 0);
   if (lockMode) setLock(null);
   TM.dur = ms; TM.end = performance.now() + ms; TM.run = true; TM.lastSec = -1;
   timerEl.hidden = false; timerEl.classList.remove('done', 'hot');
@@ -3409,7 +3416,7 @@ function gAll(){ return [...new Set([...gPlayers().map(p => p.id), ...Object.key
 function avChip(id, extra){ const r = gCard(id), c = /^#[0-9a-f]{6}$/i.test(r.accent || '') ? r.accent : '#ffad2a';
   return `<span class="mav" style="--c:${c};--oc:${lum(c) > .45 ? '#161616' : '#fff'}">${avatarHTML(r)}</span>${extra || ''}`; }
 function act(a){ if (NET.role === 'host') gameAct(myId(), a); else if (NET.role === 'guest') hostSend({k:'ga', a}); }
-function gPush(){ if (G){ G.cards ||= {}; for (const r of NET.roster) if (r.st !== 'off') G.cards[r.id] = {id: r.id, name: r.name, icon: r.icon, accent: r.accent}; } saveHostSess(); if (!G){ netBroadcast({k:'gs', g:null}); renderMode(); return; } G.v = (G.v || 0) + 1; netBroadcast({k:'gs', g:G}); renderMode(); if (win === 'game') syncSheet(); }
+function gPush(){ setTimeout(renderScoreTag, 0); if (G){ G.cards ||= {}; for (const r of NET.roster) if (r.st !== 'off') G.cards[r.id] = {id: r.id, name: r.name, icon: r.icon, accent: r.accent}; } saveHostSess(); if (!G){ netBroadcast({k:'gs', g:null}); renderMode(); return; } G.v = (G.v || 0) + 1; netBroadcast({k:'gs', g:G}); renderMode(); if (win === 'game') syncSheet(); }
 
 function startMode(kind){
   if (NET.role !== 'host') return;
@@ -3491,19 +3498,27 @@ function gameAct(from, a){
     gPush(); return;
   }
   if (G.mode === 'fluxo'){
-    if (a.t === 'cfg' && host && G.phase === 'setup'){ G.cfg[a.k] = a.v; if (a.k === 'uniq2') G.cfg.uniq2v2 = a.v; }
-    else if (a.t === 'start' && host && G.phase === 'setup'){ saveModeRules(); G.left = G.cfg.pool; G.round = 1; G.fish = {}; G.phase = 'write'; newRound(); }
+    if (a.t === 'cfg' && host && G.phase === 'setup'){ G.cfg[a.k] = a.v; if (a.k === 'uniq2') G.cfg.uniq2v2 = a.v; if (a.k === 'pool') G.cfg.poolMan = a.v !== fishSuggest(gPlayers().length); }
+    else if (a.t === 'start' && host && G.phase === 'setup'){ if (!G.cfg.poolMan) G.cfg.pool = fishSuggest(n); saveModeRules(); G.left = G.cfg.pool; G.hist = []; G.round = 1; G.fish = {}; G.phase = 'write'; newRound(); }
     else if (a.t === 'move' && host && G.phase === 'judge'){
       for (const g of G.groups){ const i = g.ids.indexOf(a.id); if (i >= 0) g.ids.splice(i, 1); }
       if (a.to === 'new') G.groups.push({label: (G.ans[a.id] || '—'), ids:[a.id]}); else { const g = G.groups[a.to]; if (g) g.ids.push(a.id); }
       G.groups = G.groups.filter(g => g.ids.length); G.fov = {};
     }
     else if (a.t === 'fov' && host && G.phase === 'judge'){ G.fov[a.id] = a.v; }
+    else if (a.t === 'undo' && host && G.hist && G.hist.length && (G.phase === 'write' || G.phase === 'end')){
+      // reabre a última conferência: devolve os peixes ao cardume e volta para os grupos
+      const h = G.hist.pop();
+      for (const id in h.f) G.fish[id] = Math.max(0, (G.fish[id] || 0) - h.f[id]);
+      G.left += h.sum; G.round = h.round; G.groups = h.groups; G.ans = h.ans; G.fov = h.fov || {}; G.phase = 'judge';
+      if (TM.run) stopTimer();
+    }
     else if (a.t === 'fishAdj' && host){ G.fish[a.id] = Math.max(0, (G.fish[a.id] || 0) + a.d); G.left = Math.max(0, G.left - a.d); }
     else if (a.t === 'dispute' && G.phase === 'judge'){ balloon(gCard(from), 'dispute'); netBroadcast({k:'act', id: from, s:'dispute'}); return; }
     else if (a.t === 'confirm' && host && G.phase === 'judge'){
       const f = fluxoFish(); let sum = 0;
       for (const id in f){ G.fish[id] = (G.fish[id] || 0) + f[id]; sum += f[id]; }
+      (G.hist ||= []).push({round: G.round, groups: JSON.parse(JSON.stringify(G.groups)), ans: G.ans, fov: G.fov, f, sum});
       G.left = Math.max(0, G.left - sum);
       if (G.left <= 0) G.phase = 'end'; else { G.phase = 'write'; G.round++; newRound(); netBroadcast({k:'fishmsg', f}); fishToast(f); }
     }
@@ -3627,7 +3642,17 @@ function fishTable(f, host){
     ${x.add ? `<i class="add">+${x.add}</i>` : ''}
     ${host ? `<button class="sbtn press" data-fadj="${x.id}" data-d="-1" aria-label="Menos">−</button>` : ''}<b class="fn">${svg(FISH, 1.8)}${x.n}</b>${host ? `<button class="sbtn press" data-fadj="${x.id}" data-d="1" aria-label="Mais">+</button>` : ''}</div>`).join('')}</div>`;
 }
+function fluxoStep(){
+  const rm = revModeNow();
+  if (rm === 'timer' && !TM.run) return NET.role === 'host' ? `Rodada ${G.round} · toque em Começar tempo` : `Rodada ${G.round} · aguarde o tempo começar`;
+  if (rm === 'timer') return `Rodada ${G.round} · escreva antes do tempo acabar`;
+  if (rm === 'each') return NET.role === 'host' ? `Rodada ${G.round} · quando todos mostrarem, Conferir` : `Rodada ${G.round} · escreva e mostre`;
+  return `Rodada ${G.round} · escreva e toque em Pronto`;
+}
 function fishToast(f){ if (!G) return; const n = (f || {})[myId()] || 0; toast(n ? `Você pegou ${n} ${n === 1 ? 'peixe' : 'peixes'}. Total: ${G.fish[myId()] || 0}` : `Seguiu o fluxo! Total: ${G.fish[myId()] || 0} peixes`); }
+/* cardume sugerido: o jogo de caixa tem 50 peixes para até 8 pessoas (~6 por pessoa); aqui escala com a mesa */
+const fishSuggest = n => Math.max(12, Math.round(Math.max(2, n) * 6));
+function fishHint(n){ const p = fishSuggest(n); return `Sugestão para ${n} ${n === 1 ? 'jogador' : 'jogadores'}: ${p} peixes (6 por pessoa, como no jogo de caixa). Dá umas ${Math.max(3, Math.round(p / Math.max(1, n / 2)))} rodadas.`; }
 function fluxoAfterReveal(list){
   if (!G || G.mode !== 'fluxo' || G.phase !== 'write' || NET.role !== 'host') return;
   G.groups = fluxoGroups(list); G.fov = {}; G.phase = 'judge'; gPush();
@@ -3638,12 +3663,13 @@ const stepper = (k, v, txt) => `<div class="mstep"><button class="sbtn press" da
 function renderMode(){
   updateRoomUI();
   const show = modeOpen();
+  if (modeEl.hidden !== !show && typeof refitVV === 'function') refitVV();
   modeEl.hidden = !show;
   document.body.classList.toggle('inmode', show);
   pill.hidden = !G || show || presenting || !!win || (NET.role && NET.myReady);
   if (G && !show && !presenting){
     pill.innerHTML = G.mode === 'fluxo' && G.phase === 'write'
-      ? `${svg(FISH, 1.8)}<span>Rodada ${G.round} · você: ${G.fish[myId()] || 0} · cardume ${G.left}</span><b>placar</b>`
+      ? `${svg(FISH, 1.8)}<span>${fluxoStep()}</span><b>placar</b>`
       : `<span>${G.mode === 'stop' ? 'Adedonha' : 'Segue o Fluxo'}</span><b>voltar</b>`;
   }
   if (!show) return;
@@ -3786,10 +3812,13 @@ function stopPlayStatus(){
 function fluxoHTML(){
   const host = NET.role === 'host', n = gPlayers().length;
   if (G.phase === 'setup') return `${mHead('Segue o Fluxo', 'preparação')}<div class="mb">
+    ${host ? '' : `<div class="mstate"><b>Preparando a partida</b><span>O anfitrião está escolhendo as regras. Quando ele tocar em Começar, escreva na lousa a resposta que você acha que a maioria vai dar.</span></div>`}
     <div class="mrules"><p>Alguém lê a pergunta da carta. Cada um escreve na lousa a resposta que acha que <b>a maioria</b> vai dar.</p>
     <p>Quem fugiu do fluxo pega peixe do cardume. Quando o cardume acaba, vence quem tiver <b>menos peixes</b>.</p></div>
+    <div class="mrow col"><span>Como cada rodada termina</span>${host ? seg('frev', [['together','Pronto'],['timer','Tempo igual'],['each','Cada um']], revModeNow()) : `<b>${{together:'cada um toca em Pronto; quando todos estiverem prontos, contagem e todos mostram', timer:'tempo igual para todos; quando acaba, todos mostram', each:'cada um mostra quando quiser; o anfitrião confere'}[revModeNow()]}</b>`}</div>
+    ${host && revModeNow() === 'timer' ? `<div class="mrow"><span>Tempo para pensar</span>${stepper('ftime', S.g.timerDur, fmtT(S.g.timerDur * 1000))}</div>` : ''}
     <div class="mrow"><span>Peixes no cardume</span>${host ? stepper('pool', G.cfg.pool) : `<b>${G.cfg.pool}</b>`}</div>
-    <div class="f-sub">Sugestão: 6 por jogador (${n * 6} para ${n}).</div>
+    <div class="f-sub">${fishHint(n)}${host && G.cfg.pool !== fishSuggest(n) ? ` <button class="lnk" data-m="fishsug">Usar ${fishSuggest(n)}</button>` : ''}</div>
     <div class="mrow"><span>Resposta única leva 2 peixes (opcional)</span>${host ? tg('data-mtg="uniq2"', G.cfg.uniq2) : `<b>${G.cfg.uniq2 ? 'sim' : 'não'}</b>`}</div>
     <div class="mrow col"><span>Empate na resposta mais comum</span>${host ? seg('mtie', [['none','Ninguém leva'],['all','Todos levam']], G.cfg.tie) : `<b>${G.cfg.tie === 'all' ? 'todos levam peixe' : 'ninguém leva peixe'}</b>`}</div></div>
     <div class="mf">${host ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="start">Começar</button>` : '<span class="mwait">O anfitrião começa</span>'}</div>`;
@@ -3814,7 +3843,7 @@ function fluxoHTML(){
     return `${mHead('O cardume acabou!', `${G.round} rodadas`)}<div class="mb">
       ${rows[0] ? `<div class="podium">${avChip(rows[0].id)}<b>${esc(gName(rows[0].id))}</b><span>seguiu o fluxo melhor: ${rows[0].f} ${rows[0].f === 1 ? 'peixe' : 'peixes'}</span></div>` : ''}
       <div class="stab">${rows.map((x, i) => `<div class="srow ${x.id === myId() ? 'me' : ''}"><span class="pos">${i + 1}</span>${avChip(x.id)}<span class="sn">${esc(gName(x.id))}</span><b class="st">${svg(FISH, 1.8)}${x.f}</b></div>`).join('')}</div></div>
-      <div class="mf">${host ? `<button class="nbtn press" data-m="end">Sair do modo</button><button class="nbtn pri press" data-m="again">Jogar de novo</button>` : '<span class="mwait">Boa partida!</span>'}</div>`;
+      <div class="mf">${host ? `${G.hist && G.hist.length ? '<button class="nbtn press" data-m="undo">Corrigir</button>' : ''}<button class="nbtn press" data-m="end">Sair</button><button class="nbtn pri press" data-m="again">Jogar de novo</button>` : '<span class="mwait">Boa partida!</span>'}</div>`;
   }
   return '';
 }
@@ -3851,6 +3880,7 @@ modeEl.addEventListener('click', e => {
   if (d.cv){ act({t:'catVote', id: d.cv, v: +d.v}); return; }
   if (d.let){ act({t:'letter', L: d.let}); return; }
   if (d.mcfg){ const k = d.mcfg, dir = +d.d, c = G.cfg;
+    if (k === 'ftime'){ stepTimer(dir); renderMode(); return; }
     const step = {ncat:[1, 0, 15], swapMax:[1, 0, 9], time:[c.time < 60 ? 10 : 15, 20, 600], uniq:[5, 5, 50], rep:[5, 0, 50], pool:[2, 4, 200]}[k];
     act({t:'cfg', k, v: Math.min(step[2], Math.max(step[1], c[k] + dir * step[0]))}); return; }
   if (d.mtg){ act({t:'cfg', k: d.mtg, v: !G.cfg[d.mtg]}); return; }
@@ -3864,6 +3894,7 @@ modeEl.addEventListener('click', e => {
   if (d.ov){ const u = G.cfg.uniq, r = G.cfg.rep, seq = ['a', String(u), String(r), '0'].filter((x, i, a) => a.indexOf(x) === i);
     const nx = seq[(seq.indexOf(d.cur) + 1) % seq.length]; act({t:'ov', k: d.ov, v: nx === 'a' ? null : +nx}); return; }
   if (d.fadj){ act({t:'fishAdj', id: d.fadj, d: +d.d}); return; }
+  const fr = t.closest('[data-seg="frev"]'); if (fr && d.v){ S.g.revMode = d.v; save(); resetReady(); pushRoster(); updateRoomUI(); renderMode(); return; }
   if (d.fov){ e.stopPropagation(); const cur = fluxoFish()[d.fov]; act({t:'fov', id: d.fov, v: (cur + 1) % 3}); return; }
   if (d.gp && host){ MV.sel = MV.sel === d.gp ? null : d.gp; renderMode(); return; }
   if (d.grp != null && host && MV.sel){ const id = MV.sel; MV.sel = null; act({t:'move', id, to: d.grp === 'new' ? 'new' : +d.grp}); return; }
@@ -3886,6 +3917,8 @@ modeEl.addEventListener('click', e => {
   else if (m === 'dispute'){ act({t:'dispute'}); toast('Pedido de revisão enviado'); }
   else if (m === 'again') act({t:'again'});
   else if (m === 'reset') act({t:'reset'});
+  else if (m === 'fishsug') act({t:'cfg', k:'pool', v: fishSuggest(gPlayers().length)});
+  else if (m === 'undo') act({t:'undo'});
 });
 modeEl.addEventListener('submit', e => { e.preventDefault(); const i = $('#catIn'); if (!i || !i.value.trim()) return; act({t:'catAdd', name: i.value}); i.value = ''; i.focus(); });
 let ansT = 0;
@@ -4087,7 +4120,7 @@ function newRound(){
   if (NET.role !== 'host') return;
   NET.phase = 'writing'; NET.gallery = null; NET.live = {}; resetReady(); setLock(null);
   netBroadcast({k:'round'});
-  if (revModeNow() === 'timer' && !(G && G.mode === 'stop')) setTimeout(() => startTimer(S.g.timerDur * 1000), 400);
+
   pushRoster();
   roundClear();
 }
@@ -4370,7 +4403,7 @@ function guestMsg(m){
   if (m.k === 'roster'){
     const wasSecret = NET.secret;
     NET.roster = m.list; NET.secret = m.room.secret;
-    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, lobby: m.room.lobby};
+    if (wasSecret && !NET.secret) myContentChanged(); NET.phase = m.room.phase; NET.hostName = m.room.name; if (G) setTimeout(renderMode, 0); NET.rules = {tEnd: m.room.tEnd, lockW: m.room.lockW, rev: m.room.rev, tick: m.room.tick, tickFrom: m.room.tickFrom, lobby: m.room.lobby};
     const mine = m.list.find(r => r.id === myId()); if (mine) NET.myReady = !!mine.ready;
     syncRoom();
     renderScoreTag();
@@ -4381,7 +4414,7 @@ function guestMsg(m){
   if (m.k === 'collect'){ NET.phase = 'revealed'; sendFinalSnap(); updateRoomUI(); return; }
   if (m.k === 'lob'){ if (m.who !== myId()) lobAdd(m.id, m.c, m.w, m.p || [], m.n, m.who); return; }
   if (m.k === 'react'){ if (m.id !== myId()) floatReact(NET.roster.find(r => r.id === m.id), m.e); return; }
-  if (m.k === 'gs'){ G = m.g; renderMode(); if (win === 'game') syncSheet(); return; }
+  if (m.k === 'gs'){ G = m.g; renderMode(); renderScoreTag(); if (win === 'game') syncSheet(); return; }
   if (m.k === 'fishmsg'){ setTimeout(() => fishToast(m.f), 300); return; }
   if (m.k === 'timer'){ const ms = m.at && NET.offOk ? m.at - NET.off - Date.now() : m.ms; startTimer(Math.max(0, ms), true); TM.dur = m.dur; return; }
   if (m.k === 'pong'){ clockSample(m); return; }
@@ -4621,7 +4654,7 @@ function updateRoomUI(){
     if (!cnt){ cnt = document.createElement('span'); cnt.className = 'cnt'; sb.appendChild(cnt); }
     cnt.textContent = `${r}/${n}`;
   } else { lb.textContent = hostNewRoundBtn() ? 'Nova rodada' : (NET.role === 'host' && !revTogether() && G && G.mode === 'fluxo' && G.phase === 'write' && NET.phase === 'writing') ? 'Conferir' : 'Mostrar'; sb.classList.remove('ready'); if (cnt) cnt.remove(); }
-  if (NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && !G) lb.textContent = 'Começar';
+  if (NET.role === 'host' && revModeNow() === 'timer' && NET.phase === 'writing' && !TM.run && (!G || (G.mode === 'fluxo' && G.phase === 'write'))) lb.textContent = 'Começar tempo';
   const rb = $('#roomBtn');
   document.body.classList.toggle('inroom', !!NET.role);
   if (NET.role){
@@ -4663,8 +4696,15 @@ function myScore(){
 }
 function renderScoreTag(){
   const el = $('#nameScore');
-  el.hidden = !S.g.showScore;
-  el.textContent = S.g.showScore ? `· ${myScore()} pts` : '';
+  if (G && (G.mode === 'fluxo' || G.mode === 'stop') && G.phase !== 'setup'){
+    // no modo de jogo o placar vem do próprio jogo: peixes (menos é melhor) ou pontos
+    const fl = G.mode === 'fluxo', ids = gAll(), val = id => fl ? (G.fish[id] || 0) : (G.totals[id] || 0);
+    const me = val(myId()), pos = 1 + ids.filter(id => fl ? val(id) < me : val(id) > me).length;
+    el.hidden = false; el.textContent = `· ${pos}º · ${me} ${fl ? (me === 1 ? 'peixe' : 'peixes') : 'pts'}`;
+  } else {
+    el.hidden = !S.g.showScore;
+    el.textContent = S.g.showScore ? `· ${myScore()} pts` : '';
+  }
   updateRoomUI();
 }
 
@@ -4837,7 +4877,7 @@ function roundCtlHTML(){
       : 'Cada um mostra quando quiser, como na mesa: dois toques no quadro ou Mostrar.')}</div>`;
   const rm = revModeNow();
   return `<div class="sec"><div class="sec-t">Rodada</div>
-    ${seg('revmode', [['each','Cada um vira'],['together','Pronto e contagem'],['timer','Tempo igual']], rm)}
+    ${seg('revmode', [['together','Pronto'],['timer','Tempo igual'],['each','Cada um']], rm)}
     ${fsub(rm === 'each' ? 'Sem Pronto e sem contagem: cada um vira a tela no seu tempo, quando a mesa combinar.' : rm === 'timer' ? 'Todos têm o mesmo tempo, pelo mesmo relógio. Quando acaba, os quadros travam e aparecem juntos. Quem terminar antes pode marcar Pronto.' : 'Cada um toca em Pronto quando terminar; a contagem começa para todos ao mesmo tempo.')}
     ${rm === 'timer' ? `<div class="tstep" style="margin-top:10px"><button class="sbtn press" data-g="tminus" aria-label="Menos">−</button><span class="tv" id="tVal">${TM.run ? fmtT(TM.end - performance.now()) : fmtT(S.g.timerDur * 1000)}</span><button class="sbtn press" data-g="tplus" aria-label="Mais">+</button></div>` : ''}
     ${rm !== 'each' ? `<div class="f-row" style="margin-top:6px"><span class="f-lb">${rm === 'timer' ? 'Revelar antes se todos ficarem prontos' : 'Começar sozinho quando todos estiverem prontos'}</span>${tg('data-gtg="autoAll"', S.g.autoAll !== false)}</div>` : ''}
@@ -4884,7 +4924,8 @@ function gameHTML(){
   }
   // placar
   if (G && G.mode === 'fluxo') return `<div class="sec"><div class="sec-t">Segue o Fluxo · rodada ${G.round}</div>${fishTable(null, NET.role === 'host')}
-      <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div>${fsub(`${G.left} de ${G.cfg.pool} peixes ainda no cardume. Vence quem tiver menos.${NET.role === 'host' ? ' − e + corrigem o placar de qualquer um, inclusive de quem saiu.' : ''}`)}</div>`;
+      <div class="pool"><span style="--p:${Math.max(0, G.left / G.cfg.pool * 100).toFixed(1)}%"></span></div>${fsub(`${G.left} de ${G.cfg.pool} peixes ainda no cardume. Vence quem tiver menos.${NET.role === 'host' ? ' − e + corrigem o placar de qualquer um, inclusive de quem saiu.' : ''}`)}
+      ${NET.role === 'host' && G.hist && G.hist.length && G.phase === 'write' ? `<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-g="undoround">Reabrir a rodada ${G.hist[G.hist.length - 1].round}</button></div>` : ''}</div>`;
   if (NET.role) return `<div class="sec"><div class="sec-t">Placar da sala</div><div class="plist">${NET.roster.map(r => playerRow(r, host)).join('')}</div>
       ${host ? '<div class="nv-row" style="margin-top:12px"><button class="nbtn press" data-g="zeroNet">Zerar placar</button></div>' : fsub('Só o anfitrião muda os pontos.')}</div>
       <div class="sec"><div class="f-row"><span class="f-lb">Exibir meus pontos no quadro</span>${tg('data-gtg="showScore"', S.g.showScore)}</div></div>`;
@@ -4922,7 +4963,7 @@ function roomHTML(){
   return `<div class="sec">${host && NET.mode === 'online' ? `<div class="codebar"><span>Código</span><b>${NET.code}</b><button class="nbtn press" data-g="invite">Convidar</button></div>` : `<div class="sec-t">${host ? 'Sua sala' : 'Sala de ' + esc(NET.hostName)}</div>`}
       <div class="plist">${NET.roster.map(r => playerRow(r, false, host)).join('')}</div>
       <div class="nv-row" style="margin-top:12px">${host ? (NET.mode === 'online' ? '' : '<button class="nbtn press" data-g="invite">Convidar</button>') + '<button class="nbtn press" data-g="end">Encerrar sala</button>' : '<button class="nbtn press" data-g="leave">Sair da sala</button>'}</div></div>
-    ${G ? '' : roundCtlHTML()}
+    ${roundCtlHTML()}
     <div class="sec"><div class="sec-t">Quadros dos outros</div>
       ${host ? seg('peek', [['0','Escondidos'],['1','Visíveis']], NET.secret ? '0' : '1') : ''}
       ${fsub(NET.secret ? (host ? 'Ninguém vê o quadro dos outros antes da revelação.' : 'O anfitrião deixou os quadros escondidos até a revelação.') : 'Todos podem espiar aqui, ao vivo, o que os outros estão fazendo.')}
@@ -4981,12 +5022,16 @@ function gameClick(t){
   else if (a === 'reveal') revealAll();
   else if (a === 'round'){ newRound(); }
   else if (a === 'collect') collectAll();
+  else if (a === 'undoround'){ act({t:'undo'}); closeSheet(); }
   return true;
 }
 
 /* ================= viewport / início ================= */
 const vv = window.visualViewport;
 function fitVV(){ if (!vv || presenting) return; app.style.height = vv.height + 'px'; app.style.top = vv.offsetTop + 'px'; }
+// o teclado pode fechar enquanto a apresentação ou um modo está na frente: reajusta a altura quando voltar
+const refitVV = () => { [60, 350, 800].forEach(ms => setTimeout(fitVV, ms)); };
+document.addEventListener('focusout', refitVV);
 if (vv){ vv.addEventListener('resize', fitVV); vv.addEventListener('scroll', fitVV); fitVV(); }
 let roW = 0, roH = 0;
 new ResizeObserver(() => { if (board.clientWidth === roW && board.clientHeight === roH) return; roW = board.clientWidth; roH = board.clientHeight; render(); }).observe(board);
